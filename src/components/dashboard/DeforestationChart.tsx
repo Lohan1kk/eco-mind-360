@@ -14,60 +14,63 @@ import {
 import { HISTORICAL_DEFORESTATION_PRODES } from '@/data/historicalSeries';
 
 const BIOME_CONFIGS = [
-  { key: 'amazonia', name: 'Amazônia', color: '#10b981' },
-  { key: 'cerrado', name: 'Cerrado', color: '#d97706' },
-  { key: 'caatinga', name: 'Caatinga', color: '#ea580c' },
-  { key: 'pantanal', name: 'Pantanal', color: '#06b6d4' },
-  { key: 'pampa', name: 'Pampa', color: '#84cc16' },
-  { key: 'mata_atlantica', name: 'Mata Atlântica', color: '#059669' },
+  { key: 'amazonia', name: 'Amazônia', color: '#163d2a' },
+  { key: 'cerrado', name: 'Cerrado', color: '#c45524' },
+  { key: 'caatinga', name: 'Caatinga', color: '#87441f' },
+  { key: 'pantanal', name: 'Pantanal', color: '#2f7a4f' },
+  { key: 'pampa', name: 'Pampa', color: '#529668' },
+  { key: 'mata_atlantica', name: 'Mata Atlântica', color: '#1f5438' },
 ];
 
 export function DeforestationChart() {
   const [selectedBiome, setSelectedBiome] = useState<string>('all');
 
   return (
-    <div className="p-5 rounded-2xl bg-white dark:bg-[#0d1522] border border-slate-200 dark:border-slate-800/80 shadow-sm flex flex-col h-full">
+    <div className="panel-soft flex flex-col justify-between p-6 h-full">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
         <div>
-          <h3 className="font-semibold text-base text-slate-900 dark:text-white flex items-center gap-2">
-            <span>Evolução Histórica do Desmatamento</span>
-            <span className="text-[11px] font-mono font-medium px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
-              PRODES / INPE
-            </span>
+          <span className="text-[11px] font-bold uppercase tracking-wider text-forest-mid">
+            PRODES / INPE · Série Histórica
+          </span>
+          <h3 className="display font-bold text-xl text-forest mt-0.5">
+            Evolução do Desmatamento
           </h3>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-            Taxa anual oficial consolidada de supressão vegetal (km²/ano de 2018 a 2024)
+          <p className="text-xs text-ash mt-1">
+            Taxa anual oficial consolidada (km²/ano de 2018 a 2024)
           </p>
         </div>
 
         {/* Seletor de foco de bioma */}
-        <div className="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800/80 p-1 rounded-xl text-xs">
+        <div className="flex items-center gap-1 border border-forest/15 bg-mist p-1 rounded-xl text-xs">
           <button
+            type="button"
             onClick={() => setSelectedBiome('all')}
-            className={`px-2.5 py-1 rounded-lg font-medium transition-all ${
+            className={`px-2.5 py-1 rounded-lg font-bold transition-all ${
               selectedBiome === 'all'
-                ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-emerald-400 shadow-sm'
-                : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
+                ? 'bg-forest text-mist shadow-sm'
+                : 'text-ash hover:text-forest'
             }`}
           >
             Todos
           </button>
           <button
+            type="button"
             onClick={() => setSelectedBiome('amazonia')}
-            className={`px-2.5 py-1 rounded-lg font-medium transition-all ${
+            className={`px-2.5 py-1 rounded-lg font-bold transition-all ${
               selectedBiome === 'amazonia'
-                ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-emerald-400 shadow-sm'
-                : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
+                ? 'bg-forest text-mist shadow-sm'
+                : 'text-ash hover:text-forest'
             }`}
           >
             Amazônia
           </button>
           <button
+            type="button"
             onClick={() => setSelectedBiome('cerrado')}
-            className={`px-2.5 py-1 rounded-lg font-medium transition-all ${
+            className={`px-2.5 py-1 rounded-lg font-bold transition-all ${
               selectedBiome === 'cerrado'
-                ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-amber-400 shadow-sm'
-                : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
+                ? 'bg-forest text-mist shadow-sm'
+                : 'text-ash hover:text-forest'
             }`}
           >
             Cerrado
@@ -81,15 +84,15 @@ export function DeforestationChart() {
             <defs>
               {BIOME_CONFIGS.map((biome) => (
                 <linearGradient key={biome.key} id={`grad-${biome.key}`} x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor={biome.color} stopOpacity={0.4} />
+                  <stop offset="5%" stopColor={biome.color} stopOpacity={0.35} />
                   <stop offset="95%" stopColor={biome.color} stopOpacity={0.0} />
                 </linearGradient>
               ))}
             </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="#334155" opacity={0.2} />
-            <XAxis dataKey="year" stroke="#64748b" fontSize={12} tickLine={false} />
+            <CartesianGrid strokeDasharray="3 3" stroke="#163d2a" opacity={0.08} />
+            <XAxis dataKey="year" stroke="#5f675f" fontSize={12} tickLine={false} />
             <YAxis 
-              stroke="#64748b" 
+              stroke="#5f675f" 
               fontSize={11} 
               tickLine={false}
               tickFormatter={(v) => `${(v / 1000).toFixed(0)}k km²`}
@@ -98,16 +101,16 @@ export function DeforestationChart() {
               content={({ active, payload, label }) => {
                 if (active && payload && payload.length) {
                   return (
-                    <div className="p-3 bg-slate-900/95 border border-slate-700 rounded-xl shadow-xl text-xs backdrop-blur-md">
-                      <div className="font-bold text-white mb-2">Ano {label} (PRODES/INPE)</div>
+                    <div className="p-3 bg-white/95 border border-forest/15 rounded-xl shadow-lg text-xs backdrop-blur-md">
+                      <div className="font-bold text-forest mb-2">Ano {label} (PRODES/INPE)</div>
                       <div className="space-y-1">
                         {payload.map((entry) => (
                           <div key={entry.name} className="flex items-center justify-between gap-4">
-                            <span className="flex items-center gap-1.5" style={{ color: entry.color }}>
+                            <span className="flex items-center gap-1.5 font-medium" style={{ color: entry.color }}>
                               <span className="w-2 h-2 rounded-full" style={{ backgroundColor: entry.color }} />
                               {entry.name}:
                             </span>
-                            <span className="font-mono font-bold text-white">
+                            <span className="font-mono font-bold text-ink">
                               {Number(entry.value).toLocaleString('pt-BR')} km²
                             </span>
                           </div>
@@ -121,7 +124,7 @@ export function DeforestationChart() {
             />
             <Legend
               wrapperStyle={{ paddingTop: '10px', fontSize: '11px' }}
-              formatter={(value) => <span className="text-slate-600 dark:text-slate-300 font-medium">{value}</span>}
+              formatter={(value) => <span className="text-forest font-semibold">{value}</span>}
             />
             {BIOME_CONFIGS.filter(b => selectedBiome === 'all' || b.key === selectedBiome).map((biome) => (
               <Area
@@ -139,9 +142,9 @@ export function DeforestationChart() {
         </ResponsiveContainer>
       </div>
 
-      <div className="mt-3 pt-2 border-t border-slate-100 dark:border-slate-800/60 flex flex-col sm:flex-row items-start sm:items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 gap-1">
-        <span>* Sistema Costeiro-Marinho possui dinâmica fitofisionômica marinha (sem taxa PRODES terrestre).</span>
-        <span className="text-emerald-500 font-medium">Queda de 30,6% na Amazônia em 2024</span>
+      <div className="mt-3 pt-3 border-t border-forest/10 flex flex-col sm:flex-row items-start sm:items-center justify-between text-[11px] text-ash gap-1">
+        <span>* Taxas oficiais auditadas sem nuvens pelo MCTI / INPE.</span>
+        <span className="text-forest font-bold">Queda de 30,6% na Amazônia em 2024</span>
       </div>
     </div>
   );

@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { BIOMES_DATA, BIOMES_LIST } from '@/data/biomes';
+import { PageIntro } from '@/components/PageIntro';
 import {
   ResponsiveContainer,
   BarChart,
@@ -43,48 +44,45 @@ export default function ComparacaoPage() {
     },
   ];
 
-  // Dados para o Radar Científico
   const radarData = [
     { subject: 'Extensão Territorial', A: Math.min(100, (biomeA.areaKm2 / 4196943) * 100), B: Math.min(100, (biomeB.areaKm2 / 4196943) * 100) },
     { subject: 'Vegetação Nativa', A: biomeA.nativeVegetationPercentage, B: biomeB.nativeVegetationPercentage },
     { subject: 'Cobertura de UCs', A: Math.min(100, biomeA.protectedAreaPercentage * 2), B: Math.min(100, biomeB.protectedAreaPercentage * 2) },
-    { subject: 'Pressão Antrópica', A: Math.min(100, (biomeA.activeFireHotspots24h / 450) * 100), B: Math.min(100, (biomeB.activeFireHotspots24h / 450) * 100) },
+    { subject: 'Focos 24h (Inverso)', A: Math.max(10, 100 - (biomeA.activeFireHotspots24h / 450) * 80), B: Math.max(10, 100 - (biomeB.activeFireHotspots24h / 450) * 80) },
     { subject: 'Estabilidade 2024', A: biomeA.deforestationTrendPercent ? Math.abs(biomeA.deforestationTrendPercent) * 2.5 : 80, B: biomeB.deforestationTrendPercent ? Math.abs(biomeB.deforestationTrendPercent) * 2.5 : 80 },
   ];
 
   return (
-    <div className="space-y-8 py-2">
+    <div className="section-inner max-w-6xl mx-auto py-6 space-y-8">
       {/* Cabeçalho */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-200 dark:border-slate-800">
-        <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
-              Comparador Científico de Ambientes
-            </h1>
-            <span className="text-xs px-2.5 py-0.5 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 font-bold border border-blue-500/20">
-              Análise Multicritério
-            </span>
-          </div>
-          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
-            Confronte métricas oficiais de preservação, área e pressões antrópicas lado a lado
+      <div className="border-b border-forest/10 pb-6">
+        <PageIntro
+          eyebrow="Análise Multicritério Oficial"
+          title="Comparador Científico de Ambientes"
+          eyebrowClassName="eyebrow text-forest-mid"
+          titleClassName="display mt-2 text-3xl text-forest md:text-5xl"
+        >
+          <p className="mt-3 max-w-2xl text-base text-ash">
+            Confronte diretamente dois ambientes brasileiros lado a lado com dados de vegetação remanescente,
+            unidades de conservação, desmatamento auditado e focos termais.
           </p>
-        </div>
+        </PageIntro>
       </div>
 
-      {/* Seletores dos Dois Biomas com Visual de Cockpit Científico */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-5 rounded-3xl bg-white dark:bg-[#090f1a] border border-slate-200 dark:border-slate-800 shadow-sm">
-        <div className="space-y-2 p-3 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800">
-          <label className="text-xs font-bold text-slate-700 dark:text-slate-200 flex items-center justify-between">
+      {/* Seletores dos Dois Biomas */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 panel-soft p-5">
+        <div className="space-y-2 p-4 rounded-xl bg-mist border border-forest/10">
+          <label className="text-xs font-bold text-forest flex items-center justify-between">
             <div className="flex items-center gap-2">
               <span className="w-3 h-3 rounded-full" style={{ backgroundColor: biomeA.color }} />
-              <span>Ambiente de Referência (A):</span>
+              <span>Ambiente Referência (A):</span>
             </div>
-            <span className="text-[10px] font-mono font-bold text-emerald-500">{biomeA.percentageBrazil}% BR</span>
+            <span className="text-[11px] font-mono font-bold text-forest">{biomeA.percentageBrazil}% BR</span>
           </label>
           <select
             value={biomeAId}
             onChange={(e) => setBiomeAId(e.target.value)}
-            className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white font-bold text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer shadow-inner"
+            className="w-full px-3.5 py-2.5 rounded-xl bg-paper border border-forest/20 text-forest font-bold text-sm focus:outline-none focus:ring-2 focus:ring-forest cursor-pointer shadow-sm"
           >
             {BIOMES_LIST.map((b) => (
               <option key={b.id} value={b.id} disabled={b.id === biomeBId}>
@@ -94,18 +92,18 @@ export default function ComparacaoPage() {
           </select>
         </div>
 
-        <div className="space-y-2 p-3 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800">
-          <label className="text-xs font-bold text-slate-700 dark:text-slate-200 flex items-center justify-between">
+        <div className="space-y-2 p-4 rounded-xl bg-mist border border-forest/10">
+          <label className="text-xs font-bold text-forest flex items-center justify-between">
             <div className="flex items-center gap-2">
               <span className="w-3 h-3 rounded-full" style={{ backgroundColor: biomeB.color }} />
               <span>Ambiente Comparado (B):</span>
             </div>
-            <span className="text-[10px] font-mono font-bold text-amber-500">{biomeB.percentageBrazil}% BR</span>
+            <span className="text-[11px] font-mono font-bold text-forest">{biomeB.percentageBrazil}% BR</span>
           </label>
           <select
             value={biomeBId}
             onChange={(e) => setBiomeBId(e.target.value)}
-            className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white font-bold text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer shadow-inner"
+            className="w-full px-3.5 py-2.5 rounded-xl bg-paper border border-forest/20 text-forest font-bold text-sm focus:outline-none focus:ring-2 focus:ring-forest cursor-pointer shadow-sm"
           >
             {BIOMES_LIST.map((b) => (
               <option key={b.id} value={b.id} disabled={b.id === biomeAId}>
@@ -116,15 +114,15 @@ export default function ComparacaoPage() {
         </div>
       </div>
 
-      {/* Gráficos de Confronto: Barras & Radar Multidimensional */}
+      {/* Gráficos de Confronto: Barras & Radar */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Gráfico de Barras */}
-        <div className="p-6 rounded-3xl bg-white dark:bg-[#090f1a] border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+        <div className="panel-soft p-6 space-y-4">
           <div>
-            <h3 className="font-bold text-base text-slate-900 dark:text-white">
+            <h3 className="display font-bold text-xl text-forest">
               Percentuais Comparativos (%)
             </h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400">
+            <p className="text-xs text-ash mt-1">
               {biomeA.name} vs {biomeB.name} — Dados MapBiomas e ICMBio
             </p>
           </div>
@@ -132,15 +130,15 @@ export default function ComparacaoPage() {
           <div className="w-full h-72">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={comparisonData} margin={{ top: 20, right: 20, left: 0, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#334155" opacity={0.2} />
-                <XAxis dataKey="metric" stroke="#64748b" fontSize={12} />
-                <YAxis unit="%" stroke="#64748b" fontSize={11} domain={[0, 100]} />
+                <CartesianGrid strokeDasharray="3 3" stroke="#163d2a" opacity={0.08} />
+                <XAxis dataKey="metric" stroke="#5f675f" fontSize={12} />
+                <YAxis unit="%" stroke="#5f675f" fontSize={11} domain={[0, 100]} />
                 <Tooltip 
                   contentStyle={{ 
-                    backgroundColor: '#0f172a', 
-                    borderColor: '#334155',
+                    backgroundColor: '#ffffff', 
+                    borderColor: '#163d2a',
                     borderRadius: '12px',
-                    color: '#ffffff',
+                    color: '#122018',
                     fontSize: '12px'
                   }} 
                 />
@@ -153,31 +151,31 @@ export default function ComparacaoPage() {
         </div>
 
         {/* Gráfico Radar */}
-        <div className="p-6 rounded-3xl bg-white dark:bg-[#090f1a] border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+        <div className="panel-soft p-6 space-y-4">
           <div>
-            <h3 className="font-bold text-base text-slate-900 dark:text-white">
-              Radar de Vulnerabilidade e Conservação
+            <h3 className="display font-bold text-xl text-forest">
+              Equilíbrio Ecológico & Vulnerabilidade
             </h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400">
-              Equilíbrio ecológico entre extensão, conservação e pressão
+            <p className="text-xs text-ash mt-1">
+              Comparação multidimensional normalizada
             </p>
           </div>
 
           <div className="w-full h-72">
             <ResponsiveContainer width="100%" height="100%">
               <RadarChart data={radarData}>
-                <PolarGrid stroke="#334155" opacity={0.3} />
-                <PolarAngleAxis dataKey="subject" stroke="#64748b" fontSize={10} />
-                <PolarRadiusAxis stroke="#64748b" fontSize={9} domain={[0, 100]} />
-                <Radar name={biomeA.name} dataKey="A" stroke={biomeA.color} fill={biomeA.color} fillOpacity={0.35} />
-                <Radar name={biomeB.name} dataKey="B" stroke={biomeB.color} fill={biomeB.color} fillOpacity={0.35} />
+                <PolarGrid stroke="#163d2a" opacity={0.15} />
+                <PolarAngleAxis dataKey="subject" stroke="#5f675f" fontSize={10} />
+                <PolarRadiusAxis stroke="#5f675f" fontSize={9} domain={[0, 100]} />
+                <Radar name={biomeA.name} dataKey="A" stroke={biomeA.color} fill={biomeA.color} fillOpacity={0.3} />
+                <Radar name={biomeB.name} dataKey="B" stroke={biomeB.color} fill={biomeB.color} fillOpacity={0.3} />
                 <Legend wrapperStyle={{ fontSize: '12px' }} />
                 <Tooltip 
                   contentStyle={{ 
-                    backgroundColor: '#0f172a', 
-                    borderColor: '#334155',
+                    backgroundColor: '#ffffff', 
+                    borderColor: '#163d2a',
                     borderRadius: '12px',
-                    color: '#ffffff',
+                    color: '#122018',
                     fontSize: '12px'
                   }} 
                 />
@@ -188,52 +186,52 @@ export default function ComparacaoPage() {
       </div>
 
       {/* Tabela de Confronto Detalhado Lado a Lado */}
-      <div className="p-6 rounded-3xl bg-white dark:bg-[#090f1a] border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
-        <h3 className="font-bold text-base text-slate-900 dark:text-white">
+      <div className="panel-soft p-6 space-y-4">
+        <h3 className="display font-bold text-xl text-forest">
           Tabela Comparativa Multicritério
         </h3>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs text-slate-700 dark:text-slate-300">
-            <thead className="bg-slate-50 dark:bg-[#070b14] text-[11px] uppercase font-bold text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800">
+          <table className="w-full text-left text-xs text-ink">
+            <thead className="bg-mist text-[11px] uppercase font-bold text-forest-mid border-b border-forest/10">
               <tr>
                 <th className="py-3.5 px-4 w-1/3">Critério / Indicador</th>
-                <th className="py-3.5 px-4 w-1/3" style={{ color: biomeA.color }}>
+                <th className="py-3.5 px-4 w-1/3 font-bold" style={{ color: biomeA.color }}>
                   {biomeA.name}
                 </th>
-                <th className="py-3.5 px-4 w-1/3" style={{ color: biomeB.color }}>
+                <th className="py-3.5 px-4 w-1/3 font-bold" style={{ color: biomeB.color }}>
                   {biomeB.name}
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60 font-sans">
+            <tbody className="divide-y divide-forest/10 font-sans">
               <tr>
-                <td className="py-3 px-4 font-semibold text-slate-500 dark:text-slate-400">Classificação Oficial</td>
+                <td className="py-3 px-4 font-semibold text-ash">Classificação Oficial</td>
                 <td className="py-3 px-4 font-bold">{biomeA.category}</td>
                 <td className="py-3 px-4 font-bold">{biomeB.category}</td>
               </tr>
               <tr>
-                <td className="py-3 px-4 font-semibold text-slate-500 dark:text-slate-400">Área Oficial (IBGE)</td>
+                <td className="py-3 px-4 font-semibold text-ash">Área Oficial (IBGE)</td>
                 <td className="py-3 px-4 font-mono font-bold">{biomeA.areaKm2.toLocaleString('pt-BR')} km²</td>
                 <td className="py-3 px-4 font-mono font-bold">{biomeB.areaKm2.toLocaleString('pt-BR')} km²</td>
               </tr>
               <tr>
-                <td className="py-3 px-4 font-semibold text-slate-500 dark:text-slate-400">% do Território Brasileiro</td>
+                <td className="py-3 px-4 font-semibold text-ash">% do Território Brasileiro</td>
                 <td className="py-3 px-4 font-mono font-bold">{biomeA.percentageBrazil}%</td>
                 <td className="py-3 px-4 font-mono font-bold">{biomeB.percentageBrazil}%</td>
               </tr>
               <tr>
-                <td className="py-3 px-4 font-semibold text-slate-500 dark:text-slate-400">Vegetação Nativa Remanescente</td>
-                <td className="py-3 px-4 font-mono font-bold text-emerald-500">{biomeA.nativeVegetationPercentage}% (MapBiomas)</td>
-                <td className="py-3 px-4 font-mono font-bold text-emerald-500">{biomeB.nativeVegetationPercentage}% (MapBiomas)</td>
+                <td className="py-3 px-4 font-semibold text-ash">Vegetação Nativa Remanescente</td>
+                <td className="py-3 px-4 font-mono font-bold text-forest">{biomeA.nativeVegetationPercentage}% (MapBiomas)</td>
+                <td className="py-3 px-4 font-mono font-bold text-forest">{biomeB.nativeVegetationPercentage}% (MapBiomas)</td>
               </tr>
               <tr>
-                <td className="py-3 px-4 font-semibold text-slate-500 dark:text-slate-400">Áreas Protegidas em UCs</td>
-                <td className="py-3 px-4 font-mono font-bold text-blue-500">{biomeA.protectedAreaPercentage}%</td>
-                <td className="py-3 px-4 font-mono font-bold text-blue-500">{biomeB.protectedAreaPercentage}%</td>
+                <td className="py-3 px-4 font-semibold text-ash">Áreas Protegidas em UCs</td>
+                <td className="py-3 px-4 font-mono font-bold text-forest-mid">{biomeA.protectedAreaPercentage}%</td>
+                <td className="py-3 px-4 font-mono font-bold text-forest-mid">{biomeB.protectedAreaPercentage}%</td>
               </tr>
               <tr>
-                <td className="py-3 px-4 font-semibold text-slate-500 dark:text-slate-400">Taxa de Desmatamento (PRODES 2024)</td>
+                <td className="py-3 px-4 font-semibold text-ash">Taxa de Desmatamento (PRODES 2024)</td>
                 <td className="py-3 px-4 font-mono font-semibold">
                   {biomeA.deforestationProdes2024Km2 
                     ? `${biomeA.deforestationProdes2024Km2.toLocaleString('pt-BR')} km² (${biomeA.deforestationTrendPercent}%)` 
@@ -246,27 +244,14 @@ export default function ComparacaoPage() {
                 </td>
               </tr>
               <tr>
-                <td className="py-3 px-4 font-semibold text-slate-500 dark:text-slate-400">Focos de Calor (24h)</td>
-                <td className="py-3 px-4 font-mono font-bold text-amber-500">{biomeA.activeFireHotspots24h} focos</td>
-                <td className="py-3 px-4 font-mono font-bold text-amber-500">{biomeB.activeFireHotspots24h} focos</td>
+                <td className="py-3 px-4 font-semibold text-ash">Focos de Calor (24h)</td>
+                <td className="py-3 px-4 font-mono font-bold text-burn">{biomeA.activeFireHotspots24h} focos</td>
+                <td className="py-3 px-4 font-mono font-bold text-burn">{biomeB.activeFireHotspots24h} focos</td>
               </tr>
               <tr>
-                <td className="py-3 px-4 font-semibold text-slate-500 dark:text-slate-400">Estados de Ocorrência</td>
+                <td className="py-3 px-4 font-semibold text-ash">Estados de Ocorrência</td>
                 <td className="py-3 px-4 font-mono">{biomeA.states.join(', ')}</td>
                 <td className="py-3 px-4 font-mono">{biomeB.states.join(', ')}</td>
-              </tr>
-              <tr>
-                <td className="py-3 px-4 font-semibold text-slate-500 dark:text-slate-400">Principais Ameaças</td>
-                <td className="py-3 px-4 text-xs leading-relaxed">
-                  <ul className="list-disc list-inside space-y-0.5">
-                    {biomeA.mainThreats.map((t, i) => <li key={i}>{t}</li>)}
-                  </ul>
-                </td>
-                <td className="py-3 px-4 text-xs leading-relaxed">
-                  <ul className="list-disc list-inside space-y-0.5">
-                    {biomeB.mainThreats.map((t, i) => <li key={i}>{t}</li>)}
-                  </ul>
-                </td>
               </tr>
             </tbody>
           </table>

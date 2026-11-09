@@ -28,60 +28,65 @@ export function RecentAlertsWidget() {
   const getTypeIcon = (type: EnvironmentalAlert['type']) => {
     switch (type) {
       case 'foco_calor':
-        return <Flame className="w-4 h-4 text-amber-500" />;
+        return <Flame className="w-4 h-4 text-burn" />;
       case 'alerta_desmatamento':
-        return <Trees className="w-4 h-4 text-emerald-500" />;
+        return <Trees className="w-4 h-4 text-forest" />;
       case 'anomalia_marinha':
-        return <Waves className="w-4 h-4 text-blue-500" />;
+        return <Waves className="w-4 h-4 text-forest-mid" />;
       default:
-        return <AlertTriangle className="w-4 h-4 text-amber-500" />;
+        return <AlertTriangle className="w-4 h-4 text-burn" />;
     }
   };
 
   return (
-    <div className="p-5 rounded-2xl bg-white dark:bg-[#0d1522] border border-slate-200 dark:border-slate-800/80 shadow-sm flex flex-col justify-between">
+    <div className="panel-soft flex flex-col justify-between p-6">
       <div>
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5 border-b border-forest/10 pb-4">
           <div>
-            <h3 className="font-semibold text-base text-slate-900 dark:text-white flex items-center gap-2">
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
+            <div className="flex items-center gap-2">
+              <span className="relative flex h-2.5 w-2.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-burn opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-burn"></span>
               </span>
-              <span>Alertas e Detecções Recentes</span>
-            </h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400">
-              Registros geoespaciais dos sistemas DETER, NASA FIRMS e BDQueimadas
+              <h3 className="display font-bold text-xl text-forest">
+                Detecções e Alertas Recentes
+              </h3>
+            </div>
+            <p className="text-xs text-ash mt-1">
+              Registros orbitais consolidados (DETER, BDQueimadas e NASA FIRMS)
             </p>
           </div>
 
-          <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800/80 p-1 rounded-xl text-xs">
+          <div className="flex items-center gap-1 border border-forest/15 bg-mist p-1 rounded-xl text-xs">
             <button
+              type="button"
               onClick={() => setFilterType('all')}
-              className={`px-2 py-1 rounded-lg font-medium transition-all ${
+              className={`px-2.5 py-1 rounded-lg font-bold transition-all ${
                 filterType === 'all'
-                  ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-emerald-400 shadow-sm'
-                  : 'text-slate-500 hover:text-slate-700 dark:text-slate-400'
+                  ? 'bg-forest text-mist shadow-sm'
+                  : 'text-ash hover:text-forest'
               }`}
             >
               Todos
             </button>
             <button
+              type="button"
               onClick={() => setFilterType('foco')}
-              className={`px-2 py-1 rounded-lg font-medium transition-all ${
+              className={`px-2.5 py-1 rounded-lg font-bold transition-all ${
                 filterType === 'foco'
-                  ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-amber-400 shadow-sm'
-                  : 'text-slate-500 hover:text-slate-700 dark:text-slate-400'
+                  ? 'bg-forest text-mist shadow-sm'
+                  : 'text-ash hover:text-forest'
               }`}
             >
-              Focos
+              Queimadas
             </button>
             <button
+              type="button"
               onClick={() => setFilterType('desmatamento')}
-              className={`px-2 py-1 rounded-lg font-medium transition-all ${
+              className={`px-2.5 py-1 rounded-lg font-bold transition-all ${
                 filterType === 'desmatamento'
-                  ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-emerald-400 shadow-sm'
-                  : 'text-slate-500 hover:text-slate-700 dark:text-slate-400'
+                  ? 'bg-forest text-mist shadow-sm'
+                  : 'text-ash hover:text-forest'
               }`}
             >
               DETER
@@ -89,50 +94,50 @@ export function RecentAlertsWidget() {
           </div>
         </div>
 
-        <div className="space-y-2.5">
+        <div className="space-y-3">
           {filteredAlerts.map((alert) => (
             <div
               key={alert.id}
-              className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-800/80 hover:border-slate-300 dark:hover:border-slate-700 transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs"
+              className="p-3.5 rounded-xl bg-mist border border-forest/10 hover:border-forest/20 transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs"
             >
-              <div className="flex items-start gap-2.5">
-                <div className="p-2 rounded-lg bg-slate-200/60 dark:bg-slate-800 flex-shrink-0 mt-0.5">
+              <div className="flex items-start gap-3">
+                <div className="p-2 rounded-full bg-forest/8 flex-shrink-0 mt-0.5">
                   {getTypeIcon(alert.type)}
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="font-semibold text-slate-900 dark:text-slate-100">
+                    <span className="font-bold text-forest">
                       {alert.typeName}
                     </span>
-                    <span className="text-[10px] px-1.5 py-0.2 rounded bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-medium">
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-forest/8 text-forest-mid font-semibold">
                       {alert.biomeName}
                     </span>
                   </div>
-                  <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                  <div className="text-[11px] text-ash mt-0.5">
                     📍 {alert.municipality}/{alert.state} • {alert.date} {alert.time ? `(${alert.time})` : ''} • {alert.satellite}
                   </div>
                 </div>
               </div>
 
-              <div className="flex items-center justify-between sm:justify-end gap-3 flex-shrink-0 pl-9 sm:pl-0">
+              <div className="flex items-center justify-between sm:justify-end gap-3 flex-shrink-0 pl-11 sm:pl-0">
                 {alert.areaHectares ? (
-                  <span className="font-mono text-emerald-500 font-bold text-[11px]">
+                  <span className="font-mono text-forest font-bold text-xs">
                     {alert.areaHectares} ha
                   </span>
                 ) : alert.frp ? (
-                  <span className="font-mono text-amber-500 font-bold text-[11px]">
+                  <span className="font-mono text-burn font-bold text-xs">
                     {alert.frp} MW
                   </span>
                 ) : (
-                  <span className="font-mono text-blue-500 text-[11px]">Anomalia</span>
+                  <span className="font-mono text-forest-mid text-xs">Anomalia</span>
                 )}
 
-                <span className={`inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full font-medium ${
+                <span className={`inline-flex items-center gap-1 text-[10px] px-2.5 py-1 rounded-full font-bold ${
                   alert.status === 'Confirmado (Auditoria)'
-                    ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20'
-                    : 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20'
+                    ? 'bg-sprout text-forest'
+                    : 'bg-burn/15 text-burn'
                 }`}>
-                  {alert.status === 'Confirmado (Auditoria)' ? <CheckCircle2 size={10} /> : <Clock size={10} />}
+                  {alert.status === 'Confirmado (Auditoria)' ? <CheckCircle2 size={11} /> : <Clock size={11} />}
                   {alert.status}
                 </span>
               </div>
@@ -141,16 +146,16 @@ export function RecentAlertsWidget() {
         </div>
       </div>
 
-      <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800/60 flex items-center justify-between">
-        <span className="text-[11px] text-slate-500 dark:text-slate-400">
+      <div className="mt-5 pt-3 border-t border-forest/10 flex items-center justify-between">
+        <span className="text-xs text-ash">
           Dados abertos auditados do INPE e NASA
         </span>
         <Link
           href="/alertas"
-          className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:text-emerald-500 flex items-center gap-1"
+          className="text-xs font-bold text-forest hover:text-forest-mid flex items-center gap-1 group"
         >
-          <span>Ver Tabela Completa</span>
-          <ArrowRight size={13} />
+          <span>Acessar tabela completa de alertas</span>
+          <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
         </Link>
       </div>
     </div>

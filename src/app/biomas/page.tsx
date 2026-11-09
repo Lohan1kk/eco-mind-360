@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { BIOMES_LIST } from '@/data/biomes';
+import { PageIntro } from '@/components/PageIntro';
 import { 
   MapPin, 
   Shield, 
@@ -21,51 +22,52 @@ export default function BiomasPage() {
   });
 
   return (
-    <div className="space-y-8 py-2">
+    <div className="section-inner max-w-6xl mx-auto py-6 space-y-10">
       {/* Cabeçalho */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-200 dark:border-slate-800">
-        <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
-              Os Sete Ambientes Brasileiros
-            </h1>
-            <span className="text-xs px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-semibold border border-emerald-500/20">
-              Classificação Oficial
-            </span>
-          </div>
-          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
-            Explorador detalhado com características ecológicas, dados territoriais e vetores de pressão
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-forest/10 pb-6">
+        <PageIntro
+          eyebrow="Biodiversidade e Conservação"
+          title="Os Sete Ambientes Brasileiros"
+          eyebrowClassName="eyebrow text-forest-mid"
+          titleClassName="display mt-2 text-3xl text-forest md:text-5xl"
+        >
+          <p className="mt-3 max-w-2xl text-base text-ash">
+            Compêndio territorial oficial com dados de cobertura vegetal, taxas de desmatamento,
+            vetores de pressão e áreas protegidas (IBGE, MapBiomas e INPE).
           </p>
-        </div>
+        </PageIntro>
 
         {/* Filtro por Categoria */}
-        <div className="flex items-center gap-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-1 text-xs shadow-sm">
+        <div className="flex items-center gap-1 border border-forest/15 bg-white/80 p-1 rounded-xl text-xs shadow-sm">
           <button
+            type="button"
             onClick={() => setFilterCategory('all')}
-            className={`px-3 py-1.5 rounded-lg font-medium transition-all ${
+            className={`px-3 py-1.5 rounded-lg font-bold transition-all ${
               filterCategory === 'all'
-                ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-emerald-400 shadow-sm'
-                : 'text-slate-500 hover:text-slate-700 dark:text-slate-400'
+                ? 'bg-forest text-mist shadow-sm'
+                : 'text-ash hover:text-forest'
             }`}
           >
             Todos os 7 Ambientes
           </button>
           <button
+            type="button"
             onClick={() => setFilterCategory('terrestre')}
-            className={`px-3 py-1.5 rounded-lg font-medium transition-all ${
+            className={`px-3 py-1.5 rounded-lg font-bold transition-all ${
               filterCategory === 'terrestre'
-                ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-emerald-400 shadow-sm'
-                : 'text-slate-500 hover:text-slate-700 dark:text-slate-400'
+                ? 'bg-forest text-mist shadow-sm'
+                : 'text-ash hover:text-forest'
             }`}
           >
             Biomas Terrestres (6)
           </button>
           <button
+            type="button"
             onClick={() => setFilterCategory('marinho')}
-            className={`px-3 py-1.5 rounded-lg font-medium transition-all ${
+            className={`px-3 py-1.5 rounded-lg font-bold transition-all ${
               filterCategory === 'marinho'
-                ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-emerald-400 shadow-sm'
-                : 'text-slate-500 hover:text-slate-700 dark:text-slate-400'
+                ? 'bg-forest text-mist shadow-sm'
+                : 'text-ash hover:text-forest'
             }`}
           >
             Costeiro-Marinho (1)
@@ -74,57 +76,48 @@ export default function BiomasPage() {
       </div>
 
       {/* Grid de Cards dos Biomas */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredBiomes.map((biome) => (
           <div
             key={biome.id}
-            className="p-6 rounded-2xl bg-white dark:bg-[#0d1522] border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 shadow-sm hover:shadow-md transition-all flex flex-col justify-between relative overflow-hidden"
+            className="panel-soft flex flex-col justify-between p-6 transition-transform hover:-translate-y-1"
           >
-            {/* Linha colorida do bioma */}
-            <div 
-              className="absolute top-0 left-0 right-0 h-1.5" 
-              style={{ backgroundColor: biome.color }} 
-            />
-
             <div>
               <div className="flex items-start justify-between gap-3 mb-3">
                 <div>
-                  <div className="flex items-center gap-2">
-                    <span className="w-3 h-3 rounded-full" style={{ backgroundColor: biome.color }} />
-                    <h3 className="text-xl font-bold text-slate-900 dark:text-white">
-                      {biome.name}
-                    </h3>
-                  </div>
-                  <span className="text-xs text-slate-500 dark:text-slate-400">
-                    {biome.category} • Abrange {biome.states.length} Estados ({biome.states.slice(0, 6).join(', ')}{biome.states.length > 6 ? '...' : ''})
+                  <span className="text-[11px] font-semibold uppercase tracking-wider text-forest-mid">
+                    {biome.category}
                   </span>
+                  <h3 className="display font-bold text-2xl text-forest mt-0.5">
+                    {biome.name}
+                  </h3>
                 </div>
-                <span className="text-xs font-mono font-bold px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200">
+                <span className="text-xs font-mono font-bold px-2.5 py-1 rounded-full bg-forest/8 text-forest">
                   {biome.percentageBrazil}% BR
                 </span>
               </div>
 
-              <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed mb-4">
+              <p className="text-xs text-ash leading-relaxed mb-4 line-clamp-3">
                 {biome.description}
               </p>
 
               {/* Indicadores Chave */}
-              <div className="grid grid-cols-3 gap-2 p-3 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-800/60 mb-4 text-xs">
+              <div className="grid grid-cols-3 gap-2 p-3 rounded-xl bg-mist border border-forest/10 mb-4 text-xs text-center">
                 <div>
-                  <div className="text-[10px] uppercase font-semibold text-slate-400">Área IBGE</div>
-                  <div className="font-mono font-bold text-slate-900 dark:text-white mt-0.5">
+                  <div className="text-[10px] uppercase font-semibold text-ash">Área IBGE</div>
+                  <div className="font-mono font-bold text-forest mt-0.5 text-[11px]">
                     {biome.areaKm2.toLocaleString('pt-BR')} km²
                   </div>
                 </div>
                 <div>
-                  <div className="text-[10px] uppercase font-semibold text-slate-400">Veg. Nativa</div>
-                  <div className="font-mono font-bold text-emerald-500 mt-0.5">
+                  <div className="text-[10px] uppercase font-semibold text-ash">Veg. Nativa</div>
+                  <div className="font-mono font-bold text-forest mt-0.5 text-[11px]">
                     {biome.nativeVegetationPercentage}%
                   </div>
                 </div>
                 <div>
-                  <div className="text-[10px] uppercase font-semibold text-slate-400">Áreas Protegidas</div>
-                  <div className="font-mono font-bold text-blue-500 mt-0.5">
+                  <div className="text-[10px] uppercase font-semibold text-ash">Áreas Prot.</div>
+                  <div className="font-mono font-bold text-forest-mid mt-0.5 text-[11px]">
                     {biome.protectedAreaPercentage}%
                   </div>
                 </div>
@@ -132,15 +125,15 @@ export default function BiomasPage() {
 
               {/* Principais Ameaças */}
               <div className="mb-4">
-                <div className="text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5 flex items-center gap-1.5">
-                  <Shield size={13} className="text-rose-500" />
+                <div className="text-xs font-bold text-forest mb-1.5 flex items-center gap-1.5">
+                  <Shield size={13} className="text-burn" />
                   <span>Principais Vetores de Degradação</span>
                 </div>
-                <ul className="space-y-1 text-xs text-slate-600 dark:text-slate-400">
-                  {biome.mainThreats.map((threat, idx) => (
+                <ul className="space-y-1 text-xs text-ash">
+                  {biome.mainThreats.slice(0, 2).map((threat, idx) => (
                     <li key={idx} className="flex items-start gap-1.5">
-                      <span className="text-slate-400">•</span>
-                      <span>{threat}</span>
+                      <span className="text-burn font-bold">•</span>
+                      <span className="line-clamp-1">{threat}</span>
                     </li>
                   ))}
                 </ul>
@@ -148,24 +141,24 @@ export default function BiomasPage() {
             </div>
 
             {/* Rodapé do Card com Ações */}
-            <div className="pt-4 border-t border-slate-100 dark:border-slate-800/60 flex items-center justify-between gap-2">
-              <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
-                <Flame size={14} className="text-amber-500" />
-                <span className="font-mono font-bold text-slate-800 dark:text-slate-200">{biome.activeFireHotspots24h}</span>
-                <span>focos 24h</span>
+            <div className="pt-4 border-t border-forest/10 flex items-center justify-between gap-2">
+              <div className="flex items-center gap-1.5 text-xs text-burn font-bold">
+                <Flame size={14} />
+                <span className="font-mono">{biome.activeFireHotspots24h}</span>
+                <span className="text-[11px] text-ash font-normal">focos 24h</span>
               </div>
 
               <div className="flex items-center gap-2">
                 <Link
-                  href={`/mapa?biome=${biome.id}`}
-                  className="px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition-colors flex items-center gap-1"
+                  href="/mapa"
+                  className="py-1.5 px-3 rounded-xl text-xs font-semibold btn-secondary text-forest flex items-center gap-1"
                 >
                   <MapPin size={13} />
                   <span>Mapa</span>
                 </Link>
                 <Link
                   href={`/biomas/${biome.id}`}
-                  className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white transition-colors flex items-center gap-1"
+                  className="py-1.5 px-3.5 rounded-xl text-xs font-bold btn-primary flex items-center gap-1"
                 >
                   <span>Ficha Técnica</span>
                   <ArrowUpRight size={13} />
@@ -176,20 +169,20 @@ export default function BiomasPage() {
         ))}
       </div>
 
-      {/* Tabela Comparativa Geral Oficial */}
-      <div className="p-6 rounded-2xl bg-white dark:bg-[#0d1522] border border-slate-200 dark:border-slate-800 space-y-4">
+      {/* Matriz Comparativa Oficial */}
+      <div className="panel-soft p-6 space-y-4">
         <div>
-          <h2 className="text-lg font-bold text-slate-900 dark:text-white">
+          <h2 className="display text-2xl font-bold text-forest">
             Matriz Comparativa Oficial dos 7 Ambientes
           </h2>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+          <p className="text-xs text-ash mt-1">
             Compilação direta de bases geodésicas do IBGE, MapBiomas e INPE
           </p>
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs text-slate-700 dark:text-slate-300">
-            <thead className="bg-slate-50 dark:bg-slate-900/80 text-[11px] uppercase font-semibold text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800">
+          <table className="w-full text-left text-xs text-ink">
+            <thead className="bg-mist text-[11px] uppercase font-bold text-forest-mid border-b border-forest/10">
               <tr>
                 <th className="py-3 px-3">Ambiente</th>
                 <th className="py-3 px-3">Categoria</th>
@@ -201,24 +194,24 @@ export default function BiomasPage() {
                 <th className="py-3 px-3">Focos 24h</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60 font-mono">
+            <tbody className="divide-y divide-forest/10 font-mono">
               {BIOMES_LIST.map((b) => (
-                <tr key={b.id} className="hover:bg-slate-50 dark:hover:bg-slate-900/40 transition-colors">
+                <tr key={b.id} className="hover:bg-forest/5 transition-colors">
                   <td className="py-3 px-3 font-sans font-bold flex items-center gap-2">
                     <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: b.color }} />
-                    <Link href={`/biomas/${b.id}`} className="hover:text-emerald-500 transition-colors">
+                    <Link href={`/biomas/${b.id}`} className="hover:text-forest-mid transition-colors">
                       {b.name}
                     </Link>
                   </td>
-                  <td className="py-3 px-3 font-sans text-slate-500 dark:text-slate-400">{b.category}</td>
+                  <td className="py-3 px-3 font-sans text-ash">{b.category}</td>
                   <td className="py-3 px-3">{b.areaKm2.toLocaleString('pt-BR')}</td>
                   <td className="py-3 px-3">{b.percentageBrazil}%</td>
-                  <td className="py-3 px-3 text-emerald-500 font-bold">{b.nativeVegetationPercentage}%</td>
-                  <td className="py-3 px-3 text-blue-500">{b.protectedAreaPercentage}%</td>
-                  <td className="py-3 px-3 text-slate-800 dark:text-slate-200">
+                  <td className="py-3 px-3 text-forest font-bold">{b.nativeVegetationPercentage}%</td>
+                  <td className="py-3 px-3 text-forest-mid">{b.protectedAreaPercentage}%</td>
+                  <td className="py-3 px-3 text-ash">
                     {b.deforestationProdes2024Km2 ? `${b.deforestationProdes2024Km2.toLocaleString('pt-BR')} km²` : 'N/A (Marinho)'}
                   </td>
-                  <td className="py-3 px-3 text-amber-500">{b.activeFireHotspots24h}</td>
+                  <td className="py-3 px-3 text-burn font-bold">{b.activeFireHotspots24h}</td>
                 </tr>
               ))}
             </tbody>
