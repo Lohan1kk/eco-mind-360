@@ -1,13 +1,21 @@
+import { isInBrazil } from "./geo";
 import { resolveFireLevel } from "./frp";
 import type { FireAlert } from "./types";
 
 /**
- * Public FIRMS active-fire CSVs (no MAP_KEY required).
+ * Official NASA FIRMS South America 24h CSV feeds (public, no API key required).
+ * Highly optimized (< 2MB, fast, reliable, updated on every orbital pass).
  * @see https://firms.modaps.eosdis.nasa.gov/active_fire/
  */
-const GLOBAL_FEEDS = [
-  "https://firms.modaps.eosdis.nasa.gov/data/active_fire/suomi-npp-viirs-c2/csv/SUOMI_VIIRS_C2_Global_24h.csv",
-  "https://firms.modaps.eosdis.nasa.gov/data/active_fire/noaa-20-viirs-c2/csv/J1_VIIRS_C2_Global_24h.csv",
+const SOUTH_AMERICA_FEEDS = [
+  {
+    url: "https://firms.modaps.eosdis.nasa.gov/data/active_fire/modis-c6.1/csv/MODIS_C6_1_South_America_24h.csv",
+    tag: "modis-sa",
+  },
+  {
+    url: "https://firms.modaps.eosdis.nasa.gov/data/active_fire/noaa-20-viirs-c2/csv/J1_VIIRS_C2_South_America_24h.csv",
+    tag: "viirs-j1",
+  },
 ] as const;
 
 function parseCsvLine(line: string): string[] {
@@ -32,15 +40,22 @@ function parseFirmsCsv(text: string, sourceTag: string): FireAlert[] {
 
   if (latIdx === -1 || lngIdx === -1) return [];
 
-  return lines.slice(1).flatMap((line, index) => {
-    const parts = parseCsvLine(line);
+  const results: FireAlert[] = [];
+
+  for (let index = 1; index < lines.length; index++) {
+    const parts = parseCsvLine(lines[index]);
+    if (parts.length < 3) continue;
+
     const lat = Number.parseFloat(parts[latIdx]);
     const lng = Number.parseFloat(parts[lngIdx]);
-    if (Number.isNaN(lat) || Number.isNaN(lng)) return [];
+    if (Number.isNaN(lat) || Number.isNaN(lng)) continue;
+
+    // Filter strictly to Brazilian territory
+    if (!isInBrazil(lat, lng)) continue;
 
     const confidence = confIdx >= 0 ? parts[confIdx]?.toLowerCase() : "";
-    // Skip low-confidence VIIRS detections for a more realistic map
-    if (confidence === "low" || confidence === "l") return [];
+    // Skip low-confidence VIIRS detections
+    if (confidence === "low" || confidence === "l") continue;
 
     const frp = frpIdx >= 0 ? Number.parseFloat(parts[frpIdx]) : Number.NaN;
     const bright =
@@ -61,27 +76,29 @@ function parseFirmsCsv(text: string, sourceTag: string): FireAlert[] {
 
     const confLabel = confidence ? ` · conf. ${confidence}` : "";
 
-    return [
-      {
-        id: `nasa-${sourceTag}-${index}-${lat.toFixed(3)}-${lng.toFixed(3)}`,
-        lat,
-        lng,
-        level,
-        description: `NASA FIRMS · ${satelite}${confLabel}`,
-        reportedAt,
-        source: "nasa" as const,
-        satelite,
-        frp: Number.isNaN(frp) ? undefined : frp,
-      },
-    ];
-  });
+    results.push({
+      id: `nasa-${sourceTag}-${index}-${lat.toFixed(3)}-${lng.toFixed(3)}`,
+      lat,
+      lng,
+      level,
+      description: `NASA FIRMS (${satelite}${confLabel})`,
+      reportedAt,
+      source: "nasa",
+      satelite: satelite === "T" ? "Terra" : satelite === "A" ? "Aqua" : satelite,
+      frp: Number.isNaN(frp) ? undefined : frp,
+    });
+  }
+
+  return results;
 }
 
 /**
  * Spread fires across a lat/lng grid and across severity levels
- * so the map shows identification (not only red crítico pins).
+ * so the map shows balanced geographical coverage across Brazil.
  */
 function diversifyByGrid(alerts: FireAlert[], limit: number): FireAlert[] {
+  if (alerts.length <= limit) return alerts;
+
   const byLevel = {
     critico: [] as FireAlert[],
     alto: [] as FireAlert[],
@@ -96,14 +113,13 @@ function diversifyByGrid(alerts: FireAlert[], limit: number): FireAlert[] {
   }
 
   const quotas = {
-    // Natural-ish mix: most real detections are low/medium FRP
-    critico: Math.ceil(limit * 0.12),
-    alto: Math.ceil(limit * 0.18),
-    medio: Math.ceil(limit * 0.30),
-    baixo: Math.ceil(limit * 0.40),
+    critico: Math.ceil(limit * 0.15),
+    alto: Math.ceil(limit * 0.25),
+    medio: Math.ceil(limit * 0.35),
+    baixo: Math.ceil(limit * 0.25),
   };
 
-  const cellCap = Math.max(2, Math.ceil(limit / 90));
+  const cellCap = Math.max(3, Math.ceil(limit / 60));
   const perCell = new Map<string, number>();
   const seen = new Set<string>();
   const picked: FireAlert[] = [];
@@ -111,7 +127,7 @@ function diversifyByGrid(alerts: FireAlert[], limit: number): FireAlert[] {
   function tryPick(alert: FireAlert): boolean {
     const dedupe = `${alert.lat.toFixed(2)}:${alert.lng.toFixed(2)}`;
     if (seen.has(dedupe)) return false;
-    const cell = `${Math.floor(alert.lat / 8)}:${Math.floor(alert.lng / 12)}`;
+    const cell = `${Math.floor(alert.lat / 4)}:${Math.floor(alert.lng / 6)}`;
     const count = perCell.get(cell) ?? 0;
     if (count >= cellCap) return false;
     seen.add(dedupe);
@@ -143,24 +159,25 @@ export async function fetchNasaFirmsGlobal(
   options?: { fresh?: boolean; limit?: number },
 ): Promise<FireAlert[]> {
   const fresh = Boolean(options?.fresh);
-  const limit = options?.limit ?? 420;
+  const limit = options?.limit ?? 450;
   const fetchInit: RequestInit = fresh
     ? { cache: "no-store" }
     : { next: { revalidate: 1800 } };
 
   const batches = await Promise.all(
-    GLOBAL_FEEDS.map(async (url, i) => {
+    SOUTH_AMERICA_FEEDS.map(async ({ url, tag }) => {
       try {
-        const res = await fetch(url, fetchInit);
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 4500);
+        const res = await fetch(url, {
+          ...fetchInit,
+          signal: controller.signal,
+          headers: { "User-Agent": "Mozilla/5.0 EcoMind360" },
+        });
+        clearTimeout(timeout);
         if (!res.ok) return [] as FireAlert[];
         const text = await res.text();
-        // Sample across the file (not only the first lines) for geographic realism
-        const lines = text.split("\n");
-        const header = lines[0] ?? "";
-        const body = lines.slice(1).filter(Boolean);
-        const stride = Math.max(1, Math.floor(body.length / 8000));
-        const sampled = body.filter((_, idx) => idx % stride === 0).slice(0, 8000);
-        return parseFirmsCsv([header, ...sampled].join("\n"), `g${i}`);
+        return parseFirmsCsv(text, tag);
       } catch {
         return [] as FireAlert[];
       }
@@ -170,7 +187,7 @@ export async function fetchNasaFirmsGlobal(
   return diversifyByGrid(batches.flat(), limit);
 }
 
-/** Optional key-based Brazil denser pull (legacy). */
+/** Optional key-based Brazil denser pull. */
 export async function fetchNasaFirmsFires(
   mapKey: string,
   days = 1,
@@ -182,12 +199,15 @@ export async function fetchNasaFirmsFires(
     ? { cache: "no-store" }
     : { next: { revalidate: 3600 } };
 
-  const sources = ["VIIRS_NOAA20_NRT", "VIIRS_SNPP_NRT", "MODIS_NRT"] as const;
+  const sources = ["VIIRS_NOAA20_NRT", "MODIS_NRT"] as const;
   const batches = await Promise.all(
     sources.map(async (source) => {
       const url = `https://firms.modaps.eosdis.nasa.gov/api/area/csv/${mapKey}/${source}/${BRAZIL_BBOX_FIRMS}/${days}`;
       try {
-        const res = await fetch(url, fetchInit);
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 4500);
+        const res = await fetch(url, { ...fetchInit, signal: controller.signal });
+        clearTimeout(timeout);
         if (!res.ok) return [] as FireAlert[];
         return parseFirmsCsv(await res.text(), source);
       } catch {
@@ -196,5 +216,5 @@ export async function fetchNasaFirmsFires(
     }),
   );
 
-  return diversifyByGrid(batches.flat(), 200);
+  return diversifyByGrid(batches.flat(), 250);
 }

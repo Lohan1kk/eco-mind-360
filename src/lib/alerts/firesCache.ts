@@ -1,6 +1,6 @@
 import type { FireAlert } from "./types";
 
-const CACHE_KEY = "ecomind-fires-cache-v1";
+const CACHE_KEY = "ecomind-360-fires-v2";
 
 export interface FiresCacheMeta {
   count: number;

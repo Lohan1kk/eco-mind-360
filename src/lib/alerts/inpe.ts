@@ -26,19 +26,30 @@ function dailyFilename(date: Date): string {
   return `focos_diario_br_${y}${m}${d}.csv`;
 }
 
-function fetchOpts(fresh: boolean, revalidate: number): RequestInit {
-  return fresh ? { cache: "no-store" } : { next: { revalidate } };
+function fetchOpts(fresh: boolean, revalidate: number, signal?: AbortSignal): RequestInit {
+  return {
+    ...(fresh ? { cache: "no-store" } : { next: { revalidate } }),
+    headers: { "User-Agent": "Mozilla/5.0 EcoMind360" },
+    signal,
+  };
 }
 
 async function findLatest10MinFile(fresh: boolean): Promise<string | null> {
-  const res = await fetch(INPE_10MIN_DIR, fetchOpts(fresh, 300));
-  if (!res.ok) return null;
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 3500);
+    const res = await fetch(INPE_10MIN_DIR, fetchOpts(fresh, 300, controller.signal));
+    clearTimeout(timeout);
+    if (!res.ok) return null;
 
-  const html = await res.text();
-  const matches = html.match(/focos_10min_\d{8}_\d{4}\.csv/g);
-  if (!matches?.length) return null;
+    const html = await res.text();
+    const matches = html.match(/focos_10min_\d{8}_\d{4}\.csv/g);
+    if (!matches?.length) return null;
 
-  return matches.sort().at(-1) ?? null;
+    return matches.sort().at(-1) ?? null;
+  } catch {
+    return null;
+  }
 }
 
 function parse10MinCsv(text: string): FireAlert[] {
@@ -65,16 +76,15 @@ function parse10MinCsv(text: string): FireAlert[] {
           id: `inpe-10m-${index}-${lat.toFixed(4)}-${lng.toFixed(4)}`,
           lat,
           lng,
-          // 10-min CSV has no FRP — do not imply "médio"
           level: "baixo" as const,
-          description: satelite ? `Satélite ${satelite}` : undefined,
+          description: satelite ? `Satélite ${satelite} (Tempo Real)` : undefined,
           reportedAt,
           source: "inpe" as const,
           satelite,
         },
       ];
     })
-    .slice(0, 280);
+    .slice(0, 300);
 }
 
 function parseDailyCsv(text: string): FireAlert[] {
@@ -89,6 +99,7 @@ function parseDailyCsv(text: string): FireAlert[] {
     const lat = Number.parseFloat(parts[1]);
     const lng = Number.parseFloat(parts[2]);
     if (Number.isNaN(lat) || Number.isNaN(lng)) return [];
+    if (!isInBrazil(lat, lng)) return [];
 
     const reportedAt = safeIso(parts[3]) ?? new Date().toISOString();
     const satelite = parts[4];
@@ -121,8 +132,10 @@ function parseDailyCsv(text: string): FireAlert[] {
   return rows.sort((a, b) => (b.frp ?? 0) - (a.frp ?? 0));
 }
 
-/** Keep Brazil coverage readable: mix severity levels, not only top FRP. */
+/** Keep Brazil coverage readable: mix severity levels across all biomes. */
 function diversifyInpeLevels(alerts: FireAlert[], limit: number): FireAlert[] {
+  if (alerts.length <= limit) return alerts;
+
   const byLevel: Record<string, FireAlert[]> = {
     critico: [],
     alto: [],
@@ -134,9 +147,9 @@ function diversifyInpeLevels(alerts: FireAlert[], limit: number): FireAlert[] {
   }
   const quotas = {
     critico: Math.ceil(limit * 0.15),
-    alto: Math.ceil(limit * 0.2),
-    medio: Math.ceil(limit * 0.3),
-    baixo: Math.ceil(limit * 0.35),
+    alto: Math.ceil(limit * 0.25),
+    medio: Math.ceil(limit * 0.35),
+    baixo: Math.ceil(limit * 0.25),
   };
   const picked: FireAlert[] = [];
   for (const level of ["critico", "alto", "medio", "baixo"] as const) {
@@ -157,27 +170,19 @@ async function fetchDailyCsvText(
   date: Date,
   fresh: boolean,
 ): Promise<string | null> {
-  const res = await fetch(
-    `${INPE_DAILY_BR}${dailyFilename(date)}`,
-    fetchOpts(fresh, 3600),
-  );
-  if (!res.ok) return null;
-  return res.text();
-}
-
-/**
- * Prefer a complete daily file. Mid-day "today" CSVs are often partial —
- * if today has far fewer rows than yesterday, use yesterday.
- */
-function pickBestDaily(
-  today: FireAlert[],
-  yesterday: FireAlert[],
-): FireAlert[] {
-  if (today.length === 0) return yesterday;
-  if (yesterday.length === 0) return today;
-  // Incomplete today (e.g. morning file vs full previous day)
-  if (today.length < yesterday.length * 0.4) return yesterday;
-  return today;
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 4500);
+    const res = await fetch(
+      `${INPE_DAILY_BR}${dailyFilename(date)}`,
+      fetchOpts(fresh, 3600, controller.signal),
+    );
+    clearTimeout(timeout);
+    if (!res.ok) return null;
+    return res.text();
+  } catch {
+    return null;
+  }
 }
 
 export async function fetchInpeFires(options?: {
@@ -188,29 +193,43 @@ export async function fetchInpeFires(options?: {
 }> {
   const fresh = Boolean(options?.fresh);
 
-  const today = new Date();
-  const yesterday = new Date();
-  yesterday.setUTCDate(yesterday.getUTCDate() - 1);
+  const now = new Date();
+  const today = new Date(now.getTime());
+  const yesterday = new Date(now.getTime() - 86400000);
+  const dayBefore = new Date(now.getTime() - 2 * 86400000);
 
-  const [todayText, yesterdayText] = await Promise.all([
+  const [todayText, yesterdayText, dayBeforeText] = await Promise.all([
     fetchDailyCsvText(today, fresh),
     fetchDailyCsvText(yesterday, fresh),
+    fetchDailyCsvText(dayBefore, fresh),
   ]);
 
   const todayAlerts = todayText ? parseDailyCsv(todayText) : [];
   const yesterdayAlerts = yesterdayText ? parseDailyCsv(yesterdayText) : [];
-  const daily = pickBestDaily(todayAlerts, yesterdayAlerts);
+  const dayBeforeAlerts = dayBeforeText ? parseDailyCsv(dayBeforeText) : [];
+
+  // Pick the richest consolidated daily file
+  let daily = todayAlerts;
+  if (yesterdayAlerts.length > daily.length * 0.5) {
+    daily = yesterdayAlerts;
+  }
+  if (daily.length === 0 && dayBeforeAlerts.length > 0) {
+    daily = dayBeforeAlerts;
+  }
 
   if (daily.length > 0) {
-    // Overlay latest 10-min foci for fresher pins (no FRP → baixo)
+    // Overlay latest 10-min foci for real-time responsiveness
     let merged = daily;
     try {
       const latest10 = await findLatest10MinFile(fresh);
       if (latest10) {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 3500);
         const tenRes = await fetch(
           `${INPE_10MIN_DIR}${latest10}`,
-          fetchOpts(fresh, 600),
+          fetchOpts(fresh, 600, controller.signal),
         );
+        clearTimeout(timeout);
         if (tenRes.ok) {
           const recent = parse10MinCsv(await tenRes.text());
           if (recent.length > 0) {
@@ -224,7 +243,7 @@ export async function fetchInpeFires(options?: {
               cells.add(cell);
               byId.set(r.id, r);
             }
-            merged = [...byId.values()];
+            merged = Array.from(byId.values());
           }
         }
       }
@@ -233,7 +252,7 @@ export async function fetchInpeFires(options?: {
     }
 
     return {
-      alerts: diversifyInpeLevels(merged, 320),
+      alerts: diversifyInpeLevels(merged, 350),
       source: "inpe-daily",
     };
   }
@@ -241,10 +260,13 @@ export async function fetchInpeFires(options?: {
   // Fallback: 10-min only
   const latest10 = await findLatest10MinFile(fresh);
   if (latest10) {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 3500);
     const tenRes = await fetch(
       `${INPE_10MIN_DIR}${latest10}`,
-      fetchOpts(fresh, 600),
+      fetchOpts(fresh, 600, controller.signal),
     );
+    clearTimeout(timeout);
     if (tenRes.ok) {
       const alerts = parse10MinCsv(await tenRes.text());
       if (alerts.length > 0) {

@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Outfit, Plus_Jakarta_Sans } from 'next/font/google';
+import 'leaflet/dist/leaflet.css';
 import './globals.css';
 import { AppShell } from '@/components/shell/AppShell';
 

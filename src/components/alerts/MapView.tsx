@@ -58,13 +58,17 @@ function FixMapSize({ layer }: { layer: MapLayer }) {
   const map = useMap();
   useEffect(() => {
     const bump = () => map.invalidateSize({ animate: false });
-    const t1 = window.setTimeout(bump, 40);
-    const t2 = window.setTimeout(bump, 280);
+    const t1 = window.setTimeout(bump, 50);
+    const t2 = window.setTimeout(bump, 250);
+    const t3 = window.setTimeout(bump, 650);
+    const t4 = window.setTimeout(bump, 1200);
     window.addEventListener("orientationchange", bump);
     window.addEventListener("resize", bump);
     return () => {
       window.clearTimeout(t1);
       window.clearTimeout(t2);
+      window.clearTimeout(t3);
+      window.clearTimeout(t4);
       window.removeEventListener("orientationchange", bump);
       window.removeEventListener("resize", bump);
     };
@@ -185,7 +189,7 @@ export function MapView({
       center={BRAZIL_CENTER}
       zoom={BRAZIL_DEFAULT_ZOOM}
       className="z-0 h-full w-full touch-manipulation"
-      style={{ height: "100%", width: "100%" }}
+      style={{ height: "100%", width: "100%", minHeight: "520px" }}
       scrollWheelZoom={!isTouch}
       preferCanvas
       zoomControl={!isTouch}
