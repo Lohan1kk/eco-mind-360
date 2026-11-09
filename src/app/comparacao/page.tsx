@@ -10,7 +10,12 @@ import {
   YAxis,
   Tooltip,
   Legend,
-  CartesianGrid
+  CartesianGrid,
+  RadarChart,
+  PolarGrid,
+  PolarAngleAxis,
+  PolarRadiusAxis,
+  Radar
 } from 'recharts';
 
 export default function ComparacaoPage() {
@@ -38,6 +43,15 @@ export default function ComparacaoPage() {
     },
   ];
 
+  // Dados para o Radar Científico
+  const radarData = [
+    { subject: 'Extensão Territorial', A: Math.min(100, (biomeA.areaKm2 / 4196943) * 100), B: Math.min(100, (biomeB.areaKm2 / 4196943) * 100) },
+    { subject: 'Vegetação Nativa', A: biomeA.nativeVegetationPercentage, B: biomeB.nativeVegetationPercentage },
+    { subject: 'Cobertura de UCs', A: Math.min(100, biomeA.protectedAreaPercentage * 2), B: Math.min(100, biomeB.protectedAreaPercentage * 2) },
+    { subject: 'Pressão Antrópica', A: Math.min(100, (biomeA.activeFireHotspots24h / 450) * 100), B: Math.min(100, (biomeB.activeFireHotspots24h / 450) * 100) },
+    { subject: 'Estabilidade 2024', A: biomeA.deforestationTrendPercent ? Math.abs(biomeA.deforestationTrendPercent) * 2.5 : 80, B: biomeB.deforestationTrendPercent ? Math.abs(biomeB.deforestationTrendPercent) * 2.5 : 80 },
+  ];
+
   return (
     <div className="space-y-8 py-2">
       {/* Cabeçalho */}
@@ -47,7 +61,7 @@ export default function ComparacaoPage() {
             <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
               Comparador Científico de Ambientes
             </h1>
-            <span className="text-xs px-2.5 py-0.5 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 font-semibold border border-blue-500/20">
+            <span className="text-xs px-2.5 py-0.5 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 font-bold border border-blue-500/20">
               Análise Multicritério
             </span>
           </div>
@@ -57,17 +71,20 @@ export default function ComparacaoPage() {
         </div>
       </div>
 
-      {/* Seletores dos Dois Biomas */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-5 rounded-2xl bg-white dark:bg-[#0d1522] border border-slate-200 dark:border-slate-800 shadow-sm">
-        <div className="space-y-2">
-          <label className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-2">
-            <span className="w-3 h-3 rounded-full" style={{ backgroundColor: biomeA.color }} />
-            <span>Primeiro Ambiente (A):</span>
+      {/* Seletores dos Dois Biomas com Visual de Cockpit Científico */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-5 rounded-3xl bg-white dark:bg-[#090f1a] border border-slate-200 dark:border-slate-800 shadow-sm">
+        <div className="space-y-2 p-3 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800">
+          <label className="text-xs font-bold text-slate-700 dark:text-slate-200 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="w-3 h-3 rounded-full" style={{ backgroundColor: biomeA.color }} />
+              <span>Ambiente de Referência (A):</span>
+            </div>
+            <span className="text-[10px] font-mono font-bold text-emerald-500">{biomeA.percentageBrazil}% BR</span>
           </label>
           <select
             value={biomeAId}
             onChange={(e) => setBiomeAId(e.target.value)}
-            className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white font-semibold text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white font-bold text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer shadow-inner"
           >
             {BIOMES_LIST.map((b) => (
               <option key={b.id} value={b.id} disabled={b.id === biomeBId}>
@@ -77,15 +94,18 @@ export default function ComparacaoPage() {
           </select>
         </div>
 
-        <div className="space-y-2">
-          <label className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-2">
-            <span className="w-3 h-3 rounded-full" style={{ backgroundColor: biomeB.color }} />
-            <span>Segundo Ambiente (B):</span>
+        <div className="space-y-2 p-3 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800">
+          <label className="text-xs font-bold text-slate-700 dark:text-slate-200 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="w-3 h-3 rounded-full" style={{ backgroundColor: biomeB.color }} />
+              <span>Ambiente Comparado (B):</span>
+            </div>
+            <span className="text-[10px] font-mono font-bold text-amber-500">{biomeB.percentageBrazil}% BR</span>
           </label>
           <select
             value={biomeBId}
             onChange={(e) => setBiomeBId(e.target.value)}
-            className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white font-semibold text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white font-bold text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer shadow-inner"
           >
             {BIOMES_LIST.map((b) => (
               <option key={b.id} value={b.id} disabled={b.id === biomeAId}>
@@ -96,55 +116,92 @@ export default function ComparacaoPage() {
         </div>
       </div>
 
-      {/* Gráfico Comparativo de Percentuais */}
-      <div className="p-6 rounded-2xl bg-white dark:bg-[#0d1522] border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
-        <div>
-          <h3 className="font-bold text-base text-slate-900 dark:text-white">
-            Comparação Direta de Percentuais Críticos (%)
-          </h3>
-          <p className="text-xs text-slate-500 dark:text-slate-400">
-            {biomeA.name} vs {biomeB.name} — Dados MapBiomas e ICMBio
-          </p>
+      {/* Gráficos de Confronto: Barras & Radar Multidimensional */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Gráfico de Barras */}
+        <div className="p-6 rounded-3xl bg-white dark:bg-[#090f1a] border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+          <div>
+            <h3 className="font-bold text-base text-slate-900 dark:text-white">
+              Percentuais Comparativos (%)
+            </h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              {biomeA.name} vs {biomeB.name} — Dados MapBiomas e ICMBio
+            </p>
+          </div>
+
+          <div className="w-full h-72">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={comparisonData} margin={{ top: 20, right: 20, left: 0, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#334155" opacity={0.2} />
+                <XAxis dataKey="metric" stroke="#64748b" fontSize={12} />
+                <YAxis unit="%" stroke="#64748b" fontSize={11} domain={[0, 100]} />
+                <Tooltip 
+                  contentStyle={{ 
+                    backgroundColor: '#0f172a', 
+                    borderColor: '#334155',
+                    borderRadius: '12px',
+                    color: '#ffffff',
+                    fontSize: '12px'
+                  }} 
+                />
+                <Legend wrapperStyle={{ fontSize: '12px' }} />
+                <Bar dataKey={biomeA.name} fill={biomeA.color} radius={[6, 6, 0, 0]} />
+                <Bar dataKey={biomeB.name} fill={biomeB.color} radius={[6, 6, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
         </div>
 
-        <div className="w-full h-72">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={comparisonData} margin={{ top: 20, right: 30, left: 0, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#334155" opacity={0.2} />
-              <XAxis dataKey="metric" stroke="#64748b" fontSize={12} />
-              <YAxis unit="%" stroke="#64748b" fontSize={11} domain={[0, 100]} />
-              <Tooltip 
-                contentStyle={{ 
-                  backgroundColor: '#0f172a', 
-                  borderColor: '#334155',
-                  borderRadius: '12px',
-                  color: '#ffffff',
-                  fontSize: '12px'
-                }} 
-              />
-              <Legend wrapperStyle={{ fontSize: '12px' }} />
-              <Bar dataKey={biomeA.name} fill={biomeA.color} radius={[6, 6, 0, 0]} />
-              <Bar dataKey={biomeB.name} fill={biomeB.color} radius={[6, 6, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
+        {/* Gráfico Radar */}
+        <div className="p-6 rounded-3xl bg-white dark:bg-[#090f1a] border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+          <div>
+            <h3 className="font-bold text-base text-slate-900 dark:text-white">
+              Radar de Vulnerabilidade e Conservação
+            </h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              Equilíbrio ecológico entre extensão, conservação e pressão
+            </p>
+          </div>
+
+          <div className="w-full h-72">
+            <ResponsiveContainer width="100%" height="100%">
+              <RadarChart data={radarData}>
+                <PolarGrid stroke="#334155" opacity={0.3} />
+                <PolarAngleAxis dataKey="subject" stroke="#64748b" fontSize={10} />
+                <PolarRadiusAxis stroke="#64748b" fontSize={9} domain={[0, 100]} />
+                <Radar name={biomeA.name} dataKey="A" stroke={biomeA.color} fill={biomeA.color} fillOpacity={0.35} />
+                <Radar name={biomeB.name} dataKey="B" stroke={biomeB.color} fill={biomeB.color} fillOpacity={0.35} />
+                <Legend wrapperStyle={{ fontSize: '12px' }} />
+                <Tooltip 
+                  contentStyle={{ 
+                    backgroundColor: '#0f172a', 
+                    borderColor: '#334155',
+                    borderRadius: '12px',
+                    color: '#ffffff',
+                    fontSize: '12px'
+                  }} 
+                />
+              </RadarChart>
+            </ResponsiveContainer>
+          </div>
         </div>
       </div>
 
       {/* Tabela de Confronto Detalhado Lado a Lado */}
-      <div className="p-6 rounded-2xl bg-white dark:bg-[#0d1522] border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+      <div className="p-6 rounded-3xl bg-white dark:bg-[#090f1a] border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
         <h3 className="font-bold text-base text-slate-900 dark:text-white">
           Tabela Comparativa Multicritério
         </h3>
 
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs text-slate-700 dark:text-slate-300">
-            <thead className="bg-slate-50 dark:bg-slate-900 text-[11px] uppercase font-semibold text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800">
+            <thead className="bg-slate-50 dark:bg-[#070b14] text-[11px] uppercase font-bold text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800">
               <tr>
-                <th className="py-3 px-4 w-1/3">Critério / Indicador</th>
-                <th className="py-3 px-4 w-1/3" style={{ color: biomeA.color }}>
+                <th className="py-3.5 px-4 w-1/3">Critério / Indicador</th>
+                <th className="py-3.5 px-4 w-1/3" style={{ color: biomeA.color }}>
                   {biomeA.name}
                 </th>
-                <th className="py-3 px-4 w-1/3" style={{ color: biomeB.color }}>
+                <th className="py-3.5 px-4 w-1/3" style={{ color: biomeB.color }}>
                   {biomeB.name}
                 </th>
               </tr>
@@ -152,8 +209,8 @@ export default function ComparacaoPage() {
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60 font-sans">
               <tr>
                 <td className="py-3 px-4 font-semibold text-slate-500 dark:text-slate-400">Classificação Oficial</td>
-                <td className="py-3 px-4 font-medium">{biomeA.category}</td>
-                <td className="py-3 px-4 font-medium">{biomeB.category}</td>
+                <td className="py-3 px-4 font-bold">{biomeA.category}</td>
+                <td className="py-3 px-4 font-bold">{biomeB.category}</td>
               </tr>
               <tr>
                 <td className="py-3 px-4 font-semibold text-slate-500 dark:text-slate-400">Área Oficial (IBGE)</td>
@@ -177,12 +234,12 @@ export default function ComparacaoPage() {
               </tr>
               <tr>
                 <td className="py-3 px-4 font-semibold text-slate-500 dark:text-slate-400">Taxa de Desmatamento (PRODES 2024)</td>
-                <td className="py-3 px-4 font-mono">
+                <td className="py-3 px-4 font-mono font-semibold">
                   {biomeA.deforestationProdes2024Km2 
                     ? `${biomeA.deforestationProdes2024Km2.toLocaleString('pt-BR')} km² (${biomeA.deforestationTrendPercent}%)` 
                     : 'Não aplicável (Eco Marinho)'}
                 </td>
-                <td className="py-3 px-4 font-mono">
+                <td className="py-3 px-4 font-mono font-semibold">
                   {biomeB.deforestationProdes2024Km2 
                     ? `${biomeB.deforestationProdes2024Km2.toLocaleString('pt-BR')} km² (${biomeB.deforestationTrendPercent}%)` 
                     : 'Não aplicável (Eco Marinho)'}

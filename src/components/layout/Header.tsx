@@ -9,7 +9,8 @@ import {
   Moon, 
   Satellite, 
   X,
-  ChevronDown
+  ChevronDown,
+  Compass
 } from 'lucide-react';
 import { useTheme } from './ThemeContext';
 import { BIOMES_LIST } from '@/data/biomes';
@@ -34,6 +35,20 @@ export function Header() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // Atalho de teclado Ctrl + K para abrir a busca
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        setSearchOpen(true);
+        const input = searchContainerRef.current?.querySelector('input');
+        input?.focus();
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   // Resultados de busca
   const filteredBiomes = searchQuery.trim()
     ? BIOMES_LIST.filter(b => 
@@ -52,12 +67,12 @@ export function Header() {
     : [];
 
   return (
-    <header className="sticky top-0 z-30 h-16 bg-white/80 dark:bg-[#070b12]/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800/80 px-4 lg:px-8 flex items-center justify-between gap-4 transition-colors">
-      {/* Lado esquerdo: Espaçador do menu mobile + barra de pesquisa */}
+    <header className="sticky top-0 z-30 h-16 bg-white/85 dark:bg-[#060a12]/85 backdrop-blur-xl border-b border-slate-200 dark:border-slate-800/80 px-4 lg:px-8 flex items-center justify-between gap-4 transition-colors">
+      {/* Lado esquerdo: Barra de busca inteligente com atalho Ctrl+K */}
       <div className="flex items-center gap-3 flex-1 max-w-xl pl-10 lg:pl-0">
         <div ref={searchContainerRef} className="relative w-full">
           <div className="relative flex items-center">
-            <Search className="absolute left-3 w-4 h-4 text-slate-400 pointer-events-none" />
+            <Search className="absolute left-3.5 w-4 h-4 text-emerald-500/70 pointer-events-none" />
             <input
               type="text"
               value={searchQuery}
@@ -67,26 +82,33 @@ export function Header() {
               }}
               onFocus={() => setSearchOpen(true)}
               placeholder="Buscar bioma, município (ex: Altamira, Corumbá), estado ou alerta..."
-              className="w-full pl-9 pr-8 py-2 rounded-lg text-xs md:text-sm bg-slate-100 dark:bg-slate-900/90 text-slate-900 dark:text-slate-100 placeholder-slate-400 border border-slate-200 dark:border-slate-700/70 focus:outline-none focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-500 transition-all"
+              className="w-full pl-10 pr-16 py-2 rounded-xl text-xs md:text-sm bg-slate-100/80 dark:bg-slate-900/80 text-slate-900 dark:text-slate-100 placeholder-slate-400 border border-slate-200/80 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all shadow-inner"
             />
-            {searchQuery && (
-              <button 
-                onClick={() => {
-                  setSearchQuery('');
-                  setSearchOpen(false);
-                }} 
-                className="absolute right-2.5 text-slate-400 hover:text-slate-200"
-              >
-                <X size={14} />
-              </button>
-            )}
+            <div className="absolute right-2.5 flex items-center gap-1.5">
+              {searchQuery ? (
+                <button 
+                  onClick={() => {
+                    setSearchQuery('');
+                    setSearchOpen(false);
+                  }} 
+                  className="p-1 rounded-md text-slate-400 hover:text-slate-200"
+                >
+                  <X size={13} />
+                </button>
+              ) : (
+                <span className="hidden sm:inline-block text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-300 dark:border-slate-700">
+                  Ctrl K
+                </span>
+              )}
+            </div>
           </div>
 
           {/* Dropdown de resultados de busca instantânea */}
           {searchOpen && searchQuery.trim().length > 0 && (
-            <div className="absolute top-full left-0 right-0 mt-2 p-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 shadow-xl z-50 max-h-96 overflow-y-auto">
-              <div className="text-[11px] font-semibold text-slate-400 px-2 py-1 uppercase tracking-wider">
-                Biomas Encontrados
+            <div className="absolute top-full left-0 right-0 mt-2 p-3 rounded-2xl bg-white dark:bg-[#090f1a] border border-slate-200 dark:border-slate-700 shadow-2xl z-50 max-h-96 overflow-y-auto animate-in fade-in zoom-in-95 duration-150">
+              <div className="text-[10px] font-bold text-slate-400 px-2 py-1 uppercase tracking-wider flex items-center justify-between">
+                <span>Biomas Identificados</span>
+                <span className="text-emerald-500">{filteredBiomes.length}</span>
               </div>
               {filteredBiomes.length > 0 ? (
                 <div className="space-y-1 mb-3">
@@ -98,23 +120,28 @@ export function Header() {
                         setSearchOpen(false);
                         setSearchQuery('');
                       }}
-                      className="w-full flex items-center justify-between p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-left text-xs transition-colors"
+                      className="w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800/80 text-left text-xs transition-colors group"
                     >
-                      <div className="flex items-center gap-2">
-                        <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: biome.color }} />
-                        <span className="font-semibold text-slate-900 dark:text-slate-100">{biome.name}</span>
-                        <span className="text-slate-400">({biome.states.slice(0, 4).join(', ')})</span>
+                      <div className="flex items-center gap-2.5">
+                        <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: biome.color }} />
+                        <span className="font-semibold text-slate-900 dark:text-slate-100 group-hover:text-emerald-400 transition-colors">
+                          {biome.name}
+                        </span>
+                        <span className="text-slate-400 text-[11px]">
+                          ({biome.states.slice(0, 4).join(', ')})
+                        </span>
                       </div>
-                      <span className="text-[10px] text-emerald-500 font-medium">Ver Bioma →</span>
+                      <span className="text-[11px] text-emerald-500 font-medium">Ver Bioma →</span>
                     </button>
                   ))}
                 </div>
               ) : (
-                <div className="text-xs text-slate-400 px-2 py-1 italic">Nenhum bioma com esse termo.</div>
+                <div className="text-xs text-slate-400 px-2 py-1 italic">Nenhum bioma com esse nome.</div>
               )}
 
-              <div className="text-[11px] font-semibold text-slate-400 px-2 py-1 uppercase tracking-wider border-t border-slate-100 dark:border-slate-800 pt-2">
-                Ocorrências & Alertas
+              <div className="text-[10px] font-bold text-slate-400 px-2 py-1 uppercase tracking-wider border-t border-slate-100 dark:border-slate-800 pt-2 flex items-center justify-between">
+                <span>Ocorrências e Alertas</span>
+                <span className="text-amber-500">{filteredAlerts.length}</span>
               </div>
               {filteredAlerts.length > 0 ? (
                 <div className="space-y-1">
@@ -126,7 +153,7 @@ export function Header() {
                         setSearchOpen(false);
                         setSearchQuery('');
                       }}
-                      className="w-full flex items-center justify-between p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-left text-xs transition-colors"
+                      className="w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800/80 text-left text-xs transition-colors"
                     >
                       <div>
                         <div className="font-medium text-slate-900 dark:text-slate-200">
@@ -136,53 +163,65 @@ export function Header() {
                           {alert.biomeName} • {alert.date} • {alert.source}
                         </div>
                       </div>
-                      <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
+                      <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-semibold">
                         {alert.confidence}
                       </span>
                     </button>
                   ))}
                 </div>
               ) : (
-                <div className="text-xs text-slate-400 px-2 py-1 italic">Nenhum alerta correspondente.</div>
+                <div className="text-xs text-slate-400 px-2 py-1 italic">Nenhum alerta localizado.</div>
               )}
             </div>
           )}
         </div>
       </div>
 
-      {/* Lado direito: Status satélite + Seletor de bioma rápido + Toggle de Tema */}
+      {/* Lado direito: Status satélite + Seletor de bioma rápido + Modo Apresentação + Toggle de Tema */}
       <div className="flex items-center gap-2 md:gap-3">
-        {/* Badge de status dos Satélites (desktop) */}
-        <div className="hidden xl:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 text-xs">
-          <Satellite size={14} className="text-cyan-500 animate-pulse" />
-          <span className="text-slate-600 dark:text-slate-300 font-medium">Constelação Orbital:</span>
-          <span className="text-slate-400 font-mono text-[11px]">Aqua • Terra • NOAA-20 • CBERS</span>
+        {/* Badge de Satélites Orbitais */}
+        <div className="hidden xl:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-[#0b121e] border border-slate-200 dark:border-slate-800 text-xs">
+          <span className="relative flex h-2 w-2">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-500"></span>
+          </span>
+          <Satellite size={13} className="text-cyan-400" />
+          <span className="text-slate-700 dark:text-slate-200 font-semibold">NASA • INPE:</span>
+          <span className="text-slate-400 font-mono text-[11px]">VIIRS • AQUA • CBERS</span>
         </div>
 
-        {/* Dropdown rápido de Biomas */}
+        {/* Dropdown Rápido de Biomas */}
         <div className="relative">
           <button
             onClick={() => setBiomeSelectOpen(!biomeSelectOpen)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-100 dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-800 transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 dark:bg-[#0b121e] hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-800 transition-all shadow-sm"
           >
-            <span>Ir para Bioma</span>
-            <ChevronDown size={14} />
+            <Compass size={14} className="text-emerald-500" />
+            <span className="hidden sm:inline">Ambiente:</span>
+            <span>7 Biomas</span>
+            <ChevronDown size={13} />
           </button>
 
           {biomeSelectOpen && (
             <div 
               onMouseLeave={() => setBiomeSelectOpen(false)}
-              className="absolute right-0 mt-2 w-48 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 shadow-xl py-1 z-50 text-xs"
+              className="absolute right-0 mt-2 w-52 rounded-2xl bg-white dark:bg-[#090f1a] border border-slate-200 dark:border-slate-700 shadow-2xl p-1.5 z-50 text-xs animate-in fade-in zoom-in-95 duration-150"
             >
+              <div className="px-2.5 py-1 text-[10px] uppercase font-bold text-slate-400 tracking-wider">
+                Navegação Rápida
+              </div>
               {BIOMES_LIST.map((b) => (
                 <Link
                   key={b.id}
                   href={`/biomas/${b.id}`}
                   onClick={() => setBiomeSelectOpen(false)}
-                  className="flex items-center gap-2 px-3 py-2 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 transition-colors"
+                  className="flex items-center justify-between px-2.5 py-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 transition-colors"
                 >
-                  <span className="w-2 h-2 rounded-full" style={{ backgroundColor: b.color }} />
-                  <span>{b.name}</span>
+                  <div className="flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: b.color }} />
+                    <span className="font-medium">{b.name}</span>
+                  </div>
+                  <span className="text-[10px] font-mono text-slate-400">{b.percentageBrazil}%</span>
                 </Link>
               ))}
             </div>
@@ -193,7 +232,7 @@ export function Header() {
         <button
           onClick={toggleTheme}
           aria-label="Alternar tema claro ou escuro"
-          className="p-2 rounded-lg bg-slate-100 dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-800 transition-colors"
+          className="p-2 rounded-xl bg-slate-100 dark:bg-[#0b121e] hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-800 transition-all shadow-sm"
           title={theme === 'dark' ? 'Mudar para Tema Claro' : 'Mudar para Tema Escuro'}
         >
           {theme === 'dark' ? (
