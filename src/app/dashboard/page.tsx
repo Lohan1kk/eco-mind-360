@@ -11,7 +11,8 @@ import {
   RefreshCw, 
   MapPin, 
   Download, 
-  Filter 
+  Filter,
+  Compass
 } from 'lucide-react';
 import { MetricCard } from '@/components/dashboard/MetricCard';
 import { DeforestationChart } from '@/components/dashboard/DeforestationChart';
@@ -19,7 +20,6 @@ import { LandCoverChart } from '@/components/dashboard/LandCoverChart';
 import { BiomeSummaryGrid } from '@/components/dashboard/BiomeSummaryGrid';
 import { RecentAlertsWidget } from '@/components/dashboard/RecentAlertsWidget';
 import { BIOMES_LIST, BIOMES_DATA } from '@/data/biomes';
-import { PageIntro } from '@/components/PageIntro';
 
 export default function DashboardPage() {
   const [selectedBiomeFilter, setSelectedBiomeFilter] = useState<string>('all');
@@ -65,25 +65,27 @@ export default function DashboardPage() {
 
   return (
     <div className="section-inner max-w-6xl mx-auto py-6 space-y-10">
-      {/* Cabeçalho Limpo */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-forest/10 pb-6">
-        <PageIntro
-          eyebrow="Telemetria & Dados Abertos"
-          title="Dashboard dos 7 Ambientes Brasileiros"
-          eyebrowClassName="eyebrow text-forest-mid"
-          titleClassName="display mt-2 text-3xl text-forest md:text-5xl"
-        >
-          <p className="mt-3 max-w-2xl text-base text-ash">
+      {/* Cabeçalho */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-slate-200/80 pb-6">
+        <div>
+          <div className="badge-360 mb-2">
+            <Compass size={12} />
+            <span>Telemetria & Dados Abertos 360°</span>
+          </div>
+          <h1 className="font-display text-3xl sm:text-5xl font-extrabold text-slate-900 tracking-tight">
+            Dashboard dos 7 Ambientes
+          </h1>
+          <p className="mt-2 text-sm sm:text-base text-slate-600 max-w-2xl leading-relaxed">
             Consolidação de sensoriamento remoto oficial (INPE, PRODES, MapBiomas e IBGE).
             Acompanhe o desmatamento, cobertura vegetal nativa e anomalias térmicas.
           </p>
-        </PageIntro>
+        </div>
 
         <div className="flex flex-wrap items-center gap-2">
           <button
             type="button"
             onClick={handleExportSummary}
-            className="btn btn-secondary !py-2 !px-3.5 text-xs inline-flex items-center gap-1.5"
+            className="btn-secondary !py-2 !px-3.5 text-xs inline-flex items-center gap-1.5"
             title="Baixar resumo oficial em CSV"
           >
             <Download size={14} />
@@ -93,18 +95,18 @@ export default function DashboardPage() {
           <button
             type="button"
             onClick={handleRefresh}
-            className="btn btn-secondary !p-2 text-xs"
+            className="btn-secondary !p-2 text-xs"
             title="Recarregar dados satelitais"
           >
-            <RefreshCw size={15} className={isRefreshing ? 'animate-spin text-forest' : ''} />
+            <RefreshCw size={15} className={isRefreshing ? 'animate-spin text-emerald-600' : ''} />
           </button>
         </div>
       </div>
 
       {/* Barra de Filtro Interativo por Bioma */}
-      <div className="panel-soft p-3 flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-2 text-xs font-bold text-forest">
-          <Filter size={15} className="text-forest-mid" />
+      <div className="glass-panel p-2.5 flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-2 text-xs font-bold text-slate-800">
+          <Filter size={14} className="text-emerald-600" />
           <span>Filtro por Ambiente:</span>
         </div>
 
@@ -114,8 +116,8 @@ export default function DashboardPage() {
             onClick={() => setSelectedBiomeFilter('all')}
             className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all ${
               selectedBiomeFilter === 'all'
-                ? 'bg-forest text-mist shadow-sm'
-                : 'text-ash hover:text-forest hover:bg-forest/5'
+                ? 'bg-slate-900 text-white shadow-sm'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
             }`}
           >
             🇧🇷 Brasil (Geral)
@@ -127,8 +129,8 @@ export default function DashboardPage() {
               onClick={() => setSelectedBiomeFilter(b.id)}
               className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${
                 selectedBiomeFilter === b.id
-                  ? 'bg-forest text-mist shadow-sm'
-                  : 'text-ash hover:text-forest hover:bg-forest/5'
+                  ? 'bg-emerald-600 text-white shadow-sm font-bold'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
               }`}
             >
               {b.name}
@@ -139,7 +141,7 @@ export default function DashboardPage() {
         {activeBiome && (
           <Link
             href="/mapa"
-            className="text-xs font-bold text-forest hover:text-forest-mid flex items-center gap-1"
+            className="text-xs font-bold text-emerald-700 hover:text-emerald-800 flex items-center gap-1"
           >
             <MapPin size={13} />
             <span>Ver no Mapa →</span>
@@ -170,7 +172,7 @@ export default function DashboardPage() {
           value={totalFires}
           unit="focos 24h"
           icon={Flame}
-          iconColor="text-burn"
+          iconColor="text-amber-500"
           trend={{ value: 14.8, label: 'vs média semanal', isPositiveGood: false }}
           description={`Anomalias térmicas registradas na passagem dos sensores ${activeBiome ? `em ${activeBiome.name}` : 'no país'}.`}
           source="NASA FIRMS / INPE BDQueimadas"
@@ -191,13 +193,13 @@ export default function DashboardPage() {
           value={protectedArea}
           unit="% território"
           icon={Activity}
-          iconColor="text-forest-mid"
+          iconColor="text-teal-600"
           description={`Unidades de Conservação Federais e Estaduais (PI e US) ${activeBiome ? `no ${activeBiome.name}` : 'nacionais'}.`}
           source="ICMBio / SisBio / MMA"
         />
       </motion.div>
 
-      {/* Gráficos com Estilo Botânico */}
+      {/* Gráficos com Estilo Moderno */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <DeforestationChart />
         <LandCoverChart />

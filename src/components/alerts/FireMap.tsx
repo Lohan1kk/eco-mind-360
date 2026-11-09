@@ -267,9 +267,9 @@ export default function FireMap() {
       )}
 
       {/* z-[1100]: above Leaflet controls */}
-      <div className="pointer-events-none absolute inset-x-0 top-2 z-[1100] flex justify-center px-2 sm:top-3 sm:px-3">
+      <div className="pointer-events-none absolute inset-x-0 top-3 z-[1100] flex justify-center px-3">
         <div
-          className="pointer-events-auto inline-flex items-center gap-1 rounded-lg border border-forest/15 bg-white/95 p-1 shadow-md"
+          className="pointer-events-auto inline-flex items-center gap-1 rounded-2xl border border-slate-200/80 bg-white/95 p-1 shadow-lg backdrop-blur-md"
           role="tablist"
           aria-label="Tipo de mapa"
         >
@@ -280,31 +280,31 @@ export default function FireMap() {
               role="tab"
               aria-selected={layer === mode}
               onClick={() => setLayer(mode)}
-              className={`min-h-9 rounded-md px-3.5 py-1.5 text-xs font-semibold transition touch-manipulation ${
+              className={`min-h-9 rounded-xl px-4 py-1.5 text-xs font-bold transition-all touch-manipulation ${
                 layer === mode
-                  ? "bg-forest text-mist"
-                  : "text-forest active:bg-forest/10"
+                  ? "bg-slate-900 text-white shadow-sm"
+                  : "text-slate-700 hover:text-slate-950 hover:bg-slate-100"
               }`}
             >
-              {mode === "map" ? "Mapa" : "Satélite"}
+              {mode === "map" ? "Mapa Vetorial" : "Satélite Orbital"}
             </button>
           ))}
-          <div className="h-4 w-px bg-forest/20 mx-1" />
+          <div className="h-4 w-px bg-slate-200 mx-1" />
           <button
             type="button"
             onClick={() => setShowBiomes((v) => !v)}
-            className={`min-h-9 rounded-md px-3 py-1.5 text-xs font-semibold transition touch-manipulation ${
+            className={`min-h-9 rounded-xl px-3.5 py-1.5 text-xs font-bold transition-all touch-manipulation ${
               showBiomes
-                ? "bg-forest/15 text-forest font-bold"
-                : "text-ash active:bg-forest/10"
+                ? "bg-emerald-600 text-white shadow-sm"
+                : "text-slate-600 hover:bg-slate-100"
             }`}
           >
-            🌿 Biomas {showBiomes ? "Ativos" : "Ocultos"}
+            🌿 7 Biomas {showBiomes ? "Ativos" : "Ocultos"}
           </button>
         </div>
       </div>
 
-      <div className="pointer-events-none absolute left-2 right-2 top-12 z-[1100] flex flex-col gap-1.5 sm:left-3 sm:right-3 sm:top-14 sm:gap-2">
+      <div className="pointer-events-none absolute left-3 right-3 top-16 sm:top-16 z-[1100] flex flex-col gap-2">
         <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
           {sourceLabel ? (
             <div className="pointer-events-auto max-w-[calc(100%-2.75rem)] truncate rounded-lg border border-forest/15 bg-white/95 px-2.5 py-1.5 text-[11px] font-medium text-forest shadow-md sm:max-w-none sm:px-3 sm:text-xs">

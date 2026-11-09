@@ -1,28 +1,29 @@
 import type { Metadata } from 'next';
-import { Fraunces, Source_Sans_3 } from 'next/font/google';
+import { Outfit, Plus_Jakarta_Sans } from 'next/font/google';
 import './globals.css';
 import { AppShell } from '@/components/shell/AppShell';
 
-const display = Fraunces({
+const display = Outfit({
   variable: '--font-display',
   subsets: ['latin'],
+  weight: ['400', '500', '600', '700', '800', '900'],
   display: 'swap',
 });
 
-const body = Source_Sans_3({
+const body = Plus_Jakarta_Sans({
   variable: '--font-body',
   subsets: ['latin'],
-  weight: ['400', '500', '600', '700'],
+  weight: ['400', '500', '600', '700', '800'],
   display: 'swap',
 });
 
 export const metadata: Metadata = {
   title: {
-    default: 'EcoMind 360 — Consciência Ambiental e Monitoramento dos Biomas Brasileiros',
-    template: '%s · EcoMind 360',
+    default: 'EcoMind 360° — Inteligência Territorial & Monitoramento dos Biomas',
+    template: '%s · EcoMind 360°',
   },
   description:
-    'EcoMind 360: plataforma de inteligência territorial, mapa de queimadas em tempo real com dados INPE e NASA, e monitoramento oficial dos 7 ambientes brasileiros.',
+    'EcoMind 360°: Plataforma de inteligência territorial, mapa orbital de queimadas em tempo real com dados INPE e NASA FIRMS, e monitoramento oficial dos 7 ambientes brasileiros.',
   icons: {
     icon: '/brand/icon-ecomind.png',
     apple: '/brand/icon-ecomind.png',
@@ -36,7 +37,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR" className={`${display.variable} ${body.variable}`}>
-      <body className="min-h-screen bg-mist text-ink antialiased">
+      <body className="min-h-screen bg-[#f8fafc] text-slate-900 antialiased font-sans selection:bg-emerald-500/20 selection:text-emerald-900">
         <AppShell>{children}</AppShell>
       </body>
     </html>

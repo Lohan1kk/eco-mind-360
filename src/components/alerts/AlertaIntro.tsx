@@ -1,35 +1,37 @@
-"use client";
+'use client';
 
-import { StaggerItem, StaggerReveal } from "@/components/motion";
+import React from 'react';
+import { Compass, Flame } from 'lucide-react';
 
 export function AlertaIntro() {
   return (
-    <StaggerReveal
-      className="relative z-[1] max-w-5xl"
-      staggerChildren={0.06}
-      delayChildren={0.02}
-    >
-      <StaggerItem soft>
-        <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-burn md:text-xs">
-          Inteligência Territorial · Dados Oficiais
-        </p>
-      </StaggerItem>
-      <StaggerItem>
-        <h1 className="mt-0.5 font-display text-lg font-bold text-forest md:mt-1 md:text-2xl">
+    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div>
+        <div className="flex items-center gap-2">
+          <span className="relative flex h-2 w-2">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-600"></span>
+          </span>
+          <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-500/20">
+            Feed Quase Tempo Real · INPE & NASA FIRMS
+          </span>
+        </div>
+        <h1 className="font-display text-xl sm:text-2xl font-black text-slate-900 tracking-tight mt-1">
           Mapa de Queimadas e Ambientes Brasileiros
         </h1>
-      </StaggerItem>
-      <StaggerItem soft>
-        <p className="mt-1 max-w-3xl text-xs leading-snug text-ash md:text-sm md:leading-normal">
-          <span className="md:hidden">
-            INPE + NASA · cores = FRP (potência do fogo em MW) · camada dos 7 biomas · + para reportar foco.
-          </span>
-          <span className="hidden md:inline">
-            Focos orbitais em tempo real (INPE Queimadas e NASA FIRMS). Os marcadores seguem a intensidade de FRP (Fire Radiative Power).
-            Alterne entre modo Mapa e Satélite, ative/desative a camada dos 7 biomas brasileiros ou use o botão vermelho para registrar um reporte local.
-          </span>
-        </p>
-      </StaggerItem>
-    </StaggerReveal>
+      </div>
+
+      <div className="hidden md:flex items-center gap-3 text-xs text-slate-500 font-medium">
+        <span className="flex items-center gap-1">
+          <Flame size={14} className="text-amber-500" />
+          <span>Cores por Potência (FRP em MW)</span>
+        </span>
+        <span>•</span>
+        <span className="flex items-center gap-1">
+          <Compass size={14} className="text-emerald-600" />
+          <span>7 Biomas Oficiais Ativos</span>
+        </span>
+      </div>
+    </div>
   );
 }
