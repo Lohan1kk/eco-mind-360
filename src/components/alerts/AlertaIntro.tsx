@@ -5,30 +5,27 @@ import { Compass, Flame } from 'lucide-react';
 
 export function AlertaIntro() {
   return (
-    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-      <div>
+    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+      <div className="flex items-center gap-3 flex-wrap">
         <div className="flex items-center gap-2">
-          <span className="relative flex h-2 w-2">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-600"></span>
-          </span>
-          <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-500/20">
+          <span className="inline-flex rounded-full h-2 w-2 bg-[#83A989]" />
+          <span className="text-[10px] font-mono uppercase tracking-wider text-[#91A88F] bg-[#171F1A] px-2 py-0.5 rounded-[5px] border border-[#29362D]">
             Feed Quase Tempo Real · INPE & NASA FIRMS
           </span>
         </div>
-        <h1 className="font-display text-xl sm:text-2xl font-black text-slate-900 tracking-tight mt-1">
+        <h1 className="font-display text-base sm:text-lg font-semibold text-[#DCE5DD] tracking-tight">
           Mapa de Queimadas e Ambientes Brasileiros
         </h1>
       </div>
 
-      <div className="hidden md:flex items-center gap-3 text-xs text-slate-500 font-medium">
-        <span className="flex items-center gap-1">
-          <Flame size={14} className="text-amber-500" />
-          <span>Cores por Potência (FRP em MW)</span>
+      <div className="hidden md:flex items-center gap-3 text-xs text-[#78877D]">
+        <span className="flex items-center gap-1.5">
+          <Flame size={13} className="text-[#A9A17A]" />
+          <span>Intensidade por Potência (FRP em MW)</span>
         </span>
-        <span>•</span>
-        <span className="flex items-center gap-1">
-          <Compass size={14} className="text-emerald-600" />
+        <span className="text-[#29362D]">·</span>
+        <span className="flex items-center gap-1.5">
+          <Compass size={13} className="text-[#789B7C]" />
           <span>7 Biomas Oficiais Ativos</span>
         </span>
       </div>

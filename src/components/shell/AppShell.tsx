@@ -12,7 +12,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const isHome = pathname === '/';
 
   return (
-    <div className="min-h-screen flex flex-col bg-mist text-ink antialiased">
+    <div className="min-h-screen flex flex-col bg-[#101512] text-[#DCE5DD] antialiased">
       <Header />
       <main
         className={`flex-1 ${
@@ -20,7 +20,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             ? ''
             : isMap
               ? 'h-[100dvh] pt-[calc(3.75rem+env(safe-area-inset-top))] pb-0 overflow-hidden flex flex-col'
-              : 'pt-20 md:pt-24 pb-16 md:pb-20'
+              : 'pt-20 md:pt-24 pb-20 md:pb-24'
         }`}
       >
         {children}

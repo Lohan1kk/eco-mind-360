@@ -233,35 +233,35 @@ export function FolkloreQuiz({ onChangeMode }: { onChangeMode: () => void }) {
     return (
       <motion.div
         className="mx-auto max-w-lg text-center"
-        initial={reduce ? false : { opacity: 0, y: 16 }}
+        initial={reduce ? false : { opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={enterTransition}
       >
-        <div className="border border-forest/12 bg-white/70 px-8 py-10">
-          <p className="text-sm font-semibold uppercase tracking-[0.18em] text-forest-mid">
+        <div className="rounded-[10px] border border-[#29362D] bg-[#171F1A] px-8 py-10">
+          <p className="text-xs font-mono uppercase tracking-wider text-[#91A88F]">
             Gincana do Folclore
           </p>
-          <h2 className="mt-3 font-display text-3xl font-semibold text-forest">
+          <h2 className="mt-3 font-display text-3xl font-semibold text-[#DCE5DD]">
             {title}
           </h2>
-          <p className="mt-3 text-ash">
+          <p className="mt-3 text-[#A7B3A9]">
             Você fez{" "}
-            <strong className="text-ink">{totalPoints} pts</strong> ({score}{" "}
+            <strong className="text-[#DCE5DD]">{totalPoints} pts</strong> ({score}{" "}
             acertos
             {bonusPoints > 0 ? ` · ${bonusPoints} bônus rápidos` : ""})
           </p>
           {bestStreak > 1 ? (
-            <p className="mt-1 text-sm text-forest-mid">
+            <p className="mt-1 text-xs font-mono text-[#91A88F]">
               Melhor combo: {bestStreak} seguidos
             </p>
           ) : null}
-          <div className="mx-auto mt-6 h-2 max-w-xs overflow-hidden rounded-full bg-mist-soft">
+          <div className="mx-auto mt-6 h-2 max-w-xs overflow-hidden rounded-full bg-[#131A16] border border-[#222D25]">
             <motion.div
-              className="h-full rounded-full bg-forest-mid"
+              className="h-full rounded-full bg-[#789B7C]"
               initial={reduce ? false : { width: 0 }}
               animate={{ width: `${pct}%` }}
               transition={{
-                duration: reduce ? 0 : 0.7,
+                duration: reduce ? 0 : 0.5,
                 ease: [0.22, 1, 0.36, 1],
               }}
             />
@@ -269,7 +269,7 @@ export function FolkloreQuiz({ onChangeMode }: { onChangeMode: () => void }) {
 
           {badges.length > 0 ? (
             <div className="mt-8">
-              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-forest-mid">
+              <p className="text-xs font-mono uppercase tracking-wider text-[#78877D]">
                 Insígnias conquistadas
               </p>
               <ul className="mt-4 flex flex-wrap justify-center gap-3">
@@ -278,7 +278,7 @@ export function FolkloreQuiz({ onChangeMode }: { onChangeMode: () => void }) {
                     key={b.character}
                     className="flex w-20 flex-col items-center gap-1.5"
                   >
-                    <span className="overflow-hidden rounded-full border-2 border-forest/20 shadow-sm">
+                    <span className="overflow-hidden rounded-full border border-[#29362D]">
                       <Image
                         src={b.image}
                         alt=""
@@ -287,7 +287,7 @@ export function FolkloreQuiz({ onChangeMode }: { onChangeMode: () => void }) {
                         className="h-14 w-14 object-cover"
                       />
                     </span>
-                    <span className="text-[10px] font-semibold text-forest">
+                    <span className="text-[10px] font-medium text-[#DCE5DD]">
                       {b.character}
                     </span>
                   </li>
@@ -296,7 +296,7 @@ export function FolkloreQuiz({ onChangeMode }: { onChangeMode: () => void }) {
             </div>
           ) : null}
 
-          <p className="mt-6 text-sm leading-relaxed text-ash">
+          <p className="mt-6 text-sm leading-relaxed text-[#A7B3A9]">
             O folclore lembra: a floresta e os rios pedem cuidado — e a EcoMind
             mostra caminhos concretos para agir.
           </p>
@@ -304,7 +304,7 @@ export function FolkloreQuiz({ onChangeMode }: { onChangeMode: () => void }) {
             <motion.button
               type="button"
               onClick={reset}
-              className="btn-primary cursor-pointer rounded-md bg-forest px-5 py-3 text-sm font-semibold text-mist"
+              className="btn-primary cursor-pointer"
               whileTap={reduce ? undefined : tapPress}
               transition={pressTransition}
             >
@@ -322,7 +322,7 @@ export function FolkloreQuiz({ onChangeMode }: { onChangeMode: () => void }) {
           </div>
           <Link
             href="/alerta-queimadas"
-            className="mt-5 inline-block text-sm font-semibold text-forest-mid underline-offset-4 hover:underline"
+            className="mt-5 inline-block text-xs font-medium text-[#91A88F] hover:text-[#DCE5DD] underline-offset-4 hover:underline"
           >
             Ver mapa de queimadas →
           </Link>
@@ -336,10 +336,10 @@ export function FolkloreQuiz({ onChangeMode }: { onChangeMode: () => void }) {
   if (!isClient) {
     return (
       <div className="mx-auto max-w-2xl">
-        <div className="h-2 overflow-hidden rounded-full bg-mist-soft">
-          <div className="h-full w-0 rounded-full bg-forest-mid" />
+        <div className="h-2 overflow-hidden rounded-full bg-[#131A16] border border-[#222D25]">
+          <div className="h-full w-0 rounded-full bg-[#789B7C]" />
         </div>
-        <div className="mt-6 border border-forest/12 bg-white/75 px-6 py-16 text-center text-sm text-ash">
+        <div className="mt-6 rounded-[10px] border border-[#29362D] bg-[#171F1A] px-6 py-16 text-center text-sm text-[#78877D]">
           Preparando a gincana…
         </div>
       </div>
@@ -352,41 +352,41 @@ export function FolkloreQuiz({ onChangeMode }: { onChangeMode: () => void }) {
   return (
     <div className="mx-auto max-w-2xl">
       <div className="mb-6">
-        <div className="mb-2 flex flex-wrap items-center justify-between gap-2 text-sm text-ash">
+        <div className="mb-2 flex flex-wrap items-center justify-between gap-2 text-xs font-mono text-[#78877D]">
           <span>
             Pergunta {current + 1} de {total}
           </span>
           <div className="flex items-center gap-3">
             {streak > 1 ? (
-              <span className="rounded-md bg-sprout/40 px-2 py-0.5 text-xs font-bold uppercase tracking-wide text-forest">
+              <span className="rounded-[5px] bg-[#294C35] border border-[#365C40] px-2 py-0.5 text-[11px] font-mono uppercase tracking-wide text-[#DCE5DD]">
                 Combo ×{streak}
               </span>
             ) : null}
-            <span className="font-medium text-ink">
+            <span className="font-medium text-[#DCE5DD]">
               {totalPoints} pts
-              <span className="ml-1 font-normal text-ash">
+              <span className="ml-1 font-normal text-[#78877D]">
                 ({score} acertos
                 {bonusPoints > 0 ? ` +${bonusPoints}` : ""})
               </span>
             </span>
           </div>
         </div>
-        <div className="h-2 overflow-hidden rounded-full bg-mist-soft">
+        <div className="h-2 overflow-hidden rounded-full bg-[#131A16] border border-[#222D25]">
           <motion.div
-            className="h-full rounded-full bg-forest-mid"
+            className="h-full rounded-full bg-[#789B7C]"
             animate={{ width: `${progress}%` }}
             transition={{
-              duration: reduce ? 0 : 0.45,
+              duration: reduce ? 0 : 0.35,
               ease: [0.22, 1, 0.36, 1],
             }}
           />
         </div>
         {timerEnabled ? (
           <div className="mt-3">
-            <div className="mb-1 flex justify-between text-[11px] font-semibold uppercase tracking-wide text-ash">
+            <div className="mb-1 flex justify-between text-[11px] font-mono uppercase tracking-wide text-[#78877D]">
               <span>Tempo</span>
               <span
-                className={secondsLeft <= 5 ? "text-burn" : "text-forest-mid"}
+                className={secondsLeft <= 5 ? "text-[#A77D78]" : "text-[#91A88F]"}
               >
                 {secondsLeft}s
                 {!revealed && secondsLeft > FAST_BONUS_SECONDS
@@ -394,10 +394,10 @@ export function FolkloreQuiz({ onChangeMode }: { onChangeMode: () => void }) {
                   : ""}
               </span>
             </div>
-            <div className="h-1.5 overflow-hidden rounded-full bg-mist-soft">
+            <div className="h-1.5 overflow-hidden rounded-full bg-[#131A16] border border-[#222D25]">
               <motion.div
                 className={`h-full rounded-full ${
-                  secondsLeft <= 5 ? "bg-burn" : "bg-forest-mid/70"
+                  secondsLeft <= 5 ? "bg-[#A77D78]" : "bg-[#789B7C]"
                 }`}
                 animate={{ width: `${timerPct}%` }}
                 transition={{ duration: reduce ? 0 : 0.35, ease: "linear" }}
@@ -410,13 +410,13 @@ export function FolkloreQuiz({ onChangeMode }: { onChangeMode: () => void }) {
       <AnimatePresence mode="wait">
         <motion.div
           key={`${deckNonce}-${question.id}`}
-          className="border border-forest/12 bg-white/75 px-6 py-7 sm:px-8 sm:py-8"
-          initial={reduce ? false : { opacity: 0, x: 18 }}
+          className="rounded-[10px] border border-[#29362D] bg-[#171F1A] px-6 py-7 sm:px-8 sm:py-8"
+          initial={reduce ? false : { opacity: 0, x: 14 }}
           animate={{ opacity: 1, x: 0 }}
-          exit={reduce ? undefined : { opacity: 0, x: -14 }}
+          exit={reduce ? undefined : { opacity: 0, x: -12 }}
           transition={enterTransition}
         >
-          <div className="relative mx-auto mb-5 overflow-hidden rounded-xl border border-forest/10 bg-mist-soft">
+          <div className="relative mx-auto mb-5 overflow-hidden rounded-[10px] border border-[#222D25] bg-[#131A16]">
             <Image
               src={question.image}
               alt={revealed ? question.character : "Personagem do folclore"}
@@ -433,25 +433,25 @@ export function FolkloreQuiz({ onChangeMode }: { onChangeMode: () => void }) {
             {!revealed ? (
               <div
                 aria-hidden
-                className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#0a1610]/45 via-transparent to-[#0a1610]/15"
+                className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#101512]/60 via-transparent to-[#101512]/20"
               />
             ) : null}
             {revealed ? (
               <motion.p
-                className="absolute bottom-3 left-3 rounded-md bg-white/90 px-3 py-1 text-xs font-bold uppercase tracking-[0.14em] text-forest shadow-sm"
+                className="absolute bottom-3 left-3 rounded-[7px] bg-[#171F1A]/95 border border-[#29362D] px-3 py-1 text-xs font-mono font-semibold uppercase tracking-wider text-[#DCE5DD]"
                 initial={reduce ? false : { opacity: 0, y: 6 }}
                 animate={{ opacity: 1, y: 0 }}
               >
                 {question.character}
               </motion.p>
             ) : (
-              <p className="absolute bottom-3 left-3 rounded-md bg-black/35 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-mist">
+              <p className="absolute bottom-3 left-3 rounded-[7px] bg-[#101512]/80 border border-[#29362D] px-3 py-1 text-[10px] font-mono uppercase tracking-wider text-[#A7B3A9]">
                 Quem é?
               </p>
             )}
           </div>
 
-          <h2 className="font-display text-lg font-semibold text-ink sm:text-xl">
+          <h2 className="font-display text-lg font-semibold text-[#DCE5DD] sm:text-xl">
             {question.q}
           </h2>
 
@@ -465,11 +465,14 @@ export function FolkloreQuiz({ onChangeMode }: { onChangeMode: () => void }) {
               const isCorrect = i === question.correct;
               const isSelected = i === selected;
               let cls =
-                "border-forest/15 bg-white hover:border-forest-mid/40 hover:bg-mist-soft";
+                "border-[#29362D] bg-[#131A16] hover:border-[#789B7C]/50 hover:bg-[#1D2821] text-[#DCE5DD]";
               if (revealed) {
-                if (isCorrect) cls = "border-sprout-deep bg-sprout/25";
-                else if (isSelected) cls = "border-burn/40 bg-[#f8efe8]";
-                else cls = "border-forest/5 bg-mist/50 opacity-55";
+                if (isCorrect)
+                  cls = "border-[#83A989] bg-[#294C35]/45 text-[#DCE5DD]";
+                else if (isSelected)
+                  cls = "border-[#A77D78] bg-[#A77D78]/15 text-[#DCE5DD]";
+                else
+                  cls = "border-[#222D25] bg-[#131A16]/50 text-[#78877D] opacity-60";
               }
 
               return (
@@ -478,12 +481,12 @@ export function FolkloreQuiz({ onChangeMode }: { onChangeMode: () => void }) {
                   type="button"
                   onClick={() => handleAnswer(i)}
                   disabled={revealed}
-                  className={`flex cursor-pointer items-center gap-3 border px-4 py-3.5 text-left text-sm font-medium text-ink transition sm:text-base ${cls}`}
+                  className={`flex cursor-pointer items-center gap-3 rounded-[7px] border px-4 py-3.5 text-left text-sm font-medium transition sm:text-base ${cls}`}
                   variants={staggerItemSoft}
                   whileTap={reduce || revealed ? undefined : { scale: 0.99 }}
                   transition={pressTransition}
                 >
-                  <span className="flex h-8 w-8 shrink-0 items-center justify-center bg-forest/10 text-xs font-bold text-forest-mid">
+                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-[5px] bg-[#1D2821] border border-[#29362D] text-xs font-mono font-semibold text-[#91A88F]">
                     {String.fromCharCode(65 + i)}
                   </span>
                   {opt}
@@ -495,25 +498,25 @@ export function FolkloreQuiz({ onChangeMode }: { onChangeMode: () => void }) {
           <AnimatePresence>
             {revealed ? (
               <motion.div
-                className="mt-5 space-y-2 bg-mist-soft px-4 py-3 text-sm leading-relaxed text-ash"
-                initial={reduce ? false : { opacity: 0, y: 8 }}
+                className="mt-5 space-y-2 rounded-[7px] border border-[#222D25] bg-[#131A16] px-4 py-3 text-sm leading-relaxed text-[#A7B3A9]"
+                initial={reduce ? false : { opacity: 0, y: 6 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={reduce ? undefined : { opacity: 0 }}
-                transition={{ duration: reduce ? 0 : 0.35, ease: softEase }}
+                transition={{ duration: reduce ? 0 : 0.3, ease: softEase }}
               >
                 {timedOut ? (
-                  <p className="font-semibold text-burn">
+                  <p className="font-semibold text-[#A77D78]">
                     Tempo esgotado — era {question.character}.
                   </p>
                 ) : isCorrectPick ? (
-                  <p className="font-semibold text-forest">
+                  <p className="font-semibold text-[#83A989]">
                     Acertou!
                     {timerEnabled && secondsLeft > FAST_BONUS_SECONDS
                       ? " +1 bônus rápido"
                       : ""}
                   </p>
                 ) : (
-                  <p className="font-semibold text-burn">
+                  <p className="font-semibold text-[#A77D78]">
                     Quase — a resposta é {question.character}.
                     {question.hint ? ` ${question.hint}` : ""}
                   </p>

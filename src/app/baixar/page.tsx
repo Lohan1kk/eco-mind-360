@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 
 export default function BaixarPage() {
   return (
-    <PageAtmosphereShell variant="soft" wash="light" className="bg-mist py-8">
+    <PageAtmosphereShell variant="soft" wash="dark" className="bg-[#101512] py-8">
       <BaixarContent />
     </PageAtmosphereShell>
   );

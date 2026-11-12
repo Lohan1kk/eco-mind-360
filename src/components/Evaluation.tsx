@@ -3,8 +3,6 @@
 import { useEffect, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { Reveal } from "@/components/motion";
-import { SectionAtmosphere } from "@/components/ui/section-atmosphere";
-import { VerdantWash } from "@/components/ui/verdant-accent";
 import {
   clearEvaluation,
   readEvaluation,
@@ -69,27 +67,25 @@ export function EvaluationSection() {
   return (
     <section
       id="avaliacao"
-      className="section section-soft relative overflow-hidden"
+      className="section relative overflow-hidden bg-[#131A16] border-b border-[#222D25]"
     >
-      <SectionAtmosphere variant="soft" />
-      <VerdantWash tone="light" speed={0.34} />
       <div className="section-inner relative z-[1]">
         <Reveal>
-          <p className="eyebrow text-forest-mid">Sua voz</p>
-          <h2 className="display mt-4 text-3xl text-ink md:text-5xl">
+          <p className="eyebrow text-[#91A88F]">Sua voz</p>
+          <h2 className="font-display font-semibold tracking-tight mt-3 text-3xl text-[#DCE5DD] md:text-4xl">
             Avalie a EcoMind
           </h2>
-          <p className="lede mt-5 max-w-xl">
+          <p className="lede mt-4 max-w-xl">
             A nota fica salva neste aparelho (localStorage). No seu computador e
             no celular de cada pessoa, cada um guarda a própria avaliação.
           </p>
         </Reveal>
 
         <Reveal delayMs={80}>
-          <div className="mx-auto mt-12 max-w-lg">
+          <div className="mx-auto mt-10 max-w-lg">
             {!showForm && saved ? (
-              <div className="border border-forest/12 bg-white/80 px-6 py-8 text-center sm:px-8">
-                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-forest-mid">
+              <div className="rounded-[10px] border border-[#29362D] bg-[#171F1A] px-6 py-8 text-center sm:px-8">
+                <p className="text-xs font-mono uppercase tracking-[0.14em] text-[#91A88F]">
                   Avaliação neste aparelho
                 </p>
                 <div
@@ -100,7 +96,7 @@ export function EvaluationSection() {
                     <span
                       key={i}
                       className={`text-2xl ${
-                        i < saved.rating ? "text-forest-mid" : "text-forest/20"
+                        i < saved.rating ? "text-[#91A88F]" : "text-[#29362D]"
                       }`}
                       aria-hidden
                     >
@@ -108,25 +104,25 @@ export function EvaluationSection() {
                     </span>
                   ))}
                 </div>
-                <p className="mt-2 text-sm font-medium text-ink">
+                <p className="mt-2 text-sm font-medium text-[#DCE5DD]">
                   {LABELS[saved.rating - 1]}
                 </p>
                 {saved.name ? (
-                  <p className="mt-4 text-sm text-ash">
+                  <p className="mt-4 text-sm text-[#A7B3A9]">
                     — {saved.name}
                   </p>
                 ) : null}
                 {saved.comment ? (
-                  <p className="mt-3 text-sm leading-relaxed text-ink/80">
+                  <p className="mt-3 text-sm leading-relaxed text-[#DCE5DD]">
                     “{saved.comment}”
                   </p>
                 ) : null}
-                <p className="mt-4 text-[11px] text-ash/70">
+                <p className="mt-4 text-[11px] font-mono text-[#78877D]">
                   Salva em{" "}
                   {new Date(saved.updatedAt).toLocaleString("pt-BR")}
                 </p>
                 {justSaved ? (
-                  <p className="mt-3 text-sm font-semibold text-forest-mid">
+                  <p className="mt-3 text-sm font-medium text-[#83A989]">
                     Salvo neste aparelho.
                   </p>
                 ) : null}
@@ -134,14 +130,14 @@ export function EvaluationSection() {
                   <button
                     type="button"
                     onClick={() => setEditing(true)}
-                    className="btn-primary cursor-pointer rounded-md bg-forest px-5 py-2.5 text-sm font-semibold text-mist touch-manipulation"
+                    className="btn-primary cursor-pointer"
                   >
                     Editar
                   </button>
                   <button
                     type="button"
                     onClick={handleClear}
-                    className="cursor-pointer rounded-md px-4 py-2.5 text-sm font-semibold text-forest-mid underline-offset-4 hover:underline touch-manipulation"
+                    className="btn-secondary cursor-pointer"
                   >
                     Apagar deste aparelho
                   </button>
@@ -150,10 +146,10 @@ export function EvaluationSection() {
             ) : (
               <form
                 onSubmit={handleSubmit}
-                className="border border-forest/12 bg-white/80 px-6 py-8 sm:px-8"
+                className="rounded-[10px] border border-[#29362D] bg-[#171F1A] px-6 py-8 sm:px-8"
               >
                 <fieldset>
-                  <legend className="text-sm font-semibold text-ink">
+                  <legend className="text-sm font-medium text-[#DCE5DD]">
                     Nota geral
                   </legend>
                   <div
@@ -172,11 +168,11 @@ export function EvaluationSection() {
                           onClick={() => setRating(value)}
                           onMouseEnter={() => setHover(value)}
                           onFocus={() => setHover(value)}
-                          whileTap={reduce ? undefined : { scale: 0.92 }}
-                          className={`flex h-12 w-12 cursor-pointer items-center justify-center rounded-md text-3xl transition touch-manipulation ${
+                          whileTap={reduce ? undefined : { scale: 0.94 }}
+                          className={`flex h-11 w-11 cursor-pointer items-center justify-center rounded-[7px] text-2xl transition touch-manipulation ${
                             on
-                              ? "text-forest-mid"
-                              : "text-forest/25 hover:text-forest/45"
+                              ? "text-[#91A88F] bg-[#1D2821] border border-[#29362D]"
+                              : "text-[#78877D]/50 hover:text-[#A7B3A9] bg-[#131A16] border border-[#222D25]"
                           }`}
                         >
                           ★
@@ -184,15 +180,15 @@ export function EvaluationSection() {
                       );
                     })}
                   </div>
-                  <p className="mt-2 text-center text-sm text-ash" aria-live="polite">
+                  <p className="mt-2 text-center text-xs text-[#A7B3A9]" aria-live="polite">
                     {active ? LABELS[active - 1] : "Toque nas estrelas"}
                   </p>
                 </fieldset>
 
                 <label className="mt-6 block">
-                  <span className="text-sm font-medium text-ink">
+                  <span className="text-xs font-medium text-[#DCE5DD]">
                     Nome{" "}
-                    <span className="font-normal text-ash">(opcional)</span>
+                    <span className="font-normal text-[#78877D]">(opcional)</span>
                   </span>
                   <input
                     type="text"
@@ -202,14 +198,14 @@ export function EvaluationSection() {
                     maxLength={80}
                     autoComplete="name"
                     placeholder="Como quer aparecer"
-                    className="mt-2 w-full border border-forest/15 bg-mist px-3 py-2.5 text-sm text-ink outline-none ring-forest/30 placeholder:text-ash/50 focus:ring-2"
+                    className="mt-2 w-full rounded-[7px] border border-[#29362D] bg-[#131A16] px-3 py-2 text-sm text-[#DCE5DD] outline-none placeholder:text-[#78877D] focus:border-[#789B7C]"
                   />
                 </label>
 
                 <label className="mt-4 block">
-                  <span className="text-sm font-medium text-ink">
+                  <span className="text-xs font-medium text-[#DCE5DD]">
                     Comentário{" "}
-                    <span className="font-normal text-ash">(opcional)</span>
+                    <span className="font-normal text-[#78877D]">(opcional)</span>
                   </span>
                   <textarea
                     name="comment"
@@ -218,12 +214,12 @@ export function EvaluationSection() {
                     maxLength={600}
                     rows={3}
                     placeholder="O que funcionou bem? O que melhorar?"
-                    className="mt-2 w-full resize-y border border-forest/15 bg-mist px-3 py-2.5 text-sm text-ink outline-none ring-forest/30 placeholder:text-ash/50 focus:ring-2"
+                    className="mt-2 w-full resize-y rounded-[7px] border border-[#29362D] bg-[#131A16] px-3 py-2 text-sm text-[#DCE5DD] outline-none placeholder:text-[#78877D] focus:border-[#789B7C]"
                   />
                 </label>
 
                 {error ? (
-                  <p className="mt-3 text-sm font-medium text-burn" role="alert">
+                  <p className="mt-3 text-xs font-medium text-[#A77D78]" role="alert">
                     {error}
                   </p>
                 ) : null}
@@ -231,7 +227,7 @@ export function EvaluationSection() {
                 <div className="mt-6 flex flex-wrap gap-3">
                   <button
                     type="submit"
-                    className="btn-primary cursor-pointer rounded-md bg-forest px-5 py-3 text-sm font-semibold text-mist touch-manipulation"
+                    className="btn-primary cursor-pointer"
                   >
                     {saved ? "Atualizar avaliação" : "Salvar neste aparelho"}
                   </button>
@@ -247,16 +243,16 @@ export function EvaluationSection() {
                         }
                         setError(null);
                       }}
-                      className="cursor-pointer rounded-md px-4 py-3 text-sm font-semibold text-forest-mid underline-offset-4 hover:underline touch-manipulation"
+                      className="btn-secondary cursor-pointer"
                     >
                       Cancelar
                     </button>
                   ) : null}
                 </div>
 
-                <p className="mt-4 text-[11px] leading-relaxed text-ash/75">
+                <p className="mt-4 text-[11px] leading-relaxed text-[#78877D]">
                   Não enviamos para um servidor: os dados ficam só no navegador
-                  deste aparelho (chave <code>ecomind-avaliacao</code>).
+                  deste aparelho (chave <code className="font-mono text-[#A7B3A9]">ecomind-avaliacao</code>).
                 </p>
               </form>
             )}

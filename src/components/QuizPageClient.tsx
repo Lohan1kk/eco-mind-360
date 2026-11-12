@@ -31,10 +31,10 @@ export function QuizPageClient() {
               ? "Quanto você sabe sobre a EcoMind?"
               : "Escolha seu desafio"
         }
-        eyebrowClassName="eyebrow text-forest-mid"
-        titleClassName="display mt-3 text-3xl text-forest md:text-5xl"
+        eyebrowClassName="eyebrow text-[#789B7C]"
+        titleClassName="display mt-3 text-3xl text-[#DCE5DD] md:text-4xl font-semibold"
       >
-        <p className="lede mt-4 max-w-xl">
+        <p className="mt-3 max-w-xl text-sm sm:text-base text-[#A7B3A9] leading-relaxed">
           {mode === "folklore"
             ? "Desafio com timer, combo e imagem velada: descubra Curupira, Caipora, Boitatá e mais — e o que ensinam sobre floresta, rios e fogo."
             : mode === "eco"
@@ -43,7 +43,7 @@ export function QuizPageClient() {
         </p>
       </PageIntro>
 
-      <div className="mt-12">
+      <div className="mt-10">
         {mode === "select" ? (
           <motion.div
             className="mx-auto grid max-w-3xl gap-4 sm:grid-cols-2"
@@ -58,15 +58,15 @@ export function QuizPageClient() {
               whileTap={reduce ? undefined : tapPress}
               transition={pressTransition}
               onClick={() => setMode("eco")}
-              className="panel-soft cursor-pointer p-6 text-left transition hover:border-forest/25"
+              className="rounded-[10px] border border-[#29362D] bg-[#171F1A] cursor-pointer p-6 text-left transition hover:border-[#789B7C]/50 hover:bg-[#1D2821]"
             >
-              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-forest-mid">
+              <p className="text-xs font-mono uppercase tracking-wider text-[#91A88F]">
                 Modo 01
               </p>
-              <h2 className="mt-3 font-display text-2xl font-semibold text-forest">
+              <h2 className="mt-3 font-display text-2xl font-semibold text-[#DCE5DD]">
                 Quiz EcoMind
               </h2>
-              <p className="mt-2 text-sm leading-relaxed text-ash">
+              <p className="mt-2 text-sm leading-relaxed text-[#A7B3A9]">
                 Desmatamento, ferramentas do app e dados do clima — o conteúdo do
                 site.
               </p>
@@ -79,15 +79,15 @@ export function QuizPageClient() {
               whileTap={reduce ? undefined : tapPress}
               transition={pressTransition}
               onClick={() => setMode("folklore")}
-              className="panel-soft cursor-pointer p-6 text-left transition hover:border-forest/25"
+              className="rounded-[10px] border border-[#29362D] bg-[#171F1A] cursor-pointer p-6 text-left transition hover:border-[#789B7C]/50 hover:bg-[#1D2821]"
             >
-              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-forest-mid">
+              <p className="text-xs font-mono uppercase tracking-wider text-[#91A88F]">
                 Modo 02
               </p>
-              <h2 className="mt-3 font-display text-2xl font-semibold text-forest">
+              <h2 className="mt-3 font-display text-2xl font-semibold text-[#DCE5DD]">
                 Gincana do Folclore
               </h2>
-              <p className="mt-2 text-sm leading-relaxed text-ash">
+              <p className="mt-2 text-sm leading-relaxed text-[#A7B3A9]">
                 Imagem velada, timer e combo — lore do folclore com laço
                 ambiental.
               </p>
@@ -105,7 +105,7 @@ export function QuizPageClient() {
               <button
                 type="button"
                 onClick={() => setMode("select")}
-                className="text-sm font-semibold text-forest-mid underline-offset-4 hover:underline"
+                className="text-xs font-medium text-[#91A88F] hover:text-[#DCE5DD] underline-offset-4 hover:underline"
               >
                 ← Trocar modo
               </button>
@@ -124,7 +124,7 @@ export function QuizPageClient() {
               <button
                 type="button"
                 onClick={() => setMode("select")}
-                className="text-sm font-semibold text-forest-mid underline-offset-4 hover:underline"
+                className="text-xs font-medium text-[#91A88F] hover:text-[#DCE5DD] underline-offset-4 hover:underline"
               >
                 ← Trocar modo
               </button>

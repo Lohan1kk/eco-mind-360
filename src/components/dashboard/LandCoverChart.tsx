@@ -16,15 +16,15 @@ import { LAND_COVER_DISTRIBUTION } from '@/data/historicalSeries';
 export function LandCoverChart() {
   return (
     <div className="glass-panel flex flex-col justify-between p-6 h-full">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-5">
         <div>
-          <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full">
+          <span className="text-[10px] font-mono uppercase tracking-wider text-[#91A88F]">
             MapBiomas Coleção 9
           </span>
-          <h3 className="font-display font-extrabold text-xl text-slate-900 mt-1.5">
+          <h3 className="font-display font-semibold text-lg text-[#DCE5DD] mt-1">
             Uso e Cobertura do Solo
           </h3>
-          <p className="text-xs text-slate-500 mt-0.5">
+          <p className="text-xs text-[#78877D] mt-0.5">
             Vegetação nativa remanescente vs atividades agropecuárias e corpos d&apos;água (%)
           </p>
         </div>
@@ -37,30 +37,32 @@ export function LandCoverChart() {
             layout="vertical"
             margin={{ top: 5, right: 15, left: 40, bottom: 5 }}
           >
-            <CartesianGrid strokeDasharray="3 3" stroke="#cbd5e1" opacity={0.5} horizontal={false} />
-            <XAxis type="number" domain={[0, 100]} unit="%" stroke="#64748b" fontSize={11} />
+            <CartesianGrid strokeDasharray="3 3" stroke="#222D25" horizontal={false} />
+            <XAxis type="number" domain={[0, 100]} unit="%" stroke="#78877D" fontSize={11} axisLine={{ stroke: '#222D25' }} />
             <YAxis 
               type="category" 
               dataKey="biomeName" 
-              stroke="#64748b" 
+              stroke="#A7B3A9" 
               fontSize={11} 
               tickLine={false} 
+              axisLine={{ stroke: '#222D25' }}
               width={100}
             />
             <Tooltip
+              cursor={{ fill: 'rgba(36, 49, 41, 0.4)' }}
               content={({ active, payload, label }) => {
                 if (active && payload && payload.length) {
                   return (
-                    <div className="p-3.5 bg-white/95 border border-slate-200/90 rounded-2xl shadow-xl text-xs backdrop-blur-md">
-                      <div className="font-bold text-slate-900 mb-2 font-display">{label}</div>
+                    <div className="p-3 bg-[#171F1A] border border-[#29362D] rounded-[10px] shadow-lift text-xs">
+                      <div className="font-semibold text-[#DCE5DD] mb-2">{label}</div>
                       <div className="space-y-1.5 font-mono">
                         {payload.map((entry) => (
                           <div key={entry.name} className="flex items-center justify-between gap-4">
-                            <span className="flex items-center gap-1.5 font-sans font-medium" style={{ color: entry.color }}>
+                            <span className="flex items-center gap-1.5 font-sans text-[#A7B3A9]">
                               <span className="w-2 h-2 rounded-full" style={{ backgroundColor: entry.color }} />
                               {entry.name}:
                             </span>
-                            <span className="font-bold text-slate-900">
+                            <span className="font-medium text-[#DCE5DD]">
                               {entry.value}%
                             </span>
                           </div>
@@ -74,19 +76,19 @@ export function LandCoverChart() {
             />
             <Legend 
               wrapperStyle={{ paddingTop: '10px', fontSize: '11px' }}
-              formatter={(value) => <span className="text-slate-700 font-semibold">{value}</span>}
+              formatter={(value) => <span className="text-[#A7B3A9] font-medium">{value}</span>}
             />
-            <Bar dataKey="vegetacaoNativa" name="Vegetação Nativa" stackId="a" fill="#059669" radius={[0, 0, 0, 0]} />
-            <Bar dataKey="agropecuaria" name="Agropecuária" stackId="a" fill="#d97706" />
-            <Bar dataKey="agua" name="Corpos d'Água" stackId="a" fill="#0284c7" />
-            <Bar dataKey="outros" name="Urbano / Outros" stackId="a" fill="#64748b" radius={[0, 4, 4, 0]} />
+            <Bar dataKey="vegetacaoNativa" name="Vegetação Nativa" stackId="a" fill="#789B7C" radius={[0, 0, 0, 0]} />
+            <Bar dataKey="agropecuaria" name="Agropecuária" stackId="a" fill="#A9A17A" />
+            <Bar dataKey="agua" name="Corpos d'Água" stackId="a" fill="#365C40" />
+            <Bar dataKey="outros" name="Urbano / Outros" stackId="a" fill="#78877D" radius={[0, 4, 4, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </div>
 
-      <div className="mt-3 pt-3 border-t border-slate-200/70 flex items-center justify-between text-[11px] text-slate-500 font-mono">
+      <div className="mt-4 pt-3 border-t border-[#222D25] flex items-center justify-between text-[11px] text-[#78877D] font-mono">
         <span>Fonte: MapBiomas Brasil (Série histórica 1985-2023)</span>
-        <span className="text-emerald-700 font-bold font-sans">Classificação Satelital</span>
+        <span className="text-[#91A88F]">Classificação Satelital</span>
       </div>
     </div>
   );

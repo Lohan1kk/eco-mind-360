@@ -5,26 +5,21 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { 
   Search, 
-  Sun, 
-  Moon, 
   Satellite, 
   X,
   ChevronDown,
   Compass
 } from 'lucide-react';
-import { useTheme } from './ThemeContext';
 import { BIOMES_LIST } from '@/data/biomes';
 import { VERIFIED_ALERTS } from '@/data/alerts';
 
 export function Header() {
-  const { theme, toggleTheme } = useTheme();
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
   const [searchOpen, setSearchOpen] = useState(false);
   const [biomeSelectOpen, setBiomeSelectOpen] = useState(false);
   const searchContainerRef = useRef<HTMLDivElement>(null);
 
-  // Fechar dropdown de pesquisa ao clicar fora
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
@@ -35,7 +30,6 @@ export function Header() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Atalho de teclado Ctrl + K para abrir a busca
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
       if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
@@ -49,7 +43,6 @@ export function Header() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  // Resultados de busca
   const filteredBiomes = searchQuery.trim()
     ? BIOMES_LIST.filter(b => 
         b.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -67,12 +60,11 @@ export function Header() {
     : [];
 
   return (
-    <header className="sticky top-0 z-30 h-16 bg-white/85 dark:bg-[#060a12]/85 backdrop-blur-xl border-b border-slate-200 dark:border-slate-800/80 px-4 lg:px-8 flex items-center justify-between gap-4 transition-colors">
-      {/* Lado esquerdo: Barra de busca inteligente com atalho Ctrl+K */}
+    <header className="sticky top-0 z-30 h-14 bg-[#131A16]/90 backdrop-blur-xl border-b border-[#222D25] px-4 lg:px-8 flex items-center justify-between gap-4">
       <div className="flex items-center gap-3 flex-1 max-w-xl pl-10 lg:pl-0">
         <div ref={searchContainerRef} className="relative w-full">
           <div className="relative flex items-center">
-            <Search className="absolute left-3.5 w-4 h-4 text-emerald-500/70 pointer-events-none" />
+            <Search className="absolute left-3 w-4 h-4 text-[#78877D] pointer-events-none" />
             <input
               type="text"
               value={searchQuery}
@@ -81,34 +73,33 @@ export function Header() {
                 setSearchOpen(true);
               }}
               onFocus={() => setSearchOpen(true)}
-              placeholder="Buscar bioma, município (ex: Altamira, Corumbá), estado ou alerta..."
-              className="w-full pl-10 pr-16 py-2 rounded-xl text-xs md:text-sm bg-slate-100/80 dark:bg-slate-900/80 text-slate-900 dark:text-slate-100 placeholder-slate-400 border border-slate-200/80 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all shadow-inner"
+              placeholder="Buscar bioma, município, UF ou alerta..."
+              className="w-full pl-9 pr-16 py-1.5 rounded-[7px] text-xs bg-[#171F1A] text-[#DCE5DD] placeholder-[#78877D] border border-[#29362D] focus:outline-none focus:border-[#789B7C] transition-colors"
             />
-            <div className="absolute right-2.5 flex items-center gap-1.5">
+            <div className="absolute right-2 flex items-center gap-1.5">
               {searchQuery ? (
                 <button 
                   onClick={() => {
                     setSearchQuery('');
                     setSearchOpen(false);
                   }} 
-                  className="p-1 rounded-md text-slate-400 hover:text-slate-200"
+                  className="p-1 rounded-[5px] text-[#78877D] hover:text-[#DCE5DD]"
                 >
                   <X size={13} />
                 </button>
               ) : (
-                <span className="hidden sm:inline-block text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-300 dark:border-slate-700">
+                <span className="hidden sm:inline-block text-[10px] font-mono px-1.5 py-0.5 rounded-[5px] bg-[#1D2821] text-[#78877D] border border-[#29362D]">
                   Ctrl K
                 </span>
               )}
             </div>
           </div>
 
-          {/* Dropdown de resultados de busca instantânea */}
           {searchOpen && searchQuery.trim().length > 0 && (
-            <div className="absolute top-full left-0 right-0 mt-2 p-3 rounded-2xl bg-white dark:bg-[#090f1a] border border-slate-200 dark:border-slate-700 shadow-2xl z-50 max-h-96 overflow-y-auto animate-in fade-in zoom-in-95 duration-150">
-              <div className="text-[10px] font-bold text-slate-400 px-2 py-1 uppercase tracking-wider flex items-center justify-between">
+            <div className="absolute top-full left-0 right-0 mt-2 p-2.5 rounded-[10px] bg-[#171F1A] border border-[#29362D] shadow-lift z-50 max-h-96 overflow-y-auto">
+              <div className="text-[10px] font-mono text-[#78877D] px-2 py-1 uppercase tracking-wider flex items-center justify-between">
                 <span>Biomas Identificados</span>
-                <span className="text-emerald-500">{filteredBiomes.length}</span>
+                <span className="text-[#91A88F]">{filteredBiomes.length}</span>
               </div>
               {filteredBiomes.length > 0 ? (
                 <div className="space-y-1 mb-3">
@@ -120,28 +111,28 @@ export function Header() {
                         setSearchOpen(false);
                         setSearchQuery('');
                       }}
-                      className="w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800/80 text-left text-xs transition-colors group"
+                      className="w-full flex items-center justify-between p-2 rounded-[7px] hover:bg-[#1D2821] text-left text-xs transition-colors"
                     >
-                      <div className="flex items-center gap-2.5">
-                        <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: biome.color }} />
-                        <span className="font-semibold text-slate-900 dark:text-slate-100 group-hover:text-emerald-400 transition-colors">
+                      <div className="flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: biome.color }} />
+                        <span className="font-medium text-[#DCE5DD]">
                           {biome.name}
                         </span>
-                        <span className="text-slate-400 text-[11px]">
+                        <span className="text-[#78877D] text-[11px]">
                           ({biome.states.slice(0, 4).join(', ')})
                         </span>
                       </div>
-                      <span className="text-[11px] text-emerald-500 font-medium">Ver Bioma →</span>
+                      <span className="text-[11px] text-[#91A88F]">Ver →</span>
                     </button>
                   ))}
                 </div>
               ) : (
-                <div className="text-xs text-slate-400 px-2 py-1 italic">Nenhum bioma com esse nome.</div>
+                <div className="text-xs text-[#78877D] px-2 py-1">Nenhum bioma com esse nome.</div>
               )}
 
-              <div className="text-[10px] font-bold text-slate-400 px-2 py-1 uppercase tracking-wider border-t border-slate-100 dark:border-slate-800 pt-2 flex items-center justify-between">
+              <div className="text-[10px] font-mono text-[#78877D] px-2 py-1 uppercase tracking-wider border-t border-[#222D25] pt-2 flex items-center justify-between">
                 <span>Ocorrências e Alertas</span>
-                <span className="text-amber-500">{filteredAlerts.length}</span>
+                <span className="text-[#A9A17A]">{filteredAlerts.length}</span>
               </div>
               {filteredAlerts.length > 0 ? (
                 <div className="space-y-1">
@@ -153,61 +144,55 @@ export function Header() {
                         setSearchOpen(false);
                         setSearchQuery('');
                       }}
-                      className="w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800/80 text-left text-xs transition-colors"
+                      className="w-full flex items-center justify-between p-2 rounded-[7px] hover:bg-[#1D2821] text-left text-xs transition-colors"
                     >
                       <div>
-                        <div className="font-medium text-slate-900 dark:text-slate-200">
+                        <div className="font-medium text-[#DCE5DD]">
                           {alert.typeName} — {alert.municipality}/{alert.state}
                         </div>
-                        <div className="text-[10px] text-slate-400">
-                          {alert.biomeName} • {alert.date} • {alert.source}
+                        <div className="text-[10px] text-[#78877D]">
+                          {alert.biomeName} · {alert.date} · {alert.source}
                         </div>
                       </div>
-                      <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-semibold">
+                      <span className="text-[10px] font-mono px-2 py-0.5 rounded-[5px] bg-[#1D2821] text-[#A7B3A9] border border-[#29362D]">
                         {alert.confidence}
                       </span>
                     </button>
                   ))}
                 </div>
               ) : (
-                <div className="text-xs text-slate-400 px-2 py-1 italic">Nenhum alerta localizado.</div>
+                <div className="text-xs text-[#78877D] px-2 py-1">Nenhum alerta localizado.</div>
               )}
             </div>
           )}
         </div>
       </div>
 
-      {/* Lado direito: Status satélite + Seletor de bioma rápido + Modo Apresentação + Toggle de Tema */}
-      <div className="flex items-center gap-2 md:gap-3">
-        {/* Badge de Satélites Orbitais */}
-        <div className="hidden xl:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-[#0b121e] border border-slate-200 dark:border-slate-800 text-xs">
-          <span className="relative flex h-2 w-2">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-500"></span>
-          </span>
-          <Satellite size={13} className="text-cyan-400" />
-          <span className="text-slate-700 dark:text-slate-200 font-semibold">NASA • INPE:</span>
-          <span className="text-slate-400 font-mono text-[11px]">VIIRS • AQUA • CBERS</span>
+      <div className="flex items-center gap-2">
+        <div className="hidden xl:flex items-center gap-2 px-3 py-1.5 rounded-[7px] bg-[#171F1A] border border-[#29362D] text-xs">
+          <span className="inline-flex rounded-full h-2 w-2 bg-[#83A989]" />
+          <Satellite size={13} className="text-[#789B7C]" />
+          <span className="text-[#DCE5DD] font-medium">NASA · INPE:</span>
+          <span className="text-[#78877D] font-mono text-[11px]">VIIRS · AQUA · CBERS</span>
         </div>
 
-        {/* Dropdown Rápido de Biomas */}
         <div className="relative">
           <button
             onClick={() => setBiomeSelectOpen(!biomeSelectOpen)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 dark:bg-[#0b121e] hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-800 transition-all shadow-sm"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-[7px] text-xs font-medium bg-[#171F1A] hover:bg-[#1D2821] text-[#DCE5DD] border border-[#29362D] transition-colors"
           >
-            <Compass size={14} className="text-emerald-500" />
+            <Compass size={13} className="text-[#789B7C]" />
             <span className="hidden sm:inline">Ambiente:</span>
             <span>7 Biomas</span>
-            <ChevronDown size={13} />
+            <ChevronDown size={13} className="text-[#78877D]" />
           </button>
 
           {biomeSelectOpen && (
             <div 
               onMouseLeave={() => setBiomeSelectOpen(false)}
-              className="absolute right-0 mt-2 w-52 rounded-2xl bg-white dark:bg-[#090f1a] border border-slate-200 dark:border-slate-700 shadow-2xl p-1.5 z-50 text-xs animate-in fade-in zoom-in-95 duration-150"
+              className="absolute right-0 mt-2 w-52 rounded-[10px] bg-[#171F1A] border border-[#29362D] shadow-lift p-1.5 z-50 text-xs"
             >
-              <div className="px-2.5 py-1 text-[10px] uppercase font-bold text-slate-400 tracking-wider">
+              <div className="px-2.5 py-1 text-[10px] uppercase font-mono text-[#78877D] tracking-wider">
                 Navegação Rápida
               </div>
               {BIOMES_LIST.map((b) => (
@@ -215,32 +200,18 @@ export function Header() {
                   key={b.id}
                   href={`/biomas/${b.id}`}
                   onClick={() => setBiomeSelectOpen(false)}
-                  className="flex items-center justify-between px-2.5 py-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 transition-colors"
+                  className="flex items-center justify-between px-2.5 py-1.5 rounded-[7px] hover:bg-[#1D2821] text-[#A7B3A9] hover:text-[#DCE5DD] transition-colors"
                 >
                   <div className="flex items-center gap-2">
-                    <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: b.color }} />
-                    <span className="font-medium">{b.name}</span>
+                    <span className="w-2 h-2 rounded-full" style={{ backgroundColor: b.color }} />
+                    <span>{b.name}</span>
                   </div>
-                  <span className="text-[10px] font-mono text-slate-400">{b.percentageBrazil}%</span>
+                  <span className="text-[10px] font-mono text-[#78877D]">{b.percentageBrazil}%</span>
                 </Link>
               ))}
             </div>
           )}
         </div>
-
-        {/* Botão de Alternância de Tema Claro / Escuro */}
-        <button
-          onClick={toggleTheme}
-          aria-label="Alternar tema claro ou escuro"
-          className="p-2 rounded-xl bg-slate-100 dark:bg-[#0b121e] hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-800 transition-all shadow-sm"
-          title={theme === 'dark' ? 'Mudar para Tema Claro' : 'Mudar para Tema Escuro'}
-        >
-          {theme === 'dark' ? (
-            <Sun size={17} className="text-amber-400 hover:rotate-45 transition-transform" />
-          ) : (
-            <Moon size={17} className="text-slate-700 hover:-rotate-12 transition-transform" />
-          )}
-        </button>
       </div>
     </header>
   );

@@ -1,8 +1,8 @@
 'use client';
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect } from 'react';
 
-type Theme = 'dark' | 'light';
+type Theme = 'dark';
 
 interface ThemeContextType {
   theme: Theme;
@@ -15,36 +15,17 @@ const ThemeContext = createContext<ThemeContextType>({
 });
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState<Theme>('dark');
-  const [mounted, setMounted] = useState(false);
-
   useEffect(() => {
-    const savedTheme = localStorage.getItem('ecomind_theme') as Theme | null;
-    if (savedTheme === 'light' || savedTheme === 'dark') {
-      setTheme(savedTheme);
-      document.documentElement.classList.toggle('dark', savedTheme === 'dark');
-    } else {
-      setTheme('dark');
-      document.documentElement.classList.add('dark');
-    }
-    setMounted(true);
+    document.documentElement.classList.add('dark');
   }, []);
 
   const toggleTheme = () => {
-    const newTheme = theme === 'dark' ? 'light' : 'dark';
-    setTheme(newTheme);
-    localStorage.setItem('ecomind_theme', newTheme);
-    document.documentElement.classList.toggle('dark', newTheme === 'dark');
+    // Tema exclusivamente Dark Botanical conforme diretriz de arte
   };
 
-  if (!mounted) {
-    // Evitar layout shift
-    return <div className="dark bg-[#070b12] text-slate-100 min-h-screen">{children}</div>;
-  }
-
   return (
-    <ThemeContext.Provider value={{ theme, toggleTheme }}>
-      <div className={theme === 'dark' ? 'dark' : ''}>{children}</div>
+    <ThemeContext.Provider value={{ theme: 'dark', toggleTheme }}>
+      <div className="dark bg-[#101512] text-[#DCE5DD] min-h-screen">{children}</div>
     </ThemeContext.Provider>
   );
 }

@@ -13,23 +13,23 @@ export const LEVEL_META: Record<
 > = {
   critico: {
     label: "Crítico",
-    color: "#dc2626",
-    pinClass: "bg-red-600",
+    color: "#A77D78",
+    pinClass: "bg-[#A77D78]",
   },
   alto: {
     label: "Alto",
-    color: "#ea580c",
-    pinClass: "bg-orange-500",
+    color: "#A9A17A",
+    pinClass: "bg-[#A9A17A]",
   },
   medio: {
     label: "Médio",
-    color: "#ca8a04",
-    pinClass: "bg-yellow-500",
+    color: "#91A88F",
+    pinClass: "bg-[#91A88F]",
   },
   baixo: {
     label: "Baixo",
-    color: "#16a34a",
-    pinClass: "bg-green-600",
+    color: "#789B7C",
+    pinClass: "bg-[#789B7C]",
   },
 };
 

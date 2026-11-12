@@ -8,7 +8,7 @@ import { Header } from './Header';
 export function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <ThemeProvider>
-      <div className="min-h-screen bg-slate-50 dark:bg-[#070b12] text-slate-900 dark:text-slate-100 flex flex-col antialiased">
+      <div className="min-h-screen bg-[#101512] text-[#DCE5DD] flex flex-col antialiased">
         {/* Sidebar fixa à esquerda */}
         <Sidebar />
 
@@ -20,17 +20,17 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           </main>
 
           {/* Rodapé institucional */}
-          <footer className="border-t border-slate-200 dark:border-slate-800/80 bg-white/50 dark:bg-[#070b12]/50 py-6 px-4 md:px-8 text-xs text-slate-500 dark:text-slate-400">
+          <footer className="border-t border-[#222D25] bg-[#131A16] py-6 px-4 md:px-8 text-xs text-[#78877D]">
             <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
               <div className="flex items-center gap-2">
-                <span className="font-semibold text-slate-700 dark:text-slate-300">
+                <span className="font-semibold text-[#DCE5DD]">
                   EcoMind 360
                 </span>
                 <span>— Plataforma de Inteligência e Monitoramento dos Biomas Brasileiros</span>
               </div>
               <div className="flex flex-wrap items-center gap-4 text-[11px]">
-                <span>Dados Oficiais: INPE • NASA FIRMS • MapBiomas • IBGE • ICMBio</span>
-                <span className="text-emerald-500 font-medium">Orçamento R$ 0 • Apresentação 2024</span>
+                <span>Dados Oficiais: INPE · NASA FIRMS · MapBiomas · IBGE · ICMBio</span>
+                <span className="text-[#91A88F] font-mono">Orçamento R$ 0 · Apresentação 2024</span>
               </div>
             </div>
           </footer>

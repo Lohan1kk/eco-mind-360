@@ -25,11 +25,17 @@ export function PageIntro({
       initial={reduce ? false : "hidden"}
       animate="visible"
     >
-      <motion.p className={eyebrowClassName ?? "eyebrow"} variants={staggerItem}>
+      <motion.p
+        className={eyebrowClassName ?? "eyebrow text-[#91A88F]"}
+        variants={staggerItem}
+      >
         {eyebrow}
       </motion.p>
       <motion.h1
-        className={titleClassName ?? "display mt-3 text-3xl md:text-5xl"}
+        className={
+          titleClassName ??
+          "font-display font-semibold tracking-tight mt-2 text-3xl text-[#DCE5DD] md:text-4xl"
+        }
         variants={staggerItem}
       >
         {title}

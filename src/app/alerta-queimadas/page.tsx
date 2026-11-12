@@ -10,8 +10,8 @@ export const metadata: Metadata = {
 
 export default function AlertaQueimadasPage() {
   return (
-    <div className="flex h-[calc(100dvh-4rem)] md:h-[calc(100dvh-4.25rem)] w-full flex-col overflow-hidden relative">
-      <div className="shrink-0 border-b border-forest/10 bg-mist px-4 py-2 md:px-8 md:py-2.5 z-10">
+    <div className="flex h-[calc(100dvh-3.75rem)] w-full flex-col overflow-hidden relative bg-[#101512]">
+      <div className="shrink-0 border-b border-[#222D25] bg-[#131A16] px-4 py-2 md:px-8 md:py-2.5 z-10">
         <AlertaIntro />
       </div>
       <div className="min-h-0 flex-1 relative w-full h-full">

@@ -25,11 +25,11 @@ export function OfflineIndicator() {
         <motion.div
           key="offline"
           role="status"
-          className="fixed inset-x-0 top-0 z-[60] bg-burn px-4 py-2 pt-[max(0.5rem,env(safe-area-inset-top))] text-center text-xs font-semibold text-mist"
+          className="fixed inset-x-0 top-0 z-[60] bg-[#1D2821] border-b border-[#A9A17A]/40 px-4 py-2 pt-[max(0.5rem,env(safe-area-inset-top))] text-center text-xs font-medium text-[#A9A17A]"
           initial={reduce ? false : { opacity: 0, y: -8 }}
           animate={{ opacity: 1, y: 0 }}
           exit={reduce ? undefined : { opacity: 0, y: -6 }}
-          transition={reduce ? { duration: 0 } : { ...enterTransition, duration: 0.35 }}
+          transition={reduce ? { duration: 0 } : { ...enterTransition, duration: 0.3 }}
         >
           Você está offline — mapa ao vivo e instalação podem ficar limitados
         </motion.div>

@@ -19,7 +19,7 @@ export function BottomNav() {
   return (
     <nav
       aria-label="Navegação móvel"
-      className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-mist/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl md:hidden shadow-lg"
+      className="fixed inset-x-0 bottom-0 z-40 border-t border-[#222D25] bg-[#131A16]/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl md:hidden"
     >
       <ul className="mx-auto flex max-w-md items-center justify-around py-2">
         {ITEMS.map((item) => {
@@ -29,11 +29,11 @@ export function BottomNav() {
             <li key={item.href} className="flex-1">
               <Link
                 href={item.href}
-                className={`flex flex-col items-center gap-1 py-1 text-[10px] font-bold transition ${
-                  active ? 'text-forest' : 'text-ash hover:text-forest'
+                className={`flex flex-col items-center gap-1 py-1 text-[10px] font-medium transition ${
+                  active ? 'text-[#91A88F]' : 'text-[#78877D] hover:text-[#DCE5DD]'
                 }`}
               >
-                <Icon size={18} className={active ? 'text-forest' : 'text-ash'} />
+                <Icon size={17} className={active ? 'text-[#789B7C]' : 'text-[#78877D]'} />
                 <span>{item.label}</span>
               </Link>
             </li>

@@ -70,18 +70,17 @@ export function ReportFireModal({
     });
   }
 
-  // Compact banner while picking — keep instant (must not fight map interaction).
   if (open && pickMode) {
     return (
       <div className="pointer-events-none fixed inset-x-0 bottom-0 z-[1200] flex justify-center p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
-        <div className="pointer-events-auto flex w-full max-w-md items-center gap-3 rounded-xl border border-forest/15 bg-white/95 px-4 py-3 shadow-lg backdrop-blur-sm">
-          <p className="flex-1 text-sm font-medium text-forest">
+        <div className="pointer-events-auto flex w-full max-w-md items-center gap-3 rounded-[10px] border border-[#29362D] bg-[#171F1A]/95 px-4 py-3 shadow-lift backdrop-blur-md">
+          <p className="flex-1 text-xs font-medium text-[#DCE5DD]">
             Toque no mapa para marcar o foco
           </p>
           <button
             type="button"
             onClick={onCancelPickMode}
-            className="rounded-md bg-forest/10 px-3 py-1.5 text-sm font-semibold text-forest"
+            className="rounded-[7px] bg-[#1D2821] border border-[#29362D] px-3 py-1.5 text-xs font-medium text-[#DCE5DD] hover:bg-[#243129]"
           >
             Cancelar
           </button>
@@ -95,39 +94,39 @@ export function ReportFireModal({
       {open ? (
         <motion.div
           key="report-modal"
-          className="fixed inset-0 z-[1200] flex items-end justify-center bg-ink/50 p-4 sm:items-center"
+          className="fixed inset-0 z-[1200] flex items-end justify-center bg-black/70 backdrop-blur-sm p-4 sm:items-center"
           role="dialog"
           aria-modal="true"
           aria-labelledby="report-title"
           initial={reduce ? false : { opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={reduce ? undefined : { opacity: 0 }}
-          transition={reduce ? { duration: 0 } : { duration: 0.28, ease: softEase }}
+          transition={reduce ? { duration: 0 } : { duration: 0.25, ease: softEase }}
         >
           <motion.div
-            className="w-full max-w-md rounded-xl bg-mist p-6 shadow-xl"
+            className="w-full max-w-md rounded-[14px] border border-[#29362D] bg-[#171F1A] p-6 shadow-lift"
             variants={scaleIn}
             initial={reduce ? false : "hidden"}
             animate="visible"
             exit={reduce ? undefined : { opacity: 0, y: 12, scale: 0.98 }}
             transition={reduce ? { duration: 0 } : enterTransition}
           >
-            <div className="flex items-start justify-between gap-4">
+            <div className="flex items-start justify-between gap-4 border-b border-[#222D25] pb-4">
               <div>
                 <h2
                   id="report-title"
-                  className="font-display text-xl font-semibold text-forest"
+                  className="font-display text-lg font-semibold text-[#DCE5DD]"
                 >
                   Reportar queimada
                 </h2>
-                <p className="mt-1 text-sm text-ash">
+                <p className="mt-1 text-xs text-[#78877D]">
                   O reporte fica salvo neste aparelho (não sincroniza na nuvem).
                 </p>
               </div>
               <button
                 type="button"
                 onClick={onClose}
-                className="rounded-md px-2 py-1 text-sm text-ash hover:bg-forest/10"
+                className="rounded-[7px] px-2 py-1 text-xs text-[#78877D] hover:bg-[#1D2821] hover:text-[#DCE5DD]"
                 aria-label="Fechar"
               >
                 ✕
@@ -136,28 +135,28 @@ export function ReportFireModal({
 
             <form onSubmit={handleSubmit} className="mt-5 space-y-4">
               <div>
-                <p className="text-sm font-semibold text-ink">Localização</p>
+                <p className="text-xs font-medium text-[#DCE5DD]">Localização</p>
                 {coords ? (
-                  <p className="mt-1 text-sm text-ash">
+                  <p className="mt-1 text-xs font-mono text-[#91A88F]">
                     {coords.lat.toFixed(4)}, {coords.lng.toFixed(4)}
                   </p>
                 ) : (
-                  <p className="mt-1 text-sm text-burn">
+                  <p className="mt-1 text-xs text-[#A9A17A]">
                     Escolha uma forma de definir o local.
                   </p>
                 )}
-                <div className="mt-2 flex flex-wrap gap-2">
+                <div className="mt-2.5 flex flex-wrap gap-2">
                   <button
                     type="button"
                     onClick={onStartPickMode}
-                    className="rounded-md bg-forest/10 px-3 py-1.5 text-sm font-medium text-forest"
+                    className="btn-secondary !py-1.5 !px-3 text-xs"
                   >
                     Marcar no mapa
                   </button>
                   <button
                     type="button"
                     onClick={onUseGeolocation}
-                    className="rounded-md bg-forest/10 px-3 py-1.5 text-sm font-medium text-forest"
+                    className="btn-secondary !py-1.5 !px-3 text-xs"
                   >
                     Usar minha localização
                   </button>
@@ -167,7 +166,7 @@ export function ReportFireModal({
               <div>
                 <label
                   htmlFor="level"
-                  className="block text-sm font-semibold text-ink"
+                  className="block text-xs font-medium text-[#DCE5DD]"
                 >
                   Nível de alerta
                 </label>
@@ -175,7 +174,7 @@ export function ReportFireModal({
                   id="level"
                   name="level"
                   defaultValue="medio"
-                  className="mt-1.5 w-full rounded-md border border-forest/20 bg-white px-3 py-2 text-ink outline-none focus:border-forest-mid focus:ring-2 focus:ring-sprout/60"
+                  className="mt-1.5 w-full rounded-[7px] border border-[#29362D] bg-[#131A16] px-3 py-2 text-xs text-[#DCE5DD] outline-none focus:border-[#789B7C]"
                 >
                   {ALERT_LEVELS.map((level) => (
                     <option key={level} value={level}>
@@ -188,7 +187,7 @@ export function ReportFireModal({
               <div>
                 <label
                   htmlFor="description"
-                  className="block text-sm font-semibold text-ink"
+                  className="block text-xs font-medium text-[#DCE5DD]"
                 >
                   Descrição (opcional)
                 </label>
@@ -198,12 +197,12 @@ export function ReportFireModal({
                   rows={3}
                   maxLength={500}
                   placeholder="Ex.: fumaça visível, área de mata..."
-                  className="mt-1.5 w-full resize-y rounded-md border border-forest/20 bg-white px-3 py-2 text-ink outline-none focus:border-forest-mid focus:ring-2 focus:ring-sprout/60"
+                  className="mt-1.5 w-full resize-y rounded-[7px] border border-[#29362D] bg-[#131A16] px-3 py-2 text-xs text-[#DCE5DD] placeholder:text-[#78877D] outline-none focus:border-[#789B7C]"
                 />
               </div>
 
               {error ? (
-                <p role="alert" className="text-sm font-medium text-burn">
+                <p role="alert" className="text-xs font-medium text-[#A77D78]">
                   {error}
                 </p>
               ) : null}
@@ -211,7 +210,7 @@ export function ReportFireModal({
               <button
                 type="submit"
                 disabled={!coords || submitting}
-                className="w-full rounded-md bg-forest px-4 py-3 text-sm font-semibold text-mist transition hover:bg-forest-mid disabled:cursor-not-allowed disabled:opacity-50"
+                className="w-full btn-primary !py-2.5 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {submitting ? "Salvando..." : "Salvar neste aparelho"}
               </button>

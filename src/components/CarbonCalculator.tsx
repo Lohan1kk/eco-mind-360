@@ -57,12 +57,12 @@ export function CarbonCalculator() {
   }, [result.total, totalMv]);
 
   return (
-    <div className="grid gap-10 lg:grid-cols-2 lg:gap-16">
-      <div className="space-y-8">
+    <div className="grid gap-10 lg:grid-cols-2 lg:gap-14">
+      <div className="space-y-8 rounded-[10px] border border-[#29362D] bg-[#171F1A] p-6 sm:p-8">
         <div>
-          <label htmlFor="km" className="flex justify-between text-sm font-semibold text-mist">
+          <label htmlFor="km" className="flex justify-between text-sm font-medium text-[#DCE5DD]">
             <span>Deslocamento diário</span>
-            <span className="text-sprout">{km} km</span>
+            <span className="font-mono text-[#91A88F]">{km} km</span>
           </label>
           <input
             id="km"
@@ -71,22 +71,22 @@ export function CarbonCalculator() {
             max={80}
             value={km}
             onChange={(e) => setKm(Number(e.target.value))}
-            className="mt-2 w-full accent-sprout"
+            className="mt-2.5 w-full accent-[#789B7C]"
           />
         </div>
 
         <div>
-          <p className="text-sm font-semibold text-mist">Meio de transporte principal</p>
-          <div className="mt-2 flex flex-wrap gap-2">
+          <p className="text-sm font-medium text-[#DCE5DD]">Meio de transporte principal</p>
+          <div className="mt-2.5 flex flex-wrap gap-2">
             {TRANSPORT_OPTIONS.map((opt) => (
               <motion.button
                 key={opt.mode}
                 type="button"
                 onClick={() => setTransport(opt.mode)}
-                className={`cursor-pointer rounded-md px-4 py-2 text-sm font-medium transition ${
+                className={`cursor-pointer rounded-[7px] px-4 py-2 text-xs font-medium transition ${
                   transport === opt.mode
-                    ? "bg-sprout text-ink"
-                    : "border border-mist/25 text-mist/90 hover:border-sprout/50"
+                    ? "bg-[#294C35] text-[#DCE5DD] border border-[#365C40]"
+                    : "border border-[#29362D] bg-[#131A16] text-[#A7B3A9] hover:border-[#789B7C]/50 hover:text-[#DCE5DD]"
                 }`}
                 whileTap={reduce ? undefined : tapSoft}
                 transition={pressTransition}
@@ -98,9 +98,9 @@ export function CarbonCalculator() {
         </div>
 
         <div>
-          <label htmlFor="meat" className="flex justify-between text-sm font-semibold text-mist">
+          <label htmlFor="meat" className="flex justify-between text-sm font-medium text-[#DCE5DD]">
             <span>Consumo de carne</span>
-            <span className="text-sprout">{meat}x por semana</span>
+            <span className="font-mono text-[#91A88F]">{meat}x por semana</span>
           </label>
           <input
             id="meat"
@@ -109,14 +109,14 @@ export function CarbonCalculator() {
             max={14}
             value={meat}
             onChange={(e) => setMeat(Number(e.target.value))}
-            className="mt-2 w-full accent-sprout"
+            className="mt-2.5 w-full accent-[#789B7C]"
           />
         </div>
 
         <div>
-          <label htmlFor="energy" className="flex justify-between text-sm font-semibold text-mist">
+          <label htmlFor="energy" className="flex justify-between text-sm font-medium text-[#DCE5DD]">
             <span>Conta de energia mensal</span>
-            <span className="text-sprout">
+            <span className="font-mono text-[#91A88F]">
               R$ {energy} (~{Math.round(result.kwhEstimado)} kWh)
             </span>
           </label>
@@ -128,41 +128,41 @@ export function CarbonCalculator() {
             step={10}
             value={energy}
             onChange={(e) => setEnergy(Number(e.target.value))}
-            className="mt-2 w-full accent-sprout"
+            className="mt-2.5 w-full accent-[#789B7C]"
           />
         </div>
       </div>
 
       <motion.div
-        className="border border-sprout/20 bg-ink/45 p-8"
-        initial={reduce ? false : { opacity: 0, y: 16 }}
+        className="rounded-[10px] border border-[#29362D] bg-[#171F1A] p-6 sm:p-8"
+        initial={reduce ? false : { opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: reduce ? 0 : 0.5, ease: [0.22, 1, 0.36, 1] }}
+        transition={{ duration: reduce ? 0 : 0.35, ease: [0.22, 1, 0.36, 1] }}
       >
-        <p className="text-sm font-semibold uppercase tracking-wide text-sprout/80">
+        <p className="text-xs font-mono uppercase tracking-wider text-[#91A88F]">
           Estimativa anual
         </p>
         <motion.p
-          className={`mt-2 font-display text-6xl font-semibold tabular-nums ${
-            result.level === "excelente" ? "text-sprout" : "text-mist"
+          className={`mt-2 font-display text-5xl sm:text-6xl font-semibold tabular-nums ${
+            result.level === "excelente" ? "text-[#83A989]" : "text-[#DCE5DD]"
           }`}
         >
           {totalDisplay}
         </motion.p>
-        <p className="text-lg text-mist/80">kg de CO₂ equivalente por ano</p>
-        <p className="mt-1 text-xs text-mist/50">
+        <p className="text-base text-[#A7B3A9] mt-1">kg de CO₂ equivalente por ano</p>
+        <p className="mt-1 text-xs text-[#78877D]">
           CO₂e = impacto de vários gases numa só unidade (como se fosse só CO₂).
         </p>
 
-        <div className="mt-6 h-2 overflow-hidden rounded-full bg-mist/10">
+        <div className="mt-6 h-2 overflow-hidden rounded-full bg-[#131A16] border border-[#222D25]">
           <motion.div
-            className="h-full rounded-full bg-sprout"
+            className="h-full rounded-full bg-[#789B7C]"
             animate={{ width: `${result.progressPct}%` }}
             transition={{ duration: reduce ? 0 : 0.35, ease: "easeOut" }}
           />
         </div>
 
-        <p className="mt-6 text-base leading-relaxed text-mist/90">{result.message}</p>
+        <p className="mt-6 text-sm leading-relaxed text-[#DCE5DD]">{result.message}</p>
 
         <CarbonBreakdown
           transport={result.transportAnnual}
@@ -171,7 +171,7 @@ export function CarbonCalculator() {
           total={result.total}
         />
 
-        <p className="mt-6 text-xs leading-relaxed text-mist/50">
+        <p className="mt-6 text-xs leading-relaxed text-[#78877D]">
           Metodologia: fatores médios de transporte (DEFRA/EPA), alimentação
           (Poore &amp; Nemecek, 2018) e matriz elétrica do SIN (MCTI).
         </p>

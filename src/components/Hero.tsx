@@ -19,111 +19,91 @@ export function Hero() {
   const activeBiome = BIOMES_LIST.find((b) => b.id === activeBiomeId) || BIOMES_LIST[0];
 
   return (
-    <section className="relative min-h-[92svh] overflow-hidden bg-[#09110e] text-white flex flex-col justify-between pt-24 pb-12">
-      {/* Background Dinâmico Bio-Orbital 360 */}
+    <section className="relative min-h-[88svh] overflow-hidden bg-[#101512] text-[#DCE5DD] flex flex-col justify-between pt-28 pb-12 border-b border-[#222D25]">
+      {/* Background Ambiental Sutil */}
       <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-        {/* Foto de fundo 4K com tratamento cinematográfico escuro */}
-        <div className="absolute inset-0 opacity-25 scale-105 transition-transform duration-1000 ease-out">
+        <div className="absolute inset-0 opacity-20">
           <Image
             src="/brand/hero-ecomind-4k.jpg"
             alt="EcoMind 360 Background"
             fill
             priority
             quality={90}
-            className="object-cover object-center"
+            className="object-cover object-center grayscale-[25%]"
           />
         </div>
-
-        {/* Gradientes e Radiais de Luz Atmosférica */}
-        <div className="absolute top-[-20%] left-[20%] w-[650px] h-[650px] rounded-full bg-emerald-500/15 blur-[120px]" />
-        <div className="absolute bottom-[-10%] right-[10%] w-[550px] h-[550px] rounded-full bg-teal-500/10 blur-[130px]" />
-        <div className="absolute top-[40%] right-[30%] w-[350px] h-[350px] rounded-full bg-emerald-400/10 blur-[90px]" />
 
         <div
           className="absolute inset-0"
           style={{
             background:
-              'radial-gradient(circle at 50% 30%, transparent 20%, rgba(9, 17, 14, 0.85) 70%, #09110e 100%), linear-gradient(to bottom, rgba(9, 17, 14, 0.4) 0%, #09110e 100%)',
-          }}
-        />
-
-        {/* Grade vetorial sutil no fundo */}
-        <div 
-          className="absolute inset-0 opacity-[0.03]"
-          style={{
-            backgroundImage: `radial-gradient(rgba(255, 255, 255, 0.8) 1px, transparent 1px)`,
-            backgroundSize: '36px 36px',
+              'radial-gradient(circle at 50% 25%, rgba(16, 21, 18, 0.45) 0%, rgba(16, 21, 18, 0.92) 70%, #101512 100%), linear-gradient(to bottom, rgba(16, 21, 18, 0.5) 0%, #101512 100%)',
           }}
         />
       </div>
 
       {/* Conteúdo Principal do Hero */}
-      <div className="relative z-10 section-inner flex-1 flex flex-col justify-center py-6 md:py-10">
-        <div className="max-w-4xl space-y-6">
-          {/* Badge 360 Orbital Live */}
+      <div className="relative z-10 section-inner flex-1 flex flex-col justify-center py-8 md:py-12">
+        <div className="max-w-3xl space-y-6">
+          {/* Badge Orbital */}
           <motion.div
-            initial={{ opacity: 0, y: -12 }}
+            initial={{ opacity: 0, y: -8 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4 }}
-            className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-950/80 border border-emerald-500/30 text-emerald-300 text-xs font-bold tracking-wide shadow-[0_0_20px_rgba(16,185,129,0.2)] backdrop-blur-md"
+            transition={{ duration: 0.3 }}
+            className="badge-360"
           >
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400"></span>
-            </span>
-            <span className="font-mono text-[11px] uppercase tracking-wider">
-              Monitoramento Orbital 360° Ativo
-            </span>
-            <span className="text-emerald-500/60">•</span>
-            <span className="text-[11px] font-semibold text-emerald-200/90">INPE & NASA FIRMS</span>
+            <span className="inline-flex rounded-full h-1.5 w-1.5 bg-[#83A989]" />
+            <span>Monitoramento Orbital 360° Ativo</span>
+            <span className="text-[#78877D]">·</span>
+            <span className="text-[#A7B3A9]">INPE & NASA FIRMS</span>
           </motion.div>
 
-          {/* Título de Impacto Único EcoMind 360 */}
+          {/* Título Principal */}
           <motion.div
-            initial={{ opacity: 0, y: 16 }}
+            initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-            className="space-y-3"
+            transition={{ duration: 0.35, delay: 0.05 }}
+            className="space-y-4"
           >
-            <h1 className="font-display text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight leading-[1.08] text-white">
+            <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-semibold tracking-tight leading-[1.1] text-[#DCE5DD]">
               Inteligência Territorial para os{' '}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-sprout">
+              <span className="text-[#91A88F]">
                 7 Ambientes do Brasil.
               </span>
             </h1>
-            <p className="max-w-2xl text-base sm:text-xl text-slate-300/90 font-normal leading-relaxed">
+            <p className="max-w-2xl text-base sm:text-lg text-[#A7B3A9] font-normal leading-relaxed">
               Da Amazônia ao Sistema Costeiro-Marinho: acompanhe queimadas em tempo real por satélite,
               taxas auditadas de desmatamento (PRODES 2024) e indicadores ecológicos com R$ 0 de custo.
             </p>
           </motion.div>
 
-          {/* Botões de Ação com Alta Fluidez */}
+          {/* Ações */}
           <motion.div
-            initial={{ opacity: 0, y: 16 }}
+            initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
+            transition={{ duration: 0.35, delay: 0.1 }}
             className="flex flex-wrap items-center gap-3 pt-2"
           >
             <Link
               href="/mapa"
-              className="btn-primary !py-3.5 !px-6 text-sm font-bold shadow-[0_0_30px_rgba(16,185,129,0.35)] hover:shadow-[0_0_40px_rgba(16,185,129,0.55)] group cursor-pointer"
+              className="btn-primary !py-2.5 !px-5 text-xs font-semibold cursor-pointer"
             >
-              <MapPin size={18} className="text-emerald-200 group-hover:scale-110 transition-transform" />
+              <MapPin size={15} />
               <span>Abrir Mapa Orbital 360°</span>
-              <span className="text-xs bg-white/20 px-2 py-0.5 rounded-full font-mono">FRP</span>
+              <span className="text-[10px] bg-[#101512]/20 px-1.5 py-0.5 rounded-[5px] font-mono">FRP</span>
             </Link>
 
             <Link
               href="/dashboard"
-              className="btn-ghost !py-3.5 !px-6 text-sm font-bold cursor-pointer inline-flex items-center gap-2 hover:bg-white/15"
+              className="btn-secondary !py-2.5 !px-5 text-xs font-medium cursor-pointer"
             >
-              <LayoutDashboard size={18} className="text-teal-300" />
+              <LayoutDashboard size={15} className="text-[#91A88F]" />
               <span>Painel dos 7 Ambientes</span>
             </Link>
 
             <Link
               href="/biomas"
-              className="px-4 py-3 text-xs font-bold text-slate-300 hover:text-white transition-colors inline-flex items-center gap-1 group"
+              className="px-3 py-2 text-xs font-medium text-[#A7B3A9] hover:text-[#DCE5DD] transition-colors inline-flex items-center gap-1 group"
             >
               <span>Explorar Biomas</span>
               <ArrowUpRight size={14} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
@@ -132,18 +112,17 @@ export function Hero() {
         </div>
       </div>
 
-      {/* Widget Interativo 360° de Telemetria Rápida no Rodapé do Hero */}
-      <div className="relative z-10 section-inner pt-6 border-t border-white/10">
+      {/* Telemetria Rápida no Rodapé do Hero */}
+      <div className="relative z-10 section-inner pt-8 border-t border-[#222D25]">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
-          {/* Seletor Rápido dos 7 Biomas com Transição Fluida */}
-          <div className="lg:col-span-7 space-y-2.5">
-            <div className="flex items-center justify-between text-xs font-semibold text-slate-400">
-              <span className="flex items-center gap-1.5 uppercase tracking-wider text-[11px] font-bold text-emerald-400">
-                <Compass size={14} />
+          <div className="lg:col-span-7 space-y-3">
+            <div className="flex items-center justify-between text-xs">
+              <span className="flex items-center gap-1.5 uppercase tracking-wider text-[11px] font-mono text-[#91A88F]">
+                <Compass size={13} />
                 Radar dos 7 Ambientes
               </span>
-              <span className="hidden sm:inline text-slate-400 text-[11px]">
-                Clique para alternar telemetria instantânea
+              <span className="hidden sm:inline text-[#78877D] text-[11px]">
+                Selecione para alternar telemetria
               </span>
             </div>
 
@@ -154,15 +133,15 @@ export function Hero() {
                   <button
                     key={biome.id}
                     onClick={() => setActiveBiomeId(biome.id)}
-                    className={`relative px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+                    className={`px-3 py-1.5 rounded-[7px] text-xs font-medium transition-colors flex items-center gap-1.5 ${
                       isSelected
-                        ? 'bg-emerald-500 text-slate-950 shadow-[0_0_20px_rgba(16,185,129,0.4)]'
-                        : 'bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white border border-white/10'
+                        ? 'bg-[#789B7C] text-[#101512] font-semibold'
+                        : 'bg-[#171F1A] hover:bg-[#1D2821] text-[#A7B3A9] hover:text-[#DCE5DD] border border-[#29362D]'
                     }`}
                   >
                     <span 
                       className="w-2 h-2 rounded-full" 
-                      style={{ backgroundColor: isSelected ? '#09110e' : biome.color }} 
+                      style={{ backgroundColor: isSelected ? '#101512' : biome.color }} 
                     />
                     <span>{biome.name}</span>
                   </button>
@@ -171,32 +150,31 @@ export function Hero() {
             </div>
           </div>
 
-          {/* Cartão de Telemetria Dinâmica do Bioma Selecionado */}
           <div className="lg:col-span-5">
             <AnimatePresence mode="wait">
               <motion.div
                 key={activeBiome.id}
-                initial={{ opacity: 0, y: 8 }}
+                initial={{ opacity: 0, y: 6 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -8 }}
+                exit={{ opacity: 0, y: -6 }}
                 transition={{ duration: 0.2 }}
-                className="p-4 rounded-2xl bg-white/10 border border-emerald-500/30 backdrop-blur-xl flex items-center justify-between gap-4 shadow-xl"
+                className="p-4 rounded-[10px] bg-[#171F1A] border border-[#29362D] flex items-center justify-between gap-4"
               >
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="font-display font-extrabold text-base text-white">
+                    <span className="font-display font-semibold text-base text-[#DCE5DD]">
                       {activeBiome.name}
                     </span>
-                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-bold">
+                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-[5px] bg-[#1D2821] text-[#91A88F] border border-[#29362D]">
                       {activeBiome.percentageBrazil}% BR
                     </span>
                   </div>
-                  <div className="flex items-center gap-3 mt-1.5 text-xs text-slate-300">
-                    <span className="flex items-center gap-1 text-emerald-400 font-mono font-bold">
+                  <div className="flex items-center gap-4 mt-1.5 text-xs text-[#A7B3A9]">
+                    <span className="flex items-center gap-1 text-[#83A989] font-mono">
                       <Trees size={13} />
                       {activeBiome.nativeVegetationPercentage}% nativa
                     </span>
-                    <span className="flex items-center gap-1 text-amber-400 font-mono font-bold">
+                    <span className="flex items-center gap-1 text-[#A9A17A] font-mono">
                       <Flame size={13} />
                       {activeBiome.activeFireHotspots24h} focos
                     </span>
@@ -205,10 +183,10 @@ export function Hero() {
 
                 <Link
                   href={`/biomas/${activeBiome.id}`}
-                  className="px-3 py-2 rounded-xl bg-emerald-500/20 hover:bg-emerald-500 text-emerald-300 hover:text-slate-950 text-xs font-bold transition-all flex items-center gap-1 shrink-0"
+                  className="btn-secondary !py-1.5 !px-3 text-xs font-medium shrink-0"
                 >
                   <span>Ficha</span>
-                  <ArrowUpRight size={14} />
+                  <ArrowUpRight size={13} />
                 </Link>
               </motion.div>
             </AnimatePresence>

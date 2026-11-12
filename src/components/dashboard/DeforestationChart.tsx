@@ -14,12 +14,12 @@ import {
 import { HISTORICAL_DEFORESTATION_PRODES } from '@/data/historicalSeries';
 
 const BIOME_CONFIGS = [
-  { key: 'amazonia', name: 'Amazônia', color: '#059669' },
-  { key: 'cerrado', name: 'Cerrado', color: '#d97706' },
-  { key: 'caatinga', name: 'Caatinga', color: '#ea580c' },
-  { key: 'pantanal', name: 'Pantanal', color: '#0284c7' },
-  { key: 'pampa', name: 'Pampa', color: '#65a30d' },
-  { key: 'mata_atlantica', name: 'Mata Atlântica', color: '#047857' },
+  { key: 'amazonia', name: 'Amazônia', color: '#789B7C' },
+  { key: 'cerrado', name: 'Cerrado', color: '#A9A17A' },
+  { key: 'caatinga', name: 'Caatinga', color: '#91A88F' },
+  { key: 'pantanal', name: 'Pantanal', color: '#5A8068' },
+  { key: 'pampa', name: 'Pampa', color: '#667F61' },
+  { key: 'mata_atlantica', name: 'Mata Atlântica', color: '#83A989' },
 ];
 
 export function DeforestationChart() {
@@ -27,28 +27,28 @@ export function DeforestationChart() {
 
   return (
     <div className="glass-panel flex flex-col justify-between p-6 h-full">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
         <div>
-          <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full">
+          <span className="text-[10px] font-mono uppercase tracking-wider text-[#91A88F]">
             PRODES / INPE · Série Histórica
           </span>
-          <h3 className="font-display font-extrabold text-xl text-slate-900 mt-1.5">
+          <h3 className="font-display font-semibold text-lg text-[#DCE5DD] mt-1">
             Evolução do Desmatamento
           </h3>
-          <p className="text-xs text-slate-500 mt-0.5">
+          <p className="text-xs text-[#78877D] mt-0.5">
             Taxa anual oficial consolidada (km²/ano de 2018 a 2024)
           </p>
         </div>
 
         {/* Seletor de foco de bioma */}
-        <div className="flex items-center gap-1 border border-slate-200/80 bg-slate-50 p-1 rounded-xl text-xs">
+        <div className="flex items-center gap-1 border border-[#29362D] bg-[#131A16] p-1 rounded-[7px] text-xs">
           <button
             type="button"
             onClick={() => setSelectedBiome('all')}
-            className={`px-2.5 py-1 rounded-lg font-bold transition-all ${
+            className={`px-2.5 py-1 rounded-[5px] font-medium transition-colors ${
               selectedBiome === 'all'
-                ? 'bg-slate-900 text-white shadow-sm'
-                : 'text-slate-600 hover:text-slate-900'
+                ? 'bg-[#789B7C] text-[#101512] font-semibold'
+                : 'text-[#A7B3A9] hover:text-[#DCE5DD]'
             }`}
           >
             Todos
@@ -56,10 +56,10 @@ export function DeforestationChart() {
           <button
             type="button"
             onClick={() => setSelectedBiome('amazonia')}
-            className={`px-2.5 py-1 rounded-lg font-bold transition-all ${
+            className={`px-2.5 py-1 rounded-[5px] font-medium transition-colors ${
               selectedBiome === 'amazonia'
-                ? 'bg-emerald-600 text-white shadow-sm'
-                : 'text-slate-600 hover:text-slate-900'
+                ? 'bg-[#789B7C] text-[#101512] font-semibold'
+                : 'text-[#A7B3A9] hover:text-[#DCE5DD]'
             }`}
           >
             Amazônia
@@ -67,10 +67,10 @@ export function DeforestationChart() {
           <button
             type="button"
             onClick={() => setSelectedBiome('cerrado')}
-            className={`px-2.5 py-1 rounded-lg font-bold transition-all ${
+            className={`px-2.5 py-1 rounded-[5px] font-medium transition-colors ${
               selectedBiome === 'cerrado'
-                ? 'bg-amber-600 text-white shadow-sm'
-                : 'text-slate-600 hover:text-slate-900'
+                ? 'bg-[#789B7C] text-[#101512] font-semibold'
+                : 'text-[#A7B3A9] hover:text-[#DCE5DD]'
             }`}
           >
             Cerrado
@@ -84,33 +84,34 @@ export function DeforestationChart() {
             <defs>
               {BIOME_CONFIGS.map((biome) => (
                 <linearGradient key={biome.key} id={`grad-${biome.key}`} x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor={biome.color} stopOpacity={0.35} />
+                  <stop offset="5%" stopColor={biome.color} stopOpacity={0.28} />
                   <stop offset="95%" stopColor={biome.color} stopOpacity={0.0} />
                 </linearGradient>
               ))}
             </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="#cbd5e1" opacity={0.5} />
-            <XAxis dataKey="year" stroke="#64748b" fontSize={11} tickLine={false} />
+            <CartesianGrid strokeDasharray="3 3" stroke="#222D25" />
+            <XAxis dataKey="year" stroke="#78877D" fontSize={11} tickLine={false} axisLine={{ stroke: '#222D25' }} />
             <YAxis 
-              stroke="#64748b" 
+              stroke="#78877D" 
               fontSize={11} 
               tickLine={false}
+              axisLine={{ stroke: '#222D25' }}
               tickFormatter={(v) => `${(v / 1000).toFixed(0)}k km²`}
             />
             <Tooltip
               content={({ active, payload, label }) => {
                 if (active && payload && payload.length) {
                   return (
-                    <div className="p-3.5 bg-white/95 border border-slate-200/90 rounded-2xl shadow-xl text-xs backdrop-blur-md">
-                      <div className="font-bold text-slate-900 mb-2 font-display">Ano {label} (PRODES/INPE)</div>
+                    <div className="p-3 bg-[#171F1A] border border-[#29362D] rounded-[10px] shadow-lift text-xs">
+                      <div className="font-semibold text-[#DCE5DD] mb-2 font-mono">Ano {label} (PRODES/INPE)</div>
                       <div className="space-y-1.5 font-mono">
                         {payload.map((entry) => (
                           <div key={entry.name} className="flex items-center justify-between gap-4">
-                            <span className="flex items-center gap-1.5 font-sans font-medium" style={{ color: entry.color }}>
+                            <span className="flex items-center gap-1.5 font-sans text-[#A7B3A9]">
                               <span className="w-2 h-2 rounded-full" style={{ backgroundColor: entry.color }} />
                               {entry.name}:
                             </span>
-                            <span className="font-bold text-slate-900">
+                            <span className="font-medium text-[#DCE5DD]">
                               {Number(entry.value).toLocaleString('pt-BR')} km²
                             </span>
                           </div>
@@ -124,7 +125,7 @@ export function DeforestationChart() {
             />
             <Legend
               wrapperStyle={{ paddingTop: '10px', fontSize: '11px' }}
-              formatter={(value) => <span className="text-slate-700 font-semibold">{value}</span>}
+              formatter={(value) => <span className="text-[#A7B3A9] font-medium">{value}</span>}
             />
             {BIOME_CONFIGS.filter(b => selectedBiome === 'all' || b.key === selectedBiome).map((biome) => (
               <Area
@@ -133,7 +134,7 @@ export function DeforestationChart() {
                 dataKey={biome.key}
                 name={biome.name}
                 stroke={biome.color}
-                strokeWidth={2}
+                strokeWidth={1.75}
                 fillOpacity={1}
                 fill={`url(#grad-${biome.key})`}
               />
@@ -142,9 +143,9 @@ export function DeforestationChart() {
         </ResponsiveContainer>
       </div>
 
-      <div className="mt-3 pt-3 border-t border-slate-200/70 flex flex-col sm:flex-row items-start sm:items-center justify-between text-[11px] text-slate-500 gap-1 font-mono">
+      <div className="mt-4 pt-3 border-t border-[#222D25] flex flex-col sm:flex-row items-start sm:items-center justify-between text-[11px] text-[#78877D] gap-1 font-mono">
         <span>* Auditoria MCTI / INPE em imagens livres de nuvens.</span>
-        <span className="text-emerald-700 font-bold font-sans">Queda de 30,6% na Amazônia em 2024</span>
+        <span className="text-[#83A989]">Queda de 30,6% na Amazônia em 2024</span>
       </div>
     </div>
   );

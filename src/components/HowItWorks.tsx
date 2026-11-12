@@ -1,7 +1,6 @@
 'use client';
 
 import React from 'react';
-import { motion } from 'framer-motion';
 import { Satellite, Cpu, Users, ArrowRight } from 'lucide-react';
 
 const STEPS = [
@@ -27,17 +26,17 @@ const STEPS = [
 
 export function HowItWorks() {
   return (
-    <section id="como-funciona" className="section bg-slate-50 border-b border-slate-200/70">
+    <section id="como-funciona" className="section bg-[#131A16] border-b border-[#222D25]">
       <div className="section-inner space-y-12">
         <div className="max-w-3xl space-y-3">
           <div className="badge-360">
-            <Cpu size={12} className="text-emerald-600" />
+            <Cpu size={12} className="text-[#789B7C]" />
             <span>Fluxo Operacional 360°</span>
           </div>
-          <h2 className="font-display text-3xl sm:text-5xl font-extrabold text-slate-900 tracking-tight">
+          <h2 className="font-display text-3xl sm:text-4xl font-semibold text-[#DCE5DD] tracking-tight">
             Do Espaço à Prática Escolar em Três Etapas
           </h2>
-          <p className="text-base text-slate-600">
+          <p className="text-base text-[#A7B3A9]">
             Como os dados públicos mais avançados do mundo se transformam em consciência viva para a sua comunidade.
           </p>
         </div>
@@ -46,35 +45,34 @@ export function HowItWorks() {
           {STEPS.map((s) => {
             const Icon = s.icon;
             return (
-              <motion.article
+              <article
                 key={s.n}
-                whileHover={{ y: -4, transition: { duration: 0.2 } }}
-                className="glass-panel p-7 flex flex-col justify-between relative overflow-hidden"
+                className="glass-panel p-6 flex flex-col justify-between relative"
               >
                 <div>
                   <div className="flex items-center justify-between mb-5">
-                    <span className="font-display text-3xl font-black text-slate-300">
+                    <span className="font-mono text-xl font-medium text-[#78877D]">
                       {s.n}
                     </span>
-                    <div className="h-10 w-10 rounded-xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center">
-                      <Icon size={18} />
+                    <div className="h-9 w-9 rounded-[7px] bg-[#1D2821] border border-[#29362D] text-[#789B7C] flex items-center justify-center">
+                      <Icon size={16} />
                     </div>
                   </div>
 
-                  <h3 className="font-display text-xl font-bold text-slate-900">
+                  <h3 className="font-display text-lg font-semibold text-[#DCE5DD]">
                     {s.title}
                   </h3>
 
-                  <p className="mt-3 text-xs text-slate-600 leading-relaxed">
+                  <p className="mt-2.5 text-xs text-[#A7B3A9] leading-relaxed">
                     {s.desc}
                   </p>
                 </div>
 
-                <div className="mt-6 pt-4 border-t border-slate-200/60 flex items-center justify-between text-[11px] font-bold text-emerald-700">
-                  <span>Etapa {s.n} de 03</span>
+                <div className="mt-6 pt-4 border-t border-[#222D25] flex items-center justify-between text-[11px] font-mono text-[#91A88F]">
+                  <span>Etapa {s.n} / 03</span>
                   <ArrowRight size={13} />
                 </div>
-              </motion.article>
+              </article>
             );
           })}
         </div>

@@ -37,67 +37,64 @@ export function Sidebar() {
       {/* Botão de menu Mobile */}
       <button
         onClick={() => setMobileOpen(!mobileOpen)}
-        className="lg:hidden fixed top-3 left-3 z-50 p-2 rounded-lg bg-slate-900/90 text-white border border-slate-700 backdrop-blur shadow-md"
+        className="lg:hidden fixed top-3 left-3 z-50 p-2 rounded-[7px] bg-[#171F1A] text-[#DCE5DD] border border-[#29362D]"
         aria-label="Abrir menu"
       >
-        {mobileOpen ? <X size={20} /> : <Menu size={20} />}
+        {mobileOpen ? <X size={18} /> : <Menu size={18} />}
       </button>
 
       {/* Overlay escuro em mobile */}
       {mobileOpen && (
         <div 
           onClick={() => setMobileOpen(false)}
-          className="lg:hidden fixed inset-0 z-40 bg-black/60 backdrop-blur-sm"
+          className="lg:hidden fixed inset-0 z-40 bg-black/70 backdrop-blur-sm"
         />
       )}
 
       {/* Sidebar container */}
       <aside className={`
         fixed top-0 bottom-0 left-0 z-40 w-64 md:w-72 
-        bg-slate-950 dark:bg-[#070b12] text-slate-200 
-        border-r border-slate-800/80 dark:border-slate-800/60
-        flex flex-col transition-transform duration-300 ease-in-out
+        bg-[#131A16] text-[#DCE5DD] 
+        border-r border-[#222D25]
+        flex flex-col transition-transform duration-200 ease-out
         ${mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
       `}>
         {/* Topo / Logo */}
-        <div className="p-5 border-b border-slate-800/60">
+        <div className="p-5 border-b border-[#222D25]">
           <Link href="/" className="flex items-center gap-3 group">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 via-teal-500 to-cyan-600 flex items-center justify-center shadow-lg shadow-emerald-500/20 group-hover:scale-105 transition-transform">
-              <Trees className="w-6 h-6 text-white" />
+            <div className="w-9 h-9 rounded-[10px] bg-[#1D2821] border border-[#29362D] flex items-center justify-center">
+              <Trees className="w-5 h-5 text-[#789B7C]" />
             </div>
             <div>
               <div className="flex items-center gap-1.5">
-                <span className="font-bold text-lg tracking-tight text-white group-hover:text-emerald-400 transition-colors">
-                  EcoMind <span className="text-emerald-400">360</span>
+                <span className="font-semibold text-base tracking-tight text-[#DCE5DD]">
+                  EcoMind <span className="text-[#91A88F]">360</span>
                 </span>
-                <span className="text-[10px] uppercase font-semibold px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                  MVP
+                <span className="text-[10px] uppercase font-mono px-1.5 py-0.5 rounded-[5px] bg-[#1D2821] text-[#91A88F] border border-[#29362D]">
+                  360°
                 </span>
               </div>
-              <p className="text-[11px] text-slate-400 font-medium">
+              <p className="text-[11px] text-[#78877D]">
                 Monitoramento Ambiental
               </p>
             </div>
           </Link>
 
           {/* Status badge */}
-          <div className="mt-4 px-3 py-2 rounded-lg bg-emerald-950/40 border border-emerald-500/20 flex items-center justify-between">
+          <div className="mt-4 px-3 py-2 rounded-[7px] bg-[#171F1A] border border-[#29362D] flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-              </span>
-              <span className="text-[11px] font-medium text-emerald-300">
+              <span className="inline-flex rounded-full h-2 w-2 bg-[#83A989]" />
+              <span className="text-[11px] font-medium text-[#A7B3A9]">
                 Rede Sensorial Ativa
               </span>
             </div>
-            <Radio size={14} className="text-emerald-400" />
+            <Radio size={13} className="text-[#789B7C]" />
           </div>
         </div>
 
         {/* Links de navegação */}
         <div className="flex-1 overflow-y-auto px-3 py-4 space-y-1">
-          <div className="px-3 pb-2 text-[10px] font-semibold tracking-wider uppercase text-slate-400">
+          <div className="px-3 pb-2 text-[10px] font-mono uppercase tracking-wider text-[#78877D]">
             Navegação Principal
           </div>
           {NAV_ITEMS.map((item) => {
@@ -109,41 +106,41 @@ export function Sidebar() {
                 href={item.href}
                 onClick={() => setMobileOpen(false)}
                 className={`
-                  flex items-center justify-between px-3.5 py-2.5 rounded-lg text-sm font-medium
-                  transition-all duration-150 group
+                  flex items-center justify-between px-3 py-2 rounded-[7px] text-xs font-medium
+                  transition-colors duration-150 group
                   ${isActive 
-                    ? 'bg-gradient-to-r from-emerald-600/20 to-teal-600/10 text-emerald-300 border-l-2 border-emerald-400 font-semibold shadow-sm' 
-                    : 'text-slate-300 hover:text-white hover:bg-slate-900/60'
+                    ? 'bg-[#1D2821] text-[#91A88F] border-l-2 border-[#789B7C]' 
+                    : 'text-[#A7B3A9] hover:text-[#DCE5DD] hover:bg-[#171F1A]'
                   }
                 `}
               >
-                <div className="flex items-center gap-3">
-                  <Icon size={18} className={isActive ? 'text-emerald-400' : 'text-slate-400 group-hover:text-emerald-300'} />
+                <div className="flex items-center gap-2.5">
+                  <Icon size={16} className={isActive ? 'text-[#789B7C]' : 'text-[#78877D] group-hover:text-[#A7B3A9]'} />
                   <span>{item.label}</span>
                 </div>
                 {item.badge && (
-                  <span className={`text-[10px] px-1.5 py-0.5 rounded ${
-                    isActive ? 'bg-emerald-500/30 text-emerald-200' : 'bg-slate-800 text-slate-400'
+                  <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded-[5px] ${
+                    isActive ? 'bg-[#294C35] text-[#DCE5DD]' : 'bg-[#171F1A] text-[#78877D]'
                   }`}>
                     {item.badge}
                   </span>
                 )}
                 {item.count && (
-                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 font-mono">
+                  <span className="text-[10px] px-1.5 py-0.5 rounded-[5px] bg-[#171F1A] text-[#A7B3A9] font-mono">
                     {item.count}
                   </span>
                 )}
                 {item.alertDot && (
-                  <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#A9A17A]" />
                 )}
               </Link>
             );
           })}
 
           {/* Atalho dos 7 Ambientes */}
-          <div className="pt-5 pb-2 px-3 text-[10px] font-semibold tracking-wider uppercase text-slate-400 flex items-center justify-between">
+          <div className="pt-5 pb-2 px-3 text-[10px] font-mono uppercase tracking-wider text-[#78877D] flex items-center justify-between">
             <span>Ambientes Monitorados</span>
-            <span className="text-[10px] text-slate-400">7/7</span>
+            <span className="text-[10px] text-[#78877D]">7/7</span>
           </div>
           <div className="space-y-0.5">
             {BIOMES_LIST.map((biome) => (
@@ -151,7 +148,7 @@ export function Sidebar() {
                 key={biome.id}
                 href={`/biomas/${biome.id}`}
                 onClick={() => setMobileOpen(false)}
-                className="flex items-center justify-between px-3 py-1.5 rounded-md text-xs text-slate-300 hover:text-white hover:bg-slate-900/50 transition-colors"
+                className="flex items-center justify-between px-3 py-1.5 rounded-[7px] text-xs text-[#A7B3A9] hover:text-[#DCE5DD] hover:bg-[#171F1A] transition-colors"
               >
                 <div className="flex items-center gap-2 truncate">
                   <span 
@@ -160,8 +157,8 @@ export function Sidebar() {
                   />
                   <span className="truncate">{biome.name}</span>
                 </div>
-                <span className="text-[10px] text-slate-400 font-mono">
-                  {biome.nativeVegetationPercentage}% nativo
+                <span className="text-[10px] text-[#78877D] font-mono">
+                  {biome.nativeVegetationPercentage}%
                 </span>
               </Link>
             ))}
@@ -169,18 +166,14 @@ export function Sidebar() {
         </div>
 
         {/* Rodapé da Sidebar */}
-        <div className="p-4 border-t border-slate-800/60 bg-slate-950/80">
-          <div className="flex items-center gap-2 mb-2 text-xs text-slate-400">
-            <Database size={13} className="text-emerald-400" />
-            <span className="font-semibold text-slate-300">Fontes Oficiais:</span>
+        <div className="p-4 border-t border-[#222D25] bg-[#101512]">
+          <div className="flex items-center gap-2 mb-1.5 text-xs text-[#A7B3A9]">
+            <Database size={13} className="text-[#789B7C]" />
+            <span className="font-medium text-[#DCE5DD]">Fontes Oficiais</span>
           </div>
-          <p className="text-[11px] text-slate-400 leading-relaxed">
-            INPE • NASA FIRMS • MapBiomas • IBGE • ICMBio
+          <p className="text-[11px] text-[#78877D] leading-relaxed">
+            INPE · NASA FIRMS · MapBiomas · IBGE · ICMBio
           </p>
-          <div className="mt-3 pt-2 border-t border-slate-800/40 flex items-center justify-between text-[10px] text-slate-400">
-            <span>EcoMind 360 © 2024</span>
-            <span className="text-emerald-400 font-mono">100% Brasil</span>
-          </div>
         </div>
       </aside>
     </>

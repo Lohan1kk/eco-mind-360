@@ -18,8 +18,8 @@ export const BIOMES_DATA: Record<string, BiomeInfo> = {
       'Garimpo clandestino e contaminação hídrica por mercúrio',
       'Exploração predatória de madeira e abertura de ramais ilegais'
     ],
-    color: '#10b981',
-    borderColor: '#059669',
+    color: '#789B7C',
+    borderColor: '#365C40',
     deforestationProdes2024Km2: 6288,
     deforestationTrendPercent: -30.6,
     activeFireHotspots24h: 312,
@@ -61,8 +61,8 @@ export const BIOMES_DATA: Record<string, BiomeInfo> = {
       'Substituição de vegetação nativa de raízes profundas por monoculturas',
       'Queimadas induzidas e rebaixamento do lençol freático'
     ],
-    color: '#d97706',
-    borderColor: '#b45309',
+    color: '#A9A17A',
+    borderColor: '#78877D',
     deforestationProdes2024Km2: 8174,
     deforestationTrendPercent: -25.8,
     activeFireHotspots24h: 428,
@@ -98,8 +98,8 @@ export const BIOMES_DATA: Record<string, BiomeInfo> = {
       'Especulação imobiliária no litoral e expansão urbana desordenada',
       'Poluição hídrica e invasão de espécies exóticas'
     ],
-    color: '#059669',
-    borderColor: '#047857',
+    color: '#83A989',
+    borderColor: '#365C40',
     deforestationProdes2024Km2: 106,
     deforestationTrendPercent: -27.0,
     activeFireHotspots24h: 89,
@@ -135,8 +135,8 @@ export const BIOMES_DATA: Record<string, BiomeInfo> = {
       'Extração ilegal de lenha para olarias, siderúrgicas e carvoarias',
       'Falta de Unidades de Conservação de proteção integral (apenas ~1,3%)'
     ],
-    color: '#ea580c',
-    borderColor: '#c2410c',
+    color: '#91A88F',
+    borderColor: '#667F61',
     deforestationProdes2024Km2: 1950,
     deforestationTrendPercent: -7.1,
     activeFireHotspots24h: 154,
@@ -172,8 +172,8 @@ export const BIOMES_DATA: Record<string, BiomeInfo> = {
       'Expansão da monocultura de silvicultura (eucalipto e pinus)',
       'Menor taxa de áreas formalmente protegidas entre todos os biomas terrestres (< 3%)'
     ],
-    color: '#84cc16',
-    borderColor: '#65a30d',
+    color: '#667F61',
+    borderColor: '#294C35',
     deforestationProdes2024Km2: 375,
     deforestationTrendPercent: -3.8,
     activeFireHotspots24h: 21,
@@ -209,8 +209,8 @@ export const BIOMES_DATA: Record<string, BiomeInfo> = {
       'Assoreamento do Rio Taquari decorrente de erosão no planalto vizinho',
       'Drenagem de banhados e alterações do regime natural de inundação'
     ],
-    color: '#06b6d4',
-    borderColor: '#0891b2',
+    color: '#5A8068',
+    borderColor: '#294C35',
     deforestationProdes2024Km2: 382,
     deforestationTrendPercent: -5.9,
     activeFireHotspots24h: 185,
@@ -247,8 +247,8 @@ export const BIOMES_DATA: Record<string, BiomeInfo> = {
       'Supressão de manguezais para carcinicultura e especulação imobiliária',
       'Sobrepesca predatória e prospecção petrolífera em áreas sensíveis'
     ],
-    color: '#3b82f6',
-    borderColor: '#2563eb',
+    color: '#4C6E58',
+    borderColor: '#294C35',
     deforestationProdes2024Km2: null, // Nota metodológica oficial: PRODES é voltado à vegetação terrestre; manguezais monitorados por MapBiomas/ICMBio
     deforestationTrendPercent: null,
     activeFireHotspots24h: 38,

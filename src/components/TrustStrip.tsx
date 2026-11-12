@@ -13,24 +13,24 @@ const BADGES = [
 
 export function TrustStrip() {
   return (
-    <section className="border-y border-emerald-900/10 bg-white py-5 shadow-sm">
+    <section className="border-b border-[#222D25] bg-[#131A16] py-6">
       <div className="section-inner">
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6">
           {BADGES.map((b, i) => {
             const Icon = b.icon;
             return (
               <div
                 key={i}
-                className="flex items-center gap-2.5 p-2.5 rounded-xl bg-slate-50/80 border border-slate-200/60 hover:border-emerald-500/30 transition-colors"
+                className="flex items-center gap-3"
               >
-                <div className="h-8 w-8 rounded-lg bg-emerald-500/10 text-emerald-600 flex items-center justify-center shrink-0">
-                  <Icon size={16} />
+                <div className="h-8 w-8 rounded-[7px] bg-[#171F1A] border border-[#29362D] text-[#789B7C] flex items-center justify-center shrink-0">
+                  <Icon size={15} />
                 </div>
                 <div className="min-w-0">
-                  <p className="font-bold text-xs text-slate-900 truncate">
+                  <p className="font-medium text-xs text-[#DCE5DD] truncate">
                     {b.label}
                   </p>
-                  <p className="text-[10px] text-slate-500 truncate">
+                  <p className="text-[11px] text-[#78877D] truncate font-mono">
                     {b.detail}
                   </p>
                 </div>

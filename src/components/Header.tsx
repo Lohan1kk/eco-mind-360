@@ -39,9 +39,9 @@ export function Header({ solid = false }: { solid?: boolean }) {
 
   return (
     <header
-      className={`fixed inset-x-0 top-0 z-50 pt-[env(safe-area-inset-top)] transition-all duration-300 ${
+      className={`fixed inset-x-0 top-0 z-50 pt-[env(safe-area-inset-top)] transition-all duration-200 ${
         isSolid
-          ? "border-b border-[var(--line)] bg-mist/90 backdrop-blur-md"
+          ? "border-b border-[#222D25] bg-[#101512]/90 backdrop-blur-md"
           : "bg-transparent"
       }`}
     >
@@ -55,11 +55,7 @@ export function Header({ solid = false }: { solid?: boolean }) {
             className="h-9 w-9 object-contain"
             priority
           />
-          <span
-            className={`font-display text-lg font-semibold tracking-tight ${
-              isSolid ? "text-forest" : "text-mist"
-            }`}
-          >
+          <span className="font-display text-lg font-semibold tracking-tight text-[#DCE5DD]">
             EcoMind
           </span>
         </Link>
@@ -69,16 +65,12 @@ export function Header({ solid = false }: { solid?: boolean }) {
             <Link
               key={link.href}
               href={link.href}
-              className={`text-sm font-medium tracking-wide ${
-                isSolid
-                  ? "text-ink/75 hover:text-forest"
-                  : "text-mist/85 hover:text-mist"
-              }`}
+              className="text-sm font-medium tracking-wide text-[#A7B3A9] hover:text-[#DCE5DD] transition-colors"
             >
               {link.label}
             </Link>
           ))}
-          <Link href="/#agir" className="btn btn-primary !px-4 !py-2 text-sm">
+          <Link href="/#agir" className="btn-primary !px-4 !py-2 text-sm">
             Começar
           </Link>
         </nav>
@@ -87,9 +79,7 @@ export function Header({ solid = false }: { solid?: boolean }) {
           type="button"
           aria-expanded={open}
           aria-label={open ? "Fechar menu" : "Abrir menu"}
-          className={`rounded-full px-3.5 py-2 text-sm font-semibold xl:hidden ${
-            isSolid ? "bg-forest/8 text-forest" : "bg-white/15 text-mist"
-          }`}
+          className="rounded-[7px] border border-[#29362D] bg-[#171F1A] px-3.5 py-2 text-xs font-medium text-[#DCE5DD] xl:hidden"
           onClick={() => setOpen((v) => !v)}
         >
           {open ? "Fechar" : "Menu"}
@@ -100,7 +90,7 @@ export function Header({ solid = false }: { solid?: boolean }) {
         {open ? (
           <motion.nav
             key="mobile-nav"
-            className="overflow-hidden border-t border-[var(--line)] bg-mist xl:hidden"
+            className="overflow-hidden border-t border-[#222D25] bg-[#131A16] xl:hidden"
             initial={reduce ? false : { height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={reduce ? undefined : { height: 0, opacity: 0 }}
@@ -116,7 +106,7 @@ export function Header({ solid = false }: { solid?: boolean }) {
                 <motion.li key={link.href} variants={staggerItemSoft}>
                   <Link
                     href={link.href}
-                    className="block py-1 text-base font-medium text-ink"
+                    className="block py-1 text-base font-medium text-[#DCE5DD]"
                     onClick={() => setOpen(false)}
                   >
                     {link.label}
@@ -126,7 +116,7 @@ export function Header({ solid = false }: { solid?: boolean }) {
               <motion.li variants={fadeUp} transition={pressTransition}>
                 <Link
                   href="/#agir"
-                  className="btn btn-dark mt-2"
+                  className="btn-primary mt-2"
                   onClick={() => setOpen(false)}
                 >
                   Começar

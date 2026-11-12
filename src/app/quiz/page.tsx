@@ -12,8 +12,8 @@ export default function QuizPage() {
   return (
     <PageAtmosphereShell
       variant="mist"
-      wash="light"
-      className="bg-mist min-h-[70vh] py-6"
+      wash="dark"
+      className="bg-[#101512] min-h-[70vh] py-8"
     >
       <QuizPageClient />
     </PageAtmosphereShell>

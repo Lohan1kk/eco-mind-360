@@ -41,51 +41,50 @@ export function Header({ solid = false }: { solid?: boolean }) {
 
   return (
     <header
-      className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 ${
+      className={`fixed inset-x-0 top-0 z-50 transition-all duration-200 ${
         isSolid
-          ? 'border-b border-emerald-900/10 bg-white/90 shadow-sm backdrop-blur-xl'
-          : 'bg-transparent'
+          ? 'border-b border-[#222D25] bg-[#131A16]/90 backdrop-blur-xl'
+          : 'border-b border-transparent bg-transparent'
       }`}
     >
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-3 md:px-8">
         {/* Logo EcoMind 360 */}
         <Link href="/" className="flex items-center gap-2.5 group">
-          <div className="relative h-9 w-9">
+          <div className="relative h-8 w-8">
             <Image
               src="/brand/icon-ecomind.png"
               alt="EcoMind 360 Logo"
-              width={36}
-              height={36}
-              className="h-9 w-9 object-contain group-hover:scale-105 transition-transform"
+              width={32}
+              height={32}
+              className="h-8 w-8 object-contain opacity-95 group-hover:opacity-100 transition-opacity"
               priority
             />
           </div>
-          <div className="flex items-center gap-1.5">
-            <span className={`font-display text-xl font-black tracking-tight transition-colors ${
-              isSolid ? 'text-slate-900' : 'text-white'
-            }`}>
+          <div className="flex items-center gap-2">
+            <span className="font-display text-base font-semibold tracking-tight text-[#DCE5DD]">
               EcoMind
             </span>
-            <span className="font-mono text-xs font-black px-1.5 py-0.5 rounded-md bg-emerald-500 text-slate-950 shadow-sm">
+            <span className="font-mono text-[10px] font-medium px-1.5 py-0.5 rounded-[5px] bg-[#1D2821] text-[#91A88F] border border-[#29362D]">
               360°
             </span>
           </div>
         </Link>
 
         {/* Navegação Desktop */}
-        <nav className="hidden items-center gap-6 xl:flex">
+        <nav className="hidden items-center gap-1 xl:flex">
           {NAV_LINKS.map((link) => {
-            const active = pathname === link.href;
+            const active =
+              link.href === '/'
+                ? pathname === '/'
+                : pathname.startsWith(link.href);
             return (
               <Link
                 key={link.href}
                 href={link.href}
-                className={`text-xs font-bold tracking-wide transition-colors ${
+                className={`px-3 py-1.5 rounded-[7px] text-xs font-medium transition-colors ${
                   active
-                    ? 'text-emerald-700 font-extrabold'
-                    : isSolid
-                      ? 'text-slate-600 hover:text-emerald-700'
-                      : 'text-slate-200/90 hover:text-white'
+                    ? 'bg-[#1D2821] text-[#91A88F] border border-[#29362D]'
+                    : 'text-[#A7B3A9] hover:text-[#DCE5DD] hover:bg-[#171F1A]'
                 }`}
               >
                 {link.label}
@@ -93,9 +92,11 @@ export function Header({ solid = false }: { solid?: boolean }) {
             );
           })}
 
+          <div className="h-4 w-px bg-[#222D25] mx-2" />
+
           <Link
             href="/mapa"
-            className="btn-primary !py-2 !px-4 text-xs font-bold inline-flex items-center gap-1.5 shadow-md"
+            className="btn-primary !py-1.5 !px-3.5 text-xs font-medium inline-flex items-center gap-1.5"
           >
             <MapPin size={13} />
             <span>Abrir Mapa</span>
@@ -108,11 +109,9 @@ export function Header({ solid = false }: { solid?: boolean }) {
           aria-expanded={open}
           aria-label={open ? 'Fechar menu' : 'Abrir menu'}
           onClick={() => setOpen(!open)}
-          className={`flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-bold transition xl:hidden ${
-            isSolid ? 'bg-slate-100 text-slate-800' : 'bg-white/15 text-white'
-          }`}
+          className="flex items-center gap-1.5 rounded-[7px] px-3 py-1.5 text-xs font-medium transition xl:hidden bg-[#171F1A] text-[#DCE5DD] border border-[#29362D] hover:bg-[#1D2821]"
         >
-          {open ? <X size={16} /> : <Menu size={16} />}
+          {open ? <X size={15} /> : <Menu size={15} />}
           <span>{open ? 'Fechar' : 'Menu'}</span>
         </button>
       </div>
@@ -124,34 +123,40 @@ export function Header({ solid = false }: { solid?: boolean }) {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="border-b border-slate-200 bg-white/98 backdrop-blur-2xl px-5 py-5 shadow-2xl xl:hidden"
+            transition={{ duration: 0.2 }}
+            className="border-b border-[#29362D] bg-[#131A16] px-5 py-4 shadow-2xl xl:hidden"
           >
-            <div className="flex flex-col space-y-2.5">
+            <div className="flex flex-col space-y-1">
               {NAV_LINKS.map((link) => {
-                const active = pathname === link.href;
+                const active =
+                  link.href === '/'
+                    ? pathname === '/'
+                    : pathname.startsWith(link.href);
                 return (
                   <Link
                     key={link.href}
                     href={link.href}
                     onClick={() => setOpen(false)}
-                    className={`rounded-xl px-3 py-2 text-xs font-bold transition ${
+                    className={`rounded-[7px] px-3 py-2 text-xs font-medium transition ${
                       active
-                        ? 'bg-emerald-50 text-emerald-800 font-extrabold'
-                        : 'text-slate-700 hover:bg-slate-100 hover:text-emerald-700'
+                        ? 'bg-[#1D2821] text-[#91A88F] border border-[#29362D]'
+                        : 'text-[#A7B3A9] hover:bg-[#171F1A] hover:text-[#DCE5DD]'
                     }`}
                   >
                     {link.label}
                   </Link>
                 );
               })}
-              <Link
-                href="/mapa"
-                onClick={() => setOpen(false)}
-                className="btn-primary mt-2 w-full text-center text-xs font-bold justify-center"
-              >
-                <MapPin size={14} />
-                <span>Abrir Mapa Orbital 360°</span>
-              </Link>
+              <div className="pt-2 mt-2 border-t border-[#222D25]">
+                <Link
+                  href="/mapa"
+                  onClick={() => setOpen(false)}
+                  className="btn-primary w-full text-center text-xs font-medium justify-center"
+                >
+                  <MapPin size={14} />
+                  <span>Abrir Mapa Orbital 360°</span>
+                </Link>
+              </div>
             </div>
           </motion.div>
         )}

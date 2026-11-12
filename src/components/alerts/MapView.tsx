@@ -25,9 +25,9 @@ const TILES: Record<
   { url: string; attribution: string; maxZoom: number }
 > = {
   map: {
-    url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+    url: "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
     attribution:
-      '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+      '&copy; <a href="https://carto.com/">CARTO</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
     maxZoom: 19,
   },
   satellite: {
@@ -84,35 +84,35 @@ function formatReportedAt(value: string) {
 
 function AlertPopup({ alert }: { alert: FireAlert }) {
   return (
-    <div className="min-w-[170px] max-w-[240px] text-sm">
+    <div className="min-w-[170px] max-w-[240px] text-xs p-1">
       <p
-        className="font-display font-bold text-base"
+        className="font-display font-semibold text-sm"
         style={{ color: LEVEL_META[alert.level].color }}
       >
         {LEVEL_META[alert.level].label}
       </p>
       {alert.frp != null ? (
-        <p className="mt-1 text-xs font-semibold text-ink">
+        <p className="mt-1 text-xs font-mono font-medium text-[#DCE5DD]">
           Potência (FRP): {alert.frp.toFixed(1)} MW
         </p>
       ) : null}
       {alert.municipio ? (
-        <p className="mt-1 text-xs font-medium text-forest">
+        <p className="mt-1 text-xs font-medium text-[#91A88F]">
           {[alert.municipio, alert.estado].filter(Boolean).join(" · ")}
         </p>
       ) : alert.description ? (
-        <p className="mt-1 text-xs text-ash">{alert.description}</p>
+        <p className="mt-1 text-xs text-[#A7B3A9]">{alert.description}</p>
       ) : null}
       {alert.bioma ? (
-        <p className="mt-1 text-xs text-ash font-medium">Bioma: {alert.bioma}</p>
+        <p className="mt-1 text-xs text-[#A7B3A9]">Bioma: {alert.bioma}</p>
       ) : null}
       {alert.satelite ? (
-        <p className="mt-0.5 text-xs text-ash/80">Satélite: {alert.satelite}</p>
+        <p className="mt-0.5 text-[11px] font-mono text-[#78877D]">Satélite: {alert.satelite}</p>
       ) : null}
-      <p className="mt-2 text-[11px] text-ash/80">
+      <p className="mt-2 text-[11px] font-mono text-[#78877D]">
         {formatReportedAt(alert.reportedAt)}
       </p>
-      <div className="mt-2 pt-1 border-t border-forest/10 flex items-center justify-between text-[10px] uppercase font-bold tracking-wider text-forest/70">
+      <div className="mt-2 pt-1.5 border-t border-[#222D25] flex items-center justify-between text-[10px] uppercase font-mono tracking-wider text-[#91A88F]">
         <span>
           {alert.source === "inpe"
             ? "INPE Queimadas"
@@ -175,10 +175,10 @@ export function MapView({
     >;
     for (const level of Object.keys(LEVEL_META) as FireAlert["level"][]) {
       out[level] = {
-        color: "#ffffff",
-        weight: isTouch ? 2 : 1.5,
+        color: "#101512",
+        weight: isTouch ? 1.5 : 1,
         fillColor: LEVEL_META[level].color,
-        fillOpacity: 0.92,
+        fillOpacity: 0.9,
       };
     }
     return out;
@@ -216,12 +216,12 @@ export function MapView({
           key={`biomes-${layer}`}
           data={biomesGeoJson}
           style={() => ({
-            color: layer === "satellite" ? "#86efac" : "#163d2a",
-            weight: 1.5,
+            color: "#789B7C",
+            weight: 1.25,
             opacity: 0.65,
             dashArray: "4, 4",
-            fillColor: layer === "satellite" ? "#4ade80" : "#163d2a",
-            fillOpacity: 0.04,
+            fillColor: "#294C35",
+            fillOpacity: 0.12,
           })}
           onEachFeature={(feature, featureLayer) => {
             const name = feature.properties?.name || feature.properties?.id;
@@ -269,9 +269,9 @@ export function MapView({
       {selectedCoords ? (
         <CircleMarker
           center={[selectedCoords.lat, selectedCoords.lng]}
-          radius={9}
+          radius={8}
           pathOptions={{
-            color: "#fff",
+            color: "#DCE5DD",
             weight: 2,
             fillColor: LEVEL_META.critico.color,
             fillOpacity: 1,

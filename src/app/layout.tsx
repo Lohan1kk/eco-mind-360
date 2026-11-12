@@ -1,20 +1,27 @@
 import type { Metadata } from 'next';
-import { Outfit, Plus_Jakarta_Sans } from 'next/font/google';
+import { Inter, IBM_Plex_Mono } from 'next/font/google';
 import 'leaflet/dist/leaflet.css';
 import './globals.css';
 import { AppShell } from '@/components/shell/AppShell';
 
-const display = Outfit({
+const display = Inter({
   variable: '--font-display',
   subsets: ['latin'],
-  weight: ['400', '500', '600', '700', '800', '900'],
+  weight: ['400', '500', '600', '700'],
   display: 'swap',
 });
 
-const body = Plus_Jakarta_Sans({
+const body = Inter({
   variable: '--font-body',
   subsets: ['latin'],
-  weight: ['400', '500', '600', '700', '800'],
+  weight: ['400', '500', '600', '700'],
+  display: 'swap',
+});
+
+const mono = IBM_Plex_Mono({
+  variable: '--font-mono',
+  subsets: ['latin'],
+  weight: ['400', '500', '600'],
   display: 'swap',
 });
 
@@ -37,8 +44,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="pt-BR" className={`${display.variable} ${body.variable}`}>
-      <body className="min-h-screen bg-[#f8fafc] text-slate-900 antialiased font-sans selection:bg-emerald-500/20 selection:text-emerald-900">
+    <html lang="pt-BR" className={`dark ${display.variable} ${body.variable} ${mono.variable}`}>
+      <body className="min-h-screen bg-[#101512] text-[#DCE5DD] antialiased font-sans selection:bg-[#789B7C]/25 selection:text-[#DCE5DD]">
         <AppShell>{children}</AppShell>
       </body>
     </html>

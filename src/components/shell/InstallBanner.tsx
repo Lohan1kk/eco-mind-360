@@ -87,14 +87,14 @@ export function InstallBanner() {
               : { ...enterTransition, ease: softEase }
           }
         >
-          <div className="flex items-start gap-3 rounded-xl border border-forest/15 bg-white/95 p-4 shadow-lg backdrop-blur-md">
+          <div className="flex items-start gap-3 rounded-[10px] border border-[#29362D] bg-[#171F1A]/95 p-4 shadow-lift backdrop-blur-md">
             <div className="flex-1">
-              <p className="text-sm font-semibold text-forest">
+              <p className="text-sm font-semibold text-[#DCE5DD]">
                 {showAndroid
                   ? "Instalar EcoMind"
                   : "Adicionar à Tela de Início"}
               </p>
-              <p className="mt-0.5 text-xs leading-relaxed text-ash">
+              <p className="mt-0.5 text-xs leading-relaxed text-[#A7B3A9]">
                 {showAndroid
                   ? "Acesso rápido na tela inicial do aparelho."
                   : "No iPhone: Safari → Compartilhar → Adicionar à Tela de Início."}
@@ -102,7 +102,7 @@ export function InstallBanner() {
               {showIos ? (
                 <Link
                   href="/baixar"
-                  className="mt-2 inline-block text-xs font-semibold text-forest underline-offset-2 hover:underline"
+                  className="mt-2 inline-block text-xs font-medium text-[#91A88F] underline-offset-2 hover:underline"
                 >
                   Ver passo a passo
                 </Link>
@@ -112,7 +112,7 @@ export function InstallBanner() {
               <button
                 type="button"
                 onClick={install}
-                className="shrink-0 rounded-md bg-forest px-3 py-2 text-xs font-semibold text-mist"
+                className="shrink-0 rounded-[7px] bg-[#789B7C] px-3 py-2 text-xs font-semibold text-[#101512] hover:bg-[#91B596] transition-colors"
               >
                 Instalar
               </button>
@@ -121,7 +121,7 @@ export function InstallBanner() {
               type="button"
               onClick={dismiss}
               aria-label="Fechar"
-              className="shrink-0 text-ash/60 hover:text-ash"
+              className="shrink-0 text-[#78877D] hover:text-[#DCE5DD] transition-colors"
             >
               ✕
             </button>

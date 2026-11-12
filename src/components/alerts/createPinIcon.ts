@@ -11,9 +11,9 @@ export function createPinIcon(level: AlertLevel): L.DivIcon {
   const color = LEVEL_META[level].color;
   const icon = L.divIcon({
     className: "fire-pin-icon",
-    html: `<div style="background:${color};width:16px;height:16px;border-radius:50%;border:2.5px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,0.35);"></div>`,
-    iconSize: [16, 16],
-    iconAnchor: [8, 8],
+    html: `<div style="background:${color};width:14px;height:14px;border-radius:50%;border:2px solid #101512;box-shadow:0 2px 6px rgba(0,0,0,0.6);"></div>`,
+    iconSize: [14, 14],
+    iconAnchor: [7, 7],
     popupAnchor: [0, -10],
   });
 

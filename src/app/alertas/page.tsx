@@ -37,7 +37,7 @@ export default function AlertasPage() {
       .then(data => {
         if (data.alerts && data.alerts.length > 0) {
           setAlerts(data.alerts);
-          setLiveSourceInfo(data.mode === 'live' ? '🟢 Conexão NASA FIRMS Ativa (Feed 24h)' : '🟡 Base Oficial Auditada (Última auditoria)');
+          setLiveSourceInfo(data.mode === 'live' ? 'Conexão NASA FIRMS Ativa (Feed 24h)' : 'Base Oficial Auditada (Última auditoria)');
         }
       })
       .catch(err => {
@@ -69,13 +69,13 @@ export default function AlertasPage() {
   const getTypeIcon = (type: EnvironmentalAlert['type']) => {
     switch (type) {
       case 'foco_calor':
-        return <Flame className="w-4 h-4 text-burn" />;
+        return <Flame className="w-4 h-4 text-[#A9A17A]" />;
       case 'alerta_desmatamento':
-        return <Trees className="w-4 h-4 text-forest" />;
+        return <Trees className="w-4 h-4 text-[#83A989]" />;
       case 'anomalia_marinha':
-        return <Waves className="w-4 h-4 text-forest-mid" />;
+        return <Waves className="w-4 h-4 text-[#91A88F]" />;
       default:
-        return <AlertTriangle className="w-4 h-4 text-burn" />;
+        return <AlertTriangle className="w-4 h-4 text-[#A77D78]" />;
     }
   };
 
@@ -93,32 +93,33 @@ export default function AlertasPage() {
   };
 
   return (
-    <div className="section-inner max-w-6xl mx-auto py-6 space-y-8">
+    <div className="section-inner max-w-6xl mx-auto py-8 space-y-8">
       {/* Cabeçalho */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-forest/10 pb-6">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-[#222D25] pb-6">
         <PageIntro
           eyebrow="Sensoriamento Remoto Contínuo"
           title="Alertas & Ocorrências Ambientais"
-          eyebrowClassName="eyebrow text-forest-mid"
-          titleClassName="display mt-2 text-3xl text-forest md:text-5xl"
+          eyebrowClassName="eyebrow text-[#789B7C]"
+          titleClassName="display mt-2 text-3xl text-[#DCE5DD] md:text-4xl font-semibold"
         >
-          <p className="mt-3 max-w-2xl text-base text-ash">
+          <p className="mt-2.5 max-w-2xl text-sm sm:text-base text-[#A7B3A9]">
             Registro unificado de alertas DETER (INPE), anomalias termais (NASA FIRMS / BDQueimadas)
             e cicatrizes de fogo nos 7 ambientes brasileiros.
           </p>
         </PageIntro>
 
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2.5">
           {liveSourceInfo && (
-            <div className="text-xs font-mono px-3 py-1.5 rounded-full bg-mist border border-forest/15 text-forest font-semibold">
-              {liveSourceInfo}
+            <div className="inline-flex items-center gap-2 text-xs font-mono px-3 py-1.5 rounded-[7px] bg-[#171F1A] border border-[#29362D] text-[#A7B3A9]">
+              <span className="h-2 w-2 rounded-full bg-[#83A989]" />
+              <span>{liveSourceInfo}</span>
             </div>
           )}
 
           <button
             type="button"
             onClick={handleExportAlerts}
-            className="btn btn-secondary !py-2 !px-3.5 text-xs inline-flex items-center gap-1.5"
+            className="btn-secondary !py-2 !px-3.5 text-xs inline-flex items-center gap-1.5"
             title="Exportar alertas em formato CSV"
           >
             <Download size={14} />
@@ -128,24 +129,24 @@ export default function AlertasPage() {
       </div>
 
       {/* Nota Metodológica de Orientação */}
-      <div className="p-4 rounded-2xl bg-forest/5 border border-forest/15 text-xs text-forest leading-relaxed flex items-start gap-3">
-        <Info size={18} className="text-forest flex-shrink-0 mt-0.5" />
+      <div className="p-4 rounded-[10px] bg-[#131A16] border border-[#222D25] text-xs text-[#A7B3A9] leading-relaxed flex items-start gap-3">
+        <Info size={16} className="text-[#789B7C] flex-shrink-0 mt-0.5" />
         <div>
-          <strong>Diferenciação Metodológica:</strong> <em>Focos de calor</em> representam anomalias térmicas instantâneas captadas por sensores orbitais (MODIS/VIIRS) no momento do sobrevoo. Já os <em>Alertas DETER</em> são polígonos de corte raso ou degradação florestal produzidos pelo INPE para suporte à fiscalização ambiental.
+          <strong className="text-[#DCE5DD]">Diferenciação Metodológica:</strong> <em>Focos de calor</em> representam anomalias térmicas instantâneas captadas por sensores orbitais (MODIS/VIIRS) no momento do sobrevoo. Já os <em>Alertas DETER</em> são polígonos de corte raso ou degradação florestal produzidos pelo INPE para suporte à fiscalização ambiental.
         </div>
       </div>
 
       {/* Barra de Filtros e Busca */}
-      <div className="panel-soft p-4 flex flex-col md:flex-row items-center justify-between gap-3 text-xs">
+      <div className="rounded-[10px] border border-[#29362D] bg-[#171F1A] p-4 flex flex-col md:flex-row items-center justify-between gap-3 text-xs">
         {/* Campo de Busca */}
         <div className="relative w-full md:w-80">
-          <Search className="absolute left-3.5 top-2.5 w-4 h-4 text-ash pointer-events-none" />
+          <Search className="absolute left-3.5 top-2.5 w-4 h-4 text-[#78877D] pointer-events-none" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Buscar município, satélite, UF..."
-            className="w-full pl-9 pr-3 py-2 rounded-xl bg-mist text-ink border border-forest/15 focus:outline-none focus:ring-2 focus:ring-forest"
+            className="w-full pl-9 pr-3 py-2 rounded-[7px] bg-[#131A16] text-[#DCE5DD] placeholder:text-[#78877D] border border-[#29362D] focus:outline-none focus:border-[#789B7C]"
           />
         </div>
 
@@ -155,7 +156,7 @@ export default function AlertasPage() {
           <select
             value={selectedBiome}
             onChange={(e) => setSelectedBiome(e.target.value)}
-            className="px-3 py-2 rounded-xl bg-mist border border-forest/15 text-ink font-semibold focus:outline-none cursor-pointer"
+            className="px-3 py-2 rounded-[7px] bg-[#131A16] border border-[#29362D] text-[#DCE5DD] font-medium focus:outline-none focus:border-[#789B7C] cursor-pointer"
           >
             <option value="all">Todos os Ambientes</option>
             {BIOMES_LIST.map((b) => (
@@ -167,7 +168,7 @@ export default function AlertasPage() {
           <select
             value={selectedType}
             onChange={(e) => setSelectedType(e.target.value)}
-            className="px-3 py-2 rounded-xl bg-mist border border-forest/15 text-ink font-semibold focus:outline-none cursor-pointer"
+            className="px-3 py-2 rounded-[7px] bg-[#131A16] border border-[#29362D] text-[#DCE5DD] font-medium focus:outline-none focus:border-[#789B7C] cursor-pointer"
           >
             <option value="all">Todos os Tipos</option>
             <option value="foco_calor">Foco de Calor (Térmico)</option>
@@ -180,7 +181,7 @@ export default function AlertasPage() {
           <select
             value={selectedConfidence}
             onChange={(e) => setSelectedConfidence(e.target.value)}
-            className="px-3 py-2 rounded-xl bg-mist border border-forest/15 text-ink font-semibold focus:outline-none cursor-pointer"
+            className="px-3 py-2 rounded-[7px] bg-[#131A16] border border-[#29362D] text-[#DCE5DD] font-medium focus:outline-none focus:border-[#789B7C] cursor-pointer"
           >
             <option value="all">Qualquer Confiança</option>
             <option value="Alta">Alta Confiança</option>
@@ -197,7 +198,7 @@ export default function AlertasPage() {
                 setSelectedConfidence('all');
                 setSearchQuery('');
               }}
-              className="text-xs text-burn font-bold underline px-2 py-1"
+              className="text-xs text-[#A77D78] hover:text-[#DCE5DD] font-medium underline px-2 py-1"
             >
               Limpar filtros
             </button>
@@ -206,59 +207,62 @@ export default function AlertasPage() {
       </div>
 
       {/* Tabela de Ocorrências com Design Limpo */}
-      <div className="panel-soft overflow-hidden p-0">
+      <div className="rounded-[10px] border border-[#29362D] bg-[#171F1A] overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs text-ink">
-            <thead className="bg-mist text-[11px] uppercase font-bold text-forest-mid border-b border-forest/10">
+          <table className="w-full text-left text-xs text-[#DCE5DD]">
+            <thead className="bg-[#131A16] text-[11px] font-mono uppercase text-[#78877D] border-b border-[#222D25]">
               <tr>
-                <th className="py-3.5 px-4">Tipo & Ocorrência</th>
-                <th className="py-3.5 px-4">Ambiente</th>
-                <th className="py-3.5 px-4">Localização (UF)</th>
-                <th className="py-3.5 px-4">Data / Hora</th>
-                <th className="py-3.5 px-4">Métrica (Área / FRP)</th>
-                <th className="py-3.5 px-4">Satélite / Sensor</th>
-                <th className="py-3.5 px-4">Fonte Oficial</th>
-                <th className="py-3.5 px-4 text-right">Ação</th>
+                <th className="py-3.5 px-4 font-medium">Tipo & Ocorrência</th>
+                <th className="py-3.5 px-4 font-medium">Ambiente</th>
+                <th className="py-3.5 px-4 font-medium">Localização (UF)</th>
+                <th className="py-3.5 px-4 font-medium">Data / Hora</th>
+                <th className="py-3.5 px-4 font-medium">Métrica (Área / FRP)</th>
+                <th className="py-3.5 px-4 font-medium">Satélite / Sensor</th>
+                <th className="py-3.5 px-4 font-medium">Fonte Oficial</th>
+                <th className="py-3.5 px-4 text-right font-medium">Ação</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-forest/10 font-mono">
+            <tbody className="divide-y divide-[#222D25] font-mono">
               {filteredAlerts.length > 0 ? (
                 filteredAlerts.map((alert) => (
                   <tr 
                     key={alert.id}
                     onClick={() => setActiveAlert(alert)}
-                    className="hover:bg-forest/5 cursor-pointer transition-colors"
+                    className="hover:bg-[#1D2821]/60 cursor-pointer transition-colors"
                   >
-                    <td className="py-3 px-4 font-sans font-bold">
+                    <td className="py-3 px-4 font-sans font-medium">
                       <div className="flex items-center gap-2">
                         {getTypeIcon(alert.type)}
-                        <span className="text-forest truncate max-w-xs">{alert.typeName}</span>
+                        <span className="text-[#DCE5DD] truncate max-w-xs">{alert.typeName}</span>
                       </div>
                     </td>
                     <td className="py-3 px-4 font-sans">
-                      <span className="px-2 py-0.5 rounded-full bg-forest/8 text-forest text-[11px] font-semibold">
+                      <span className="px-2 py-0.5 rounded-[7px] bg-[#131A16] border border-[#222D25] text-[#91A88F] text-[11px] font-medium">
                         {alert.biomeName}
                       </span>
                     </td>
-                    <td className="py-3 px-4 font-sans text-ink">
-                      📍 {alert.municipality}/{alert.state}
+                    <td className="py-3 px-4 font-sans text-[#DCE5DD]">
+                      <span className="inline-flex items-center gap-1.5">
+                        <MapPin className="w-3.5 h-3.5 text-[#78877D] shrink-0" />
+                        <span>{alert.municipality}/{alert.state}</span>
+                      </span>
                     </td>
-                    <td className="py-3 px-4 text-ash">
+                    <td className="py-3 px-4 text-[#A7B3A9]">
                       {alert.date} {alert.time ? `(${alert.time})` : ''}
                     </td>
                     <td className="py-3 px-4">
                       {alert.areaHectares ? (
-                        <span className="font-bold text-forest">{alert.areaHectares} ha</span>
+                        <span className="font-semibold text-[#83A989]">{alert.areaHectares} ha</span>
                       ) : alert.frp ? (
-                        <span className="font-bold text-burn">{alert.frp} MW</span>
+                        <span className="font-semibold text-[#A9A17A]">{alert.frp} MW</span>
                       ) : (
-                        <span className="text-forest-mid text-[11px]">Anomalia</span>
+                        <span className="text-[#78877D] text-[11px]">Anomalia</span>
                       )}
                     </td>
-                    <td className="py-3 px-4 text-ash font-sans">
+                    <td className="py-3 px-4 text-[#A7B3A9] font-sans">
                       {alert.satellite}
                     </td>
-                    <td className="py-3 px-4 text-ash font-sans truncate max-w-[120px]" title={alert.source}>
+                    <td className="py-3 px-4 text-[#78877D] font-sans truncate max-w-[120px]" title={alert.source}>
                       {alert.source}
                     </td>
                     <td className="py-3 px-4 text-right">
@@ -268,7 +272,7 @@ export default function AlertasPage() {
                           e.stopPropagation();
                           setActiveAlert(alert);
                         }}
-                        className="btn btn-secondary !py-1 !px-2.5 text-[11px] font-bold"
+                        className="btn-secondary !py-1 !px-2.5 text-[11px] font-medium"
                       >
                         Laudo
                       </button>
@@ -277,7 +281,7 @@ export default function AlertasPage() {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={8} className="py-8 text-center text-ash font-sans italic">
+                  <td colSpan={8} className="py-8 text-center text-[#78877D] font-sans">
                     Nenhum registro encontrado com os filtros selecionados.
                   </td>
                 </tr>
@@ -287,33 +291,33 @@ export default function AlertasPage() {
         </div>
 
         {/* Rodapé da tabela com total de registros */}
-        <div className="p-4 border-t border-forest/10 bg-mist flex items-center justify-between text-xs text-ash font-sans">
+        <div className="p-4 border-t border-[#222D25] bg-[#131A16] flex items-center justify-between text-xs text-[#78877D] font-sans">
           <span>Exibindo {filteredAlerts.length} de {alerts.length} ocorrências cadastradas</span>
-          <span className="text-forest font-bold">Dados auditados por satélite</span>
+          <span className="text-[#91A88F] font-mono text-[11px]">Dados auditados por satélite</span>
         </div>
       </div>
 
       {/* Modal Lateral de Detalhes da Ocorrência */}
       <AnimatePresence>
         {activeAlert && (
-          <div className="fixed inset-0 z-50 bg-ink/50 backdrop-blur-sm flex justify-end">
+          <div className="fixed inset-0 z-50 bg-[#101512]/80 backdrop-blur-sm flex justify-end">
             <motion.div 
               initial={{ opacity: 0, x: 200 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: 200 }}
               transition={{ duration: 0.25, ease: 'easeOut' }}
-              className="w-full max-w-lg bg-mist h-full shadow-2xl border-l border-forest/15 p-6 overflow-y-auto flex flex-col justify-between text-xs font-sans"
+              className="w-full max-w-lg bg-[#171F1A] h-full shadow-2xl border-l border-[#29362D] p-6 overflow-y-auto flex flex-col justify-between text-xs font-sans"
             >
               <div>
-                <div className="flex items-center justify-between pb-3.5 border-b border-forest/10 mb-4">
-                  <span className="text-xs font-bold uppercase tracking-wider text-forest flex items-center gap-1.5">
+                <div className="flex items-center justify-between pb-3.5 border-b border-[#222D25] mb-4">
+                  <span className="text-xs font-mono uppercase tracking-wider text-[#91A88F] flex items-center gap-1.5">
                     <Satellite size={15} />
                     Ficha Técnica da Ocorrência
                   </span>
                   <button
                     type="button"
                     onClick={() => setActiveAlert(null)}
-                    className="p-1.5 rounded-full text-ash hover:text-forest hover:bg-forest/10 transition-colors"
+                    className="p-1.5 rounded-[7px] text-[#78877D] hover:text-[#DCE5DD] hover:bg-[#1D2821] transition-colors"
                   >
                     <X size={18} />
                   </button>
@@ -321,73 +325,73 @@ export default function AlertasPage() {
 
                 <div className="space-y-4">
                   <div>
-                    <h3 className="display text-2xl font-bold text-forest mb-1.5">
+                    <h3 className="font-display text-2xl font-semibold text-[#DCE5DD] mb-2">
                       {activeAlert.typeName}
                     </h3>
                     <div className="flex items-center gap-2">
-                      <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-sprout text-forest">
+                      <span className="px-2.5 py-0.5 rounded-[7px] text-[10px] font-mono font-medium bg-[#294C35] text-[#DCE5DD] border border-[#365C40]">
                         {activeAlert.status}
                       </span>
-                      <span className="text-forest-mid font-bold">
+                      <span className="text-[#91A88F] font-medium">
                         {activeAlert.biomeName}
                       </span>
                     </div>
                   </div>
 
-                  <div className="p-4 rounded-2xl bg-paper border border-forest/10 space-y-2.5 text-ink">
+                  <div className="p-4 rounded-[10px] bg-[#131A16] border border-[#222D25] space-y-2.5 text-[#DCE5DD]">
                     <div className="flex justify-between">
-                      <span className="text-ash">Identificador (ID):</span>
-                      <span className="font-mono font-bold">{activeAlert.id}</span>
+                      <span className="text-[#78877D]">Identificador (ID):</span>
+                      <span className="font-mono font-medium">{activeAlert.id}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-ash">Município / Estado:</span>
-                      <span className="font-bold text-forest">{activeAlert.municipality} - {activeAlert.state}</span>
+                      <span className="text-[#78877D]">Município / Estado:</span>
+                      <span className="font-medium text-[#DCE5DD]">{activeAlert.municipality} - {activeAlert.state}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-ash">Coordenadas Geográficas:</span>
-                      <span className="font-mono text-forest font-bold">{activeAlert.latitude}, {activeAlert.longitude}</span>
+                      <span className="text-[#78877D]">Coordenadas Geográficas:</span>
+                      <span className="font-mono text-[#91A88F]">{activeAlert.latitude}, {activeAlert.longitude}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-ash">Data e Hora de Passagem:</span>
+                      <span className="text-[#78877D]">Data e Hora de Passagem:</span>
                       <span className="font-mono">{activeAlert.date} {activeAlert.time ? `(${activeAlert.time})` : ''}</span>
                     </div>
                     {activeAlert.areaHectares && (
                       <div className="flex justify-between">
-                        <span className="text-ash">Área Estimada:</span>
-                        <span className="font-mono font-bold text-forest">{activeAlert.areaHectares} hectares</span>
+                        <span className="text-[#78877D]">Área Estimada:</span>
+                        <span className="font-mono font-semibold text-[#83A989]">{activeAlert.areaHectares} hectares</span>
                       </div>
                     )}
                     {activeAlert.frp && (
                       <div className="flex justify-between">
-                        <span className="text-ash">Potência Radiativa do Fogo:</span>
-                        <span className="font-mono font-bold text-burn">{activeAlert.frp} MW (Megawatts)</span>
+                        <span className="text-[#78877D]">Potência Radiativa do Fogo:</span>
+                        <span className="font-mono font-semibold text-[#A9A17A]">{activeAlert.frp} MW (Megawatts)</span>
                       </div>
                     )}
                     <div className="flex justify-between">
-                      <span className="text-ash">Satélite / Sensor:</span>
-                      <span className="font-semibold">{activeAlert.satellite} ({activeAlert.sensor})</span>
+                      <span className="text-[#78877D]">Satélite / Sensor:</span>
+                      <span className="font-medium">{activeAlert.satellite} ({activeAlert.sensor})</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-ash">Índice de Confiança:</span>
-                      <span className="font-bold text-forest">{activeAlert.confidence}</span>
+                      <span className="text-[#78877D]">Índice de Confiança:</span>
+                      <span className="font-medium text-[#83A989]">{activeAlert.confidence}</span>
                     </div>
                   </div>
 
                   <div>
-                    <h4 className="font-bold text-forest mb-1">Descrição e Contexto Territorial</h4>
-                    <p className="text-ash leading-relaxed text-xs">
+                    <h4 className="font-medium text-[#DCE5DD] mb-1.5">Descrição e Contexto Territorial</h4>
+                    <p className="text-[#A7B3A9] leading-relaxed text-xs">
                       {activeAlert.description}
                     </p>
                   </div>
 
-                  <div className="p-4 rounded-2xl bg-paper border border-forest/10 space-y-2">
-                    <div className="text-[10px] text-ash uppercase font-bold tracking-wider">Fonte Primária dos Dados</div>
-                    <div className="font-bold text-forest">{activeAlert.source}</div>
+                  <div className="p-4 rounded-[10px] bg-[#131A16] border border-[#222D25] space-y-2">
+                    <div className="text-[10px] text-[#78877D] uppercase font-mono tracking-wider">Fonte Primária dos Dados</div>
+                    <div className="font-medium text-[#DCE5DD]">{activeAlert.source}</div>
                     <a
                       href={activeAlert.sourceUrl}
                       target="_blank"
                       rel="noreferrer"
-                      className="text-forest font-bold hover:underline inline-flex items-center gap-1.5 pt-1"
+                      className="text-[#91A88F] hover:text-[#DCE5DD] font-medium hover:underline inline-flex items-center gap-1.5 pt-1"
                     >
                       <span>Consultar registro no portal da fonte oficial</span>
                       <ExternalLink size={12} />
@@ -396,10 +400,10 @@ export default function AlertasPage() {
                 </div>
               </div>
 
-              <div className="pt-4 border-t border-forest/10 flex items-center gap-3">
+              <div className="pt-4 border-t border-[#222D25] flex items-center gap-3">
                 <Link
                   href="/mapa"
-                  className="flex-1 btn btn-primary text-center flex items-center justify-center gap-1.5"
+                  className="flex-1 btn-primary text-center flex items-center justify-center gap-1.5"
                 >
                   <MapPin size={14} />
                   <span>Visualizar no Mapa</span>
@@ -407,7 +411,7 @@ export default function AlertasPage() {
                 <button
                   type="button"
                   onClick={() => setActiveAlert(null)}
-                  className="btn btn-secondary !py-2.5 !px-4 text-xs font-bold"
+                  className="btn-secondary !py-2.5 !px-4 text-xs font-medium"
                 >
                   Fechar
                 </button>

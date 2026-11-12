@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { Trees, RefreshCw, Plus } from "lucide-react";
 import { usePerfProfile } from "@/components/hooks/usePerfProfile";
 import { readFiresCache, writeFiresCache } from "@/lib/alerts/firesCache";
 import { isInBrazil } from "@/lib/alerts/geo";
@@ -195,7 +196,6 @@ export default function FireMap() {
         return mergeAlerts(satellite);
       });
       closeReport();
-      // Refresh satellite in background; local save already succeeded.
       loadSatellite()
         .then(({ satellite, meta: m }) => applySatelliteResult(satellite, m))
         .catch(() => {});
@@ -249,10 +249,10 @@ export default function FireMap() {
       : null;
 
   return (
-    <div className="relative h-full w-full">
+    <div className="relative h-full w-full bg-[#101512]">
       {loading ? (
-        <div className="flex h-full flex-col items-center justify-center gap-4 bg-mist-soft text-ash">
-          <div className="h-12 w-12 animate-pulse-soft rounded-full border-2 border-forest/30 border-t-forest" />
+        <div className="flex h-full flex-col items-center justify-center gap-3 bg-[#101512] text-[#A7B3A9] text-xs font-mono">
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-[#29362D] border-t-[#789B7C]" />
           <p>Carregando focos de satélite...</p>
         </div>
       ) : (
@@ -266,10 +266,10 @@ export default function FireMap() {
         />
       )}
 
-      {/* z-[1100]: above Leaflet controls */}
+      {/* Controles Superiores Compactos */}
       <div className="pointer-events-none absolute inset-x-0 top-3 z-[1100] flex justify-center px-3">
         <div
-          className="pointer-events-auto inline-flex items-center gap-1 rounded-2xl border border-slate-200/80 bg-white/95 p-1 shadow-lg backdrop-blur-md"
+          className="pointer-events-auto inline-flex items-center gap-1 rounded-[10px] border border-[#29362D] bg-[#171F1A]/95 p-1 shadow-lift backdrop-blur-md"
           role="tablist"
           aria-label="Tipo de mapa"
         >
@@ -280,42 +280,44 @@ export default function FireMap() {
               role="tab"
               aria-selected={layer === mode}
               onClick={() => setLayer(mode)}
-              className={`min-h-9 rounded-xl px-4 py-1.5 text-xs font-bold transition-all touch-manipulation ${
+              className={`min-h-8 rounded-[7px] px-3.5 py-1 text-xs font-medium transition-colors touch-manipulation ${
                 layer === mode
-                  ? "bg-slate-900 text-white shadow-sm"
-                  : "text-slate-700 hover:text-slate-950 hover:bg-slate-100"
+                  ? "bg-[#789B7C] text-[#101512] font-semibold"
+                  : "text-[#A7B3A9] hover:text-[#DCE5DD] hover:bg-[#1D2821]"
               }`}
             >
               {mode === "map" ? "Mapa Vetorial" : "Satélite Orbital"}
             </button>
           ))}
-          <div className="h-4 w-px bg-slate-200 mx-1" />
+          <div className="h-4 w-px bg-[#222D25] mx-1" />
           <button
             type="button"
             onClick={() => setShowBiomes((v) => !v)}
-            className={`min-h-9 rounded-xl px-3.5 py-1.5 text-xs font-bold transition-all touch-manipulation ${
+            className={`min-h-8 rounded-[7px] px-3 py-1 text-xs font-medium transition-colors inline-flex items-center gap-1.5 touch-manipulation ${
               showBiomes
-                ? "bg-emerald-600 text-white shadow-sm"
-                : "text-slate-600 hover:bg-slate-100"
+                ? "bg-[#1D2821] text-[#91A88F] border border-[#29362D]"
+                : "text-[#78877D] hover:text-[#DCE5DD] hover:bg-[#1D2821]"
             }`}
           >
-            🌿 7 Biomas {showBiomes ? "Ativos" : "Ocultos"}
+            <Trees size={13} className="text-[#789B7C]" />
+            <span>7 Biomas {showBiomes ? "Ativos" : "Ocultos"}</span>
           </button>
         </div>
       </div>
 
-      <div className="pointer-events-none absolute left-3 right-3 top-16 sm:top-16 z-[1100] flex flex-col gap-2">
+      {/* Telemetria e Filtros de Nível */}
+      <div className="pointer-events-none absolute left-3 right-3 top-14 sm:top-14 z-[1100] flex flex-col gap-2">
         <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
           {sourceLabel ? (
-            <div className="pointer-events-auto max-w-[calc(100%-2.75rem)] truncate rounded-lg border border-forest/15 bg-white/95 px-2.5 py-1.5 text-[11px] font-medium text-forest shadow-md sm:max-w-none sm:px-3 sm:text-xs">
+            <div className="pointer-events-auto max-w-[calc(100%-2.75rem)] truncate rounded-[7px] border border-[#29362D] bg-[#171F1A]/95 px-2.5 py-1.5 text-[11px] font-mono text-[#DCE5DD] shadow-soft backdrop-blur-md sm:max-w-none sm:px-3">
               {sourceLabel}
-              <span className="hidden sm:inline">{freshnessLabel}</span>
-              <span className="ml-1 text-ash/70">
+              <span className="hidden sm:inline text-[#91A88F]">{freshnessLabel}</span>
+              <span className="ml-1 text-[#78877D]">
                 · {filteredAlerts.length} visíveis
               </span>
             </div>
           ) : !loading ? (
-            <div className="pointer-events-auto rounded-lg border border-burn/20 bg-white/95 px-3 py-1.5 text-xs font-medium text-burn shadow-md">
+            <div className="pointer-events-auto rounded-[7px] border border-[#29362D] bg-[#171F1A]/95 px-3 py-1.5 text-xs font-mono text-[#A9A17A] shadow-soft">
               Sem focos no momento
             </div>
           ) : null}
@@ -326,22 +328,22 @@ export default function FireMap() {
               onClick={refreshData}
               disabled={refreshing}
               aria-label="Atualizar dados"
-              className="pointer-events-auto flex h-9 w-9 items-center justify-center rounded-lg border border-forest/15 bg-white/95 text-forest shadow-md transition active:bg-mist-soft disabled:opacity-50 touch-manipulation"
+              className="pointer-events-auto flex h-8 w-8 items-center justify-center rounded-[7px] border border-[#29362D] bg-[#171F1A]/95 text-[#A7B3A9] hover:text-[#DCE5DD] hover:bg-[#1D2821] shadow-soft transition disabled:opacity-50 touch-manipulation"
             >
-              <span className={refreshing ? "animate-spin" : ""}>↻</span>
+              <RefreshCw size={13} className={refreshing ? "animate-spin text-[#91A88F]" : ""} />
             </button>
           ) : null}
         </div>
 
         {showLevelFilters ? (
-          <div className="pointer-events-auto flex max-w-full gap-1 overflow-x-auto rounded-lg border border-forest/15 bg-white/95 p-1 shadow-md [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <div className="pointer-events-auto flex max-w-full w-fit gap-1 overflow-x-auto rounded-[7px] border border-[#29362D] bg-[#171F1A]/95 p-1 shadow-soft backdrop-blur-md [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             <button
               type="button"
               onClick={() => setLevelFilter("all")}
-              className={`shrink-0 rounded-md px-2.5 py-1.5 text-[10px] font-semibold uppercase touch-manipulation ${
+              className={`shrink-0 rounded-[5px] px-2.5 py-1 text-[10px] font-mono uppercase transition-colors touch-manipulation ${
                 levelFilter === "all"
-                  ? "bg-forest text-mist"
-                  : "text-ash active:bg-forest/10"
+                  ? "bg-[#789B7C] text-[#101512] font-semibold"
+                  : "text-[#A7B3A9] hover:text-[#DCE5DD]"
               }`}
             >
               Todos ({alerts.length})
@@ -351,10 +353,10 @@ export default function FireMap() {
                 key={level}
                 type="button"
                 onClick={() => setLevelFilter(level)}
-                className={`shrink-0 rounded-md px-2.5 py-1.5 text-[10px] font-semibold uppercase touch-manipulation ${
+                className={`shrink-0 rounded-[5px] px-2.5 py-1 text-[10px] font-mono uppercase transition-colors touch-manipulation ${
                   levelFilter === level
-                    ? "text-mist"
-                    : "text-ash active:bg-forest/10"
+                    ? "text-[#101512] font-semibold"
+                    : "text-[#A7B3A9] hover:text-[#DCE5DD]"
                 }`}
                 style={
                   levelFilter === level
@@ -367,13 +369,13 @@ export default function FireMap() {
             ))}
           </div>
         ) : tenMinNote ? (
-          <p className="pointer-events-auto max-w-sm rounded-lg border border-forest/10 bg-white/90 px-3 py-1.5 text-[11px] text-ash shadow-sm">
+          <p className="pointer-events-auto max-w-sm rounded-[7px] border border-[#29362D] bg-[#171F1A]/95 px-3 py-1.5 text-[11px] text-[#A7B3A9] shadow-soft">
             {tenMinNote}
           </p>
         ) : null}
 
         {fromCache ? (
-          <p className="pointer-events-auto max-w-md rounded-lg border border-forest/15 bg-white/95 px-3 py-1.5 text-[11px] font-medium text-forest shadow-md">
+          <p className="pointer-events-auto max-w-md rounded-[7px] border border-[#29362D] bg-[#171F1A]/95 px-3 py-1.5 text-[11px] font-mono text-[#91A88F] shadow-soft">
             Dados em cache neste aparelho
             {meta?.updatedAt
               ? ` · ${new Date(meta.updatedAt).toLocaleString("pt-BR")}`
@@ -382,35 +384,38 @@ export default function FireMap() {
         ) : null}
 
         {partialWarning ? (
-          <p className="pointer-events-auto max-w-md rounded-lg border border-burn/20 bg-white/95 px-3 py-1.5 text-[11px] text-burn shadow-md">
+          <p className="pointer-events-auto max-w-md rounded-[7px] border border-[#29362D] bg-[#171F1A]/95 px-3 py-1.5 text-[11px] text-[#A9A17A] shadow-soft">
             {partialWarning}
           </p>
         ) : null}
       </div>
 
+      {/* Legenda Inferior Esquerda */}
       <div className="pointer-events-none absolute bottom-[max(1.25rem,env(safe-area-inset-bottom))] left-2 z-[1100] sm:bottom-6 sm:left-3">
         <div className="pointer-events-auto">
           <FireLegend />
         </div>
       </div>
 
+      {/* Botão Discreto de Reportar Queimada */}
       <button
         type="button"
         onClick={openReport}
         aria-label="Reportar queimada"
-        className="absolute bottom-[max(1.25rem,env(safe-area-inset-bottom))] right-3 z-[1100] flex h-14 w-14 items-center justify-center rounded-full bg-red-600 text-3xl font-light text-white shadow-lg transition active:bg-red-700 touch-manipulation sm:bottom-6 sm:right-4"
+        className="absolute bottom-[max(1.25rem,env(safe-area-inset-bottom))] right-3 z-[1100] flex items-center gap-2 rounded-[10px] border border-[#29362D] bg-[#1D2821] hover:bg-[#243129] px-3.5 py-2.5 text-xs font-medium text-[#DCE5DD] shadow-lift transition touch-manipulation sm:bottom-6 sm:right-4"
       >
-        +
+        <Plus size={15} className="text-[#91A88F]" />
+        <span className="hidden sm:inline">Reportar foco</span>
       </button>
 
       {error && !modalOpen ? (
-        <div className="absolute bottom-24 right-3 z-[1100] flex max-w-[min(20rem,calc(100vw-5rem))] flex-col gap-2 rounded-lg bg-burn px-3 py-2 text-sm text-white shadow-md sm:right-4">
-          <p>{error}</p>
+        <div className="absolute bottom-20 right-3 z-[1100] flex max-w-[min(20rem,calc(100vw-5rem))] flex-col gap-2 rounded-[10px] border border-[#A77D78]/40 bg-[#171F1A] px-3.5 py-2.5 text-xs text-[#DCE5DD] shadow-lift sm:right-4">
+          <p className="text-[#A77D78]">{error}</p>
           <button
             type="button"
             onClick={refreshData}
             disabled={refreshing}
-            className="self-start rounded-md bg-white/20 px-2 py-1 text-xs font-semibold uppercase tracking-wide active:bg-white/30 disabled:opacity-50 touch-manipulation"
+            className="self-start rounded-[5px] bg-[#1D2821] border border-[#29362D] px-2.5 py-1 text-[11px] font-medium text-[#DCE5DD] hover:bg-[#243129] disabled:opacity-50 touch-manipulation"
           >
             Tentar de novo
           </button>

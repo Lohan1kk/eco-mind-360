@@ -1,7 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Reveal, StaggerItem, StaggerReveal } from "@/components/motion";
-import { SectionAtmosphere } from "@/components/ui/section-atmosphere";
 
 const links = [
   { href: "/calculadora", label: "Calculadora" },
@@ -15,8 +14,7 @@ const links = [
 
 export function Footer() {
   return (
-    <footer className="relative overflow-hidden border-t border-white/10 bg-ink py-14 text-mist/85">
-      <SectionAtmosphere variant="deep" />
+    <footer className="relative overflow-hidden border-t border-[#222D25] bg-[#131A16] py-14 text-[#A7B3A9]">
       <div className="section-inner relative z-[1] flex flex-col gap-10 md:flex-row md:items-start md:justify-between">
         <Reveal variant="fadeUp">
           <div className="flex items-center gap-2.5">
@@ -27,11 +25,11 @@ export function Footer() {
               height={36}
               className="h-9 w-9 object-contain"
             />
-            <span className="font-display text-xl font-semibold text-mist">
+            <span className="font-display text-xl font-semibold text-[#DCE5DD]">
               EcoMind
             </span>
           </div>
-          <p className="mt-4 max-w-sm text-sm leading-relaxed text-mist/65">
+          <p className="mt-4 max-w-sm text-sm leading-relaxed text-[#78877D]">
             Consciência ambiental + tecnologia. Calculadora, quiz, mapa INPE e
             ações concretas para o planeta.
           </p>
@@ -45,7 +43,7 @@ export function Footer() {
           >
             {links.map((link) => (
               <StaggerItem key={link.href} soft>
-                <Link href={link.href} className="hover:text-sprout">
+                <Link href={link.href} className="text-[#A7B3A9] hover:text-[#DCE5DD] transition-colors">
                   {link.label}
                 </Link>
               </StaggerItem>
@@ -55,7 +53,7 @@ export function Footer() {
       </div>
 
       <Reveal
-        className="section-inner relative z-[1] mt-10 border-t border-white/10 pt-6 text-xs text-mist/50"
+        className="section-inner relative z-[1] mt-10 border-t border-[#222D25] pt-6 text-xs text-[#78877D]"
         delayMs={140}
         variant="fade"
       >
@@ -64,7 +62,7 @@ export function Footer() {
           Dados:{" "}
           <a
             href="https://queimadas.dgi.inpe.br/"
-            className="underline hover:text-sprout"
+            className="text-[#91A88F] underline hover:text-[#DCE5DD]"
             target="_blank"
             rel="noopener noreferrer"
           >
