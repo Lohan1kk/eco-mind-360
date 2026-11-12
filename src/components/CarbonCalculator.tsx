@@ -133,12 +133,7 @@ export function CarbonCalculator() {
         </div>
       </div>
 
-      <motion.div
-        className="rounded-[10px] border border-[#29362D] bg-[#171F1A] p-6 sm:p-8"
-        initial={reduce ? false : { opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: reduce ? 0 : 0.35, ease: [0.22, 1, 0.36, 1] }}
-      >
+      <div className="rounded-[10px] border border-[#29362D] bg-[#171F1A] p-6 sm:p-8">
         <p className="text-xs font-mono uppercase tracking-wider text-[#91A88F]">
           Estimativa anual
         </p>
@@ -175,7 +170,7 @@ export function CarbonCalculator() {
           Metodologia: fatores médios de transporte (DEFRA/EPA), alimentação
           (Poore &amp; Nemecek, 2018) e matriz elétrica do SIN (MCTI).
         </p>
-      </motion.div>
+      </div>
     </div>
   );
 }

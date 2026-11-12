@@ -6,7 +6,7 @@ import { MapPin, Calculator, HelpCircle, Sparkles } from 'lucide-react';
 
 export function Encourage() {
   return (
-    <section id="agir" className="section bg-[#101512] text-[#DCE5DD] relative overflow-hidden">
+    <section id="agir" className="section scroll-mt-20 bg-[#101512] text-[#DCE5DD] relative overflow-hidden">
       <div className="section-inner relative z-10 text-center max-w-3xl mx-auto space-y-8">
         <div className="badge-360 mx-auto">
           <Sparkles size={12} className="text-[#789B7C]" />

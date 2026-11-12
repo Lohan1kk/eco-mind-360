@@ -10,20 +10,12 @@ import {
   useState,
   useSyncExternalStore,
 } from "react";
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import {
   buildFolkloreDeck,
   FOLKLORE_QUESTIONS,
   type ShuffledFolkloreQuestion,
 } from "@/data/folklore-quiz";
-import {
-  enterTransition,
-  pressTransition,
-  softEase,
-  stagger,
-  staggerItemSoft,
-  tapPress,
-} from "@/components/motion";
 
 const QUESTION_SECONDS = 20;
 const FAST_BONUS_SECONDS = 10;
@@ -156,7 +148,6 @@ export function FolkloreQuiz({ onChangeMode }: { onChangeMode: () => void }) {
     secondsLeftRef.current = secondsLeft;
   }, [secondsLeft]);
 
-  // Countdown via interval callbacks only (no sync setState in effect body)
   useEffect(() => {
     if (!timerEnabled || finished || selected !== null || timedOut) return;
 
@@ -231,12 +222,7 @@ export function FolkloreQuiz({ onChangeMode }: { onChangeMode: () => void }) {
     const badges = results.filter((r) => r.correct);
 
     return (
-      <motion.div
-        className="mx-auto max-w-lg text-center"
-        initial={reduce ? false : { opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={enterTransition}
-      >
+      <div className="mx-auto max-w-lg text-center">
         <div className="rounded-[10px] border border-[#29362D] bg-[#171F1A] px-8 py-10">
           <p className="text-xs font-mono uppercase tracking-wider text-[#91A88F]">
             Gincana do Folclore
@@ -258,10 +244,9 @@ export function FolkloreQuiz({ onChangeMode }: { onChangeMode: () => void }) {
           <div className="mx-auto mt-6 h-2 max-w-xs overflow-hidden rounded-full bg-[#131A16] border border-[#222D25]">
             <motion.div
               className="h-full rounded-full bg-[#789B7C]"
-              initial={reduce ? false : { width: 0 }}
               animate={{ width: `${pct}%` }}
               transition={{
-                duration: reduce ? 0 : 0.5,
+                duration: reduce ? 0 : 0.4,
                 ease: [0.22, 1, 0.36, 1],
               }}
             />
@@ -301,24 +286,20 @@ export function FolkloreQuiz({ onChangeMode }: { onChangeMode: () => void }) {
             mostra caminhos concretos para agir.
           </p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
-            <motion.button
+            <button
               type="button"
               onClick={reset}
               className="btn-primary cursor-pointer"
-              whileTap={reduce ? undefined : tapPress}
-              transition={pressTransition}
             >
               Jogar de novo
-            </motion.button>
-            <motion.button
+            </button>
+            <button
               type="button"
               onClick={onChangeMode}
               className="btn-secondary cursor-pointer"
-              whileTap={reduce ? undefined : tapPress}
-              transition={pressTransition}
             >
               Trocar modo
-            </motion.button>
+            </button>
           </div>
           <Link
             href="/alerta-queimadas"
@@ -327,7 +308,7 @@ export function FolkloreQuiz({ onChangeMode }: { onChangeMode: () => void }) {
             Ver mapa de queimadas →
           </Link>
         </div>
-      </motion.div>
+      </div>
     );
   }
 
@@ -407,126 +388,100 @@ export function FolkloreQuiz({ onChangeMode }: { onChangeMode: () => void }) {
         ) : null}
       </div>
 
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={`${deckNonce}-${question.id}`}
-          className="rounded-[10px] border border-[#29362D] bg-[#171F1A] px-6 py-7 sm:px-8 sm:py-8"
-          initial={reduce ? false : { opacity: 0, x: 14 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={reduce ? undefined : { opacity: 0, x: -12 }}
-          transition={enterTransition}
-        >
-          <div className="relative mx-auto mb-5 overflow-hidden rounded-[10px] border border-[#222D25] bg-[#131A16]">
-            <Image
-              src={question.image}
-              alt={revealed ? question.character : "Personagem do folclore"}
-              width={640}
-              height={640}
-              className={`aspect-square h-auto w-full object-cover transition-[filter,transform] duration-500 ${
-                revealed
-                  ? "scale-100 blur-0"
-                  : "scale-[1.04] blur-[10px] brightness-90"
-              }`}
-              sizes="(max-width: 672px) 100vw, 640px"
-              priority={current === 0}
+      <div
+        key={`${deckNonce}-${question.id}`}
+        className="rounded-[10px] border border-[#29362D] bg-[#171F1A] px-6 py-7 sm:px-8 sm:py-8"
+      >
+        <div className="relative mx-auto mb-5 overflow-hidden rounded-[10px] border border-[#222D25] bg-[#131A16]">
+          <Image
+            src={question.image}
+            alt={revealed ? question.character : "Personagem do folclore"}
+            width={640}
+            height={640}
+            className={`aspect-square h-auto w-full object-cover transition-[filter,transform] duration-500 ${
+              revealed
+                ? "scale-100 blur-0"
+                : "scale-[1.04] blur-[10px] brightness-90"
+            }`}
+            sizes="(max-width: 672px) 100vw, 640px"
+            priority={current === 0}
+          />
+          {!revealed ? (
+            <div
+              aria-hidden
+              className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#101512]/60 via-transparent to-[#101512]/20"
             />
-            {!revealed ? (
-              <div
-                aria-hidden
-                className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#101512]/60 via-transparent to-[#101512]/20"
-              />
-            ) : null}
-            {revealed ? (
-              <motion.p
-                className="absolute bottom-3 left-3 rounded-[7px] bg-[#171F1A]/95 border border-[#29362D] px-3 py-1 text-xs font-mono font-semibold uppercase tracking-wider text-[#DCE5DD]"
-                initial={reduce ? false : { opacity: 0, y: 6 }}
-                animate={{ opacity: 1, y: 0 }}
+          ) : null}
+          {revealed ? (
+            <p className="absolute bottom-3 left-3 rounded-[7px] bg-[#171F1A]/95 border border-[#29362D] px-3 py-1 text-xs font-mono font-semibold uppercase tracking-wider text-[#DCE5DD]">
+              {question.character}
+            </p>
+          ) : (
+            <p className="absolute bottom-3 left-3 rounded-[7px] bg-[#101512]/80 border border-[#29362D] px-3 py-1 text-[10px] font-mono uppercase tracking-wider text-[#A7B3A9]">
+              Quem é?
+            </p>
+          )}
+        </div>
+
+        <h2 className="font-display text-lg font-semibold text-[#DCE5DD] sm:text-xl">
+          {question.q}
+        </h2>
+
+        <div className="mt-6 grid gap-3">
+          {question.options.map((opt, i) => {
+            const isCorrect = i === question.correct;
+            const isSelected = i === selected;
+            let cls =
+              "border-[#29362D] bg-[#131A16] hover:border-[#789B7C]/50 hover:bg-[#1D2821] text-[#DCE5DD]";
+            if (revealed) {
+              if (isCorrect)
+                cls = "border-[#83A989] bg-[#294C35]/45 text-[#DCE5DD]";
+              else if (isSelected)
+                cls = "border-[#A77D78] bg-[#A77D78]/15 text-[#DCE5DD]";
+              else
+                cls = "border-[#222D25] bg-[#131A16]/50 text-[#78877D] opacity-60";
+            }
+
+            return (
+              <button
+                key={`${question.id}-${opt}`}
+                type="button"
+                onClick={() => handleAnswer(i)}
+                disabled={revealed}
+                className={`flex cursor-pointer items-center gap-3 rounded-[7px] border px-4 py-3.5 text-left text-sm font-medium transition sm:text-base ${cls}`}
               >
-                {question.character}
-              </motion.p>
+                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-[5px] bg-[#1D2821] border border-[#29362D] text-xs font-mono font-semibold text-[#91A88F]">
+                  {String.fromCharCode(65 + i)}
+                </span>
+                {opt}
+              </button>
+            );
+          })}
+        </div>
+
+        {revealed ? (
+          <div className="mt-5 space-y-2 rounded-[7px] border border-[#222D25] bg-[#131A16] px-4 py-3 text-sm leading-relaxed text-[#A7B3A9]">
+            {timedOut ? (
+              <p className="font-semibold text-[#A77D78]">
+                Tempo esgotado — era {question.character}.
+              </p>
+            ) : isCorrectPick ? (
+              <p className="font-semibold text-[#83A989]">
+                Acertou!
+                {timerEnabled && secondsLeft > FAST_BONUS_SECONDS
+                  ? " +1 bônus rápido"
+                  : ""}
+              </p>
             ) : (
-              <p className="absolute bottom-3 left-3 rounded-[7px] bg-[#101512]/80 border border-[#29362D] px-3 py-1 text-[10px] font-mono uppercase tracking-wider text-[#A7B3A9]">
-                Quem é?
+              <p className="font-semibold text-[#A77D78]">
+                Quase — a resposta é {question.character}.
+                {question.hint ? ` ${question.hint}` : ""}
               </p>
             )}
+            <p>{question.feedback}</p>
           </div>
-
-          <h2 className="font-display text-lg font-semibold text-[#DCE5DD] sm:text-xl">
-            {question.q}
-          </h2>
-
-          <motion.div
-            className="mt-6 grid gap-3"
-            variants={stagger(0.05, 0.08)}
-            initial={reduce ? false : "hidden"}
-            animate="visible"
-          >
-            {question.options.map((opt, i) => {
-              const isCorrect = i === question.correct;
-              const isSelected = i === selected;
-              let cls =
-                "border-[#29362D] bg-[#131A16] hover:border-[#789B7C]/50 hover:bg-[#1D2821] text-[#DCE5DD]";
-              if (revealed) {
-                if (isCorrect)
-                  cls = "border-[#83A989] bg-[#294C35]/45 text-[#DCE5DD]";
-                else if (isSelected)
-                  cls = "border-[#A77D78] bg-[#A77D78]/15 text-[#DCE5DD]";
-                else
-                  cls = "border-[#222D25] bg-[#131A16]/50 text-[#78877D] opacity-60";
-              }
-
-              return (
-                <motion.button
-                  key={`${question.id}-${opt}`}
-                  type="button"
-                  onClick={() => handleAnswer(i)}
-                  disabled={revealed}
-                  className={`flex cursor-pointer items-center gap-3 rounded-[7px] border px-4 py-3.5 text-left text-sm font-medium transition sm:text-base ${cls}`}
-                  variants={staggerItemSoft}
-                  whileTap={reduce || revealed ? undefined : { scale: 0.99 }}
-                  transition={pressTransition}
-                >
-                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-[5px] bg-[#1D2821] border border-[#29362D] text-xs font-mono font-semibold text-[#91A88F]">
-                    {String.fromCharCode(65 + i)}
-                  </span>
-                  {opt}
-                </motion.button>
-              );
-            })}
-          </motion.div>
-
-          <AnimatePresence>
-            {revealed ? (
-              <motion.div
-                className="mt-5 space-y-2 rounded-[7px] border border-[#222D25] bg-[#131A16] px-4 py-3 text-sm leading-relaxed text-[#A7B3A9]"
-                initial={reduce ? false : { opacity: 0, y: 6 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={reduce ? undefined : { opacity: 0 }}
-                transition={{ duration: reduce ? 0 : 0.3, ease: softEase }}
-              >
-                {timedOut ? (
-                  <p className="font-semibold text-[#A77D78]">
-                    Tempo esgotado — era {question.character}.
-                  </p>
-                ) : isCorrectPick ? (
-                  <p className="font-semibold text-[#83A989]">
-                    Acertou!
-                    {timerEnabled && secondsLeft > FAST_BONUS_SECONDS
-                      ? " +1 bônus rápido"
-                      : ""}
-                  </p>
-                ) : (
-                  <p className="font-semibold text-[#A77D78]">
-                    Quase — a resposta é {question.character}.
-                    {question.hint ? ` ${question.hint}` : ""}
-                  </p>
-                )}
-                <p>{question.feedback}</p>
-              </motion.div>
-            ) : null}
-          </AnimatePresence>
-        </motion.div>
-      </AnimatePresence>
+        ) : null}
+      </div>
     </div>
   );
 }

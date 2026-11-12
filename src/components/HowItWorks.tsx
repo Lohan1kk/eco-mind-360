@@ -26,7 +26,7 @@ const STEPS = [
 
 export function HowItWorks() {
   return (
-    <section id="como-funciona" className="section bg-[#131A16] border-b border-[#222D25]">
+    <section id="como-funciona" className="section scroll-mt-20 bg-[#131A16] border-b border-[#222D25]">
       <div className="section-inner space-y-12">
         <div className="max-w-3xl space-y-3">
           <div className="badge-360">

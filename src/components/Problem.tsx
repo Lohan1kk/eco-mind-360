@@ -26,7 +26,7 @@ const ITEMS = [
 
 export function Problem() {
   return (
-    <section id="problema" className="section bg-[#101512] border-b border-[#222D25] relative">
+    <section id="problema" className="section scroll-mt-20 bg-[#101512] border-b border-[#222D25] relative">
       <div className="section-inner space-y-12">
         <div className="max-w-3xl space-y-3">
           <div className="badge-360">

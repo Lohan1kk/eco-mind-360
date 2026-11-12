@@ -35,7 +35,7 @@ export function LandCoverChart() {
           <BarChart
             data={LAND_COVER_DISTRIBUTION}
             layout="vertical"
-            margin={{ top: 5, right: 15, left: 40, bottom: 5 }}
+            margin={{ top: 5, right: 15, left: 0, bottom: 5 }}
           >
             <CartesianGrid strokeDasharray="3 3" stroke="#222D25" horizontal={false} />
             <XAxis type="number" domain={[0, 100]} unit="%" stroke="#78877D" fontSize={11} axisLine={{ stroke: '#222D25' }} />
@@ -46,7 +46,7 @@ export function LandCoverChart() {
               fontSize={11} 
               tickLine={false} 
               axisLine={{ stroke: '#222D25' }}
-              width={100}
+              width={108}
             />
             <Tooltip
               cursor={{ fill: 'rgba(36, 49, 41, 0.4)' }}

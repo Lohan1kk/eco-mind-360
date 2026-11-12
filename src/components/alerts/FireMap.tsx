@@ -266,75 +266,77 @@ export default function FireMap() {
         />
       )}
 
-      {/* Controles Superiores Compactos */}
-      <div className="pointer-events-none absolute inset-x-0 top-3 z-[1100] flex justify-center px-3">
-        <div
-          className="pointer-events-auto inline-flex items-center gap-1 rounded-[10px] border border-[#29362D] bg-[#171F1A]/95 p-1 shadow-lift backdrop-blur-md"
-          role="tablist"
-          aria-label="Tipo de mapa"
-        >
-          {(["map", "satellite"] as const).map((mode) => (
+      {/* HUD Superior Unificado (sem sobreposição em telas pequenas) */}
+      <div className="pointer-events-none absolute left-3 right-3 top-3 z-[1100] flex flex-col gap-2">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          {/* Telemetria e Refresh */}
+          <div className="flex items-center gap-1.5">
+            {sourceLabel ? (
+              <div className="pointer-events-auto truncate rounded-[7px] border border-[#29362D] bg-[#171F1A]/95 px-2.5 py-1.5 text-[11px] font-mono text-[#DCE5DD] shadow-soft backdrop-blur-md sm:px-3">
+                {sourceLabel}
+                <span className="hidden sm:inline text-[#91A88F]">{freshnessLabel}</span>
+                <span className="ml-1 text-[#78877D]">
+                  · {filteredAlerts.length} visíveis
+                </span>
+              </div>
+            ) : !loading ? (
+              <div className="pointer-events-auto rounded-[7px] border border-[#29362D] bg-[#171F1A]/95 px-3 py-1.5 text-xs font-mono text-[#A9A17A] shadow-soft">
+                Sem focos no momento
+              </div>
+            ) : null}
+
+            {!loading ? (
+              <button
+                type="button"
+                onClick={refreshData}
+                disabled={refreshing}
+                aria-label="Atualizar dados"
+                className="pointer-events-auto flex h-8 w-8 items-center justify-center rounded-[7px] border border-[#29362D] bg-[#171F1A]/95 text-[#A7B3A9] hover:text-[#DCE5DD] hover:bg-[#1D2821] shadow-soft transition disabled:opacity-50 touch-manipulation"
+              >
+                <RefreshCw size={13} className={refreshing ? "animate-spin text-[#91A88F]" : ""} />
+              </button>
+            ) : null}
+          </div>
+
+          {/* Seletor de Camadas */}
+          <div
+            className="pointer-events-auto inline-flex flex-wrap items-center gap-1 rounded-[10px] border border-[#29362D] bg-[#171F1A]/95 p-1 shadow-lift backdrop-blur-md"
+            role="tablist"
+            aria-label="Tipo de mapa"
+          >
+            {(["map", "satellite"] as const).map((mode) => (
+              <button
+                key={mode}
+                type="button"
+                role="tab"
+                aria-selected={layer === mode}
+                onClick={() => setLayer(mode)}
+                className={`min-h-7 rounded-[7px] px-3 py-1 text-xs font-medium transition-colors touch-manipulation ${
+                  layer === mode
+                    ? "bg-[#789B7C] text-[#101512] font-semibold"
+                    : "text-[#A7B3A9] hover:text-[#DCE5DD] hover:bg-[#1D2821]"
+                }`}
+              >
+                {mode === "map" ? "Mapa Vetorial" : "Satélite Orbital"}
+              </button>
+            ))}
+            <div className="h-4 w-px bg-[#222D25] mx-0.5" />
             <button
-              key={mode}
               type="button"
-              role="tab"
-              aria-selected={layer === mode}
-              onClick={() => setLayer(mode)}
-              className={`min-h-8 rounded-[7px] px-3.5 py-1 text-xs font-medium transition-colors touch-manipulation ${
-                layer === mode
-                  ? "bg-[#789B7C] text-[#101512] font-semibold"
-                  : "text-[#A7B3A9] hover:text-[#DCE5DD] hover:bg-[#1D2821]"
+              onClick={() => setShowBiomes((v) => !v)}
+              className={`min-h-7 rounded-[7px] px-2.5 py-1 text-xs font-medium transition-colors inline-flex items-center gap-1.5 touch-manipulation ${
+                showBiomes
+                  ? "bg-[#1D2821] text-[#91A88F] border border-[#29362D]"
+                  : "text-[#78877D] hover:text-[#DCE5DD] hover:bg-[#1D2821]"
               }`}
             >
-              {mode === "map" ? "Mapa Vetorial" : "Satélite Orbital"}
+              <Trees size={13} className="text-[#789B7C]" />
+              <span>7 Biomas</span>
             </button>
-          ))}
-          <div className="h-4 w-px bg-[#222D25] mx-1" />
-          <button
-            type="button"
-            onClick={() => setShowBiomes((v) => !v)}
-            className={`min-h-8 rounded-[7px] px-3 py-1 text-xs font-medium transition-colors inline-flex items-center gap-1.5 touch-manipulation ${
-              showBiomes
-                ? "bg-[#1D2821] text-[#91A88F] border border-[#29362D]"
-                : "text-[#78877D] hover:text-[#DCE5DD] hover:bg-[#1D2821]"
-            }`}
-          >
-            <Trees size={13} className="text-[#789B7C]" />
-            <span>7 Biomas {showBiomes ? "Ativos" : "Ocultos"}</span>
-          </button>
-        </div>
-      </div>
-
-      {/* Telemetria e Filtros de Nível */}
-      <div className="pointer-events-none absolute left-3 right-3 top-14 sm:top-14 z-[1100] flex flex-col gap-2">
-        <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
-          {sourceLabel ? (
-            <div className="pointer-events-auto max-w-[calc(100%-2.75rem)] truncate rounded-[7px] border border-[#29362D] bg-[#171F1A]/95 px-2.5 py-1.5 text-[11px] font-mono text-[#DCE5DD] shadow-soft backdrop-blur-md sm:max-w-none sm:px-3">
-              {sourceLabel}
-              <span className="hidden sm:inline text-[#91A88F]">{freshnessLabel}</span>
-              <span className="ml-1 text-[#78877D]">
-                · {filteredAlerts.length} visíveis
-              </span>
-            </div>
-          ) : !loading ? (
-            <div className="pointer-events-auto rounded-[7px] border border-[#29362D] bg-[#171F1A]/95 px-3 py-1.5 text-xs font-mono text-[#A9A17A] shadow-soft">
-              Sem focos no momento
-            </div>
-          ) : null}
-
-          {!loading ? (
-            <button
-              type="button"
-              onClick={refreshData}
-              disabled={refreshing}
-              aria-label="Atualizar dados"
-              className="pointer-events-auto flex h-8 w-8 items-center justify-center rounded-[7px] border border-[#29362D] bg-[#171F1A]/95 text-[#A7B3A9] hover:text-[#DCE5DD] hover:bg-[#1D2821] shadow-soft transition disabled:opacity-50 touch-manipulation"
-            >
-              <RefreshCw size={13} className={refreshing ? "animate-spin text-[#91A88F]" : ""} />
-            </button>
-          ) : null}
+          </div>
         </div>
 
+        {/* Filtros de Nível FRP */}
         {showLevelFilters ? (
           <div className="pointer-events-auto flex max-w-full w-fit gap-1 overflow-x-auto rounded-[7px] border border-[#29362D] bg-[#171F1A]/95 p-1 shadow-soft backdrop-blur-md [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             <button
@@ -391,7 +393,7 @@ export default function FireMap() {
       </div>
 
       {/* Legenda Inferior Esquerda */}
-      <div className="pointer-events-none absolute bottom-[max(1.25rem,env(safe-area-inset-bottom))] left-2 z-[1100] sm:bottom-6 sm:left-3">
+      <div className="pointer-events-none absolute bottom-4 left-3 z-[1100] sm:bottom-6 sm:left-4">
         <div className="pointer-events-auto">
           <FireLegend />
         </div>
@@ -402,14 +404,14 @@ export default function FireMap() {
         type="button"
         onClick={openReport}
         aria-label="Reportar queimada"
-        className="absolute bottom-[max(1.25rem,env(safe-area-inset-bottom))] right-3 z-[1100] flex items-center gap-2 rounded-[10px] border border-[#29362D] bg-[#1D2821] hover:bg-[#243129] px-3.5 py-2.5 text-xs font-medium text-[#DCE5DD] shadow-lift transition touch-manipulation sm:bottom-6 sm:right-4"
+        className="absolute bottom-4 right-3 z-[1100] flex items-center gap-2 rounded-[10px] border border-[#29362D] bg-[#1D2821] hover:bg-[#243129] px-3.5 py-2.5 text-xs font-medium text-[#DCE5DD] shadow-lift transition touch-manipulation sm:bottom-6 sm:right-4"
       >
         <Plus size={15} className="text-[#91A88F]" />
         <span className="hidden sm:inline">Reportar foco</span>
       </button>
 
       {error && !modalOpen ? (
-        <div className="absolute bottom-20 right-3 z-[1100] flex max-w-[min(20rem,calc(100vw-5rem))] flex-col gap-2 rounded-[10px] border border-[#A77D78]/40 bg-[#171F1A] px-3.5 py-2.5 text-xs text-[#DCE5DD] shadow-lift sm:right-4">
+        <div className="absolute bottom-16 right-3 z-[1100] flex max-w-[min(20rem,calc(100vw-5rem))] flex-col gap-2 rounded-[10px] border border-[#A77D78]/40 bg-[#171F1A] px-3.5 py-2.5 text-xs text-[#DCE5DD] shadow-lift sm:right-4">
           <p className="text-[#A77D78]">{error}</p>
           <button
             type="button"

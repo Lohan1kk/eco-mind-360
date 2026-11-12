@@ -19,35 +19,17 @@ const NAV_LINKS = [
   { href: '/metodologia', label: 'Metodologia' },
 ];
 
-export function Header({ solid = false }: { solid?: boolean }) {
+export function Header() {
   const pathname = usePathname();
-  const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
-
-  const isHome = pathname === '/';
-  const isSolid = solid || scrolled || open || !isHome;
-
-  useEffect(() => {
-    if (solid) return;
-    const onScroll = () => setScrolled(window.scrollY > 20);
-    onScroll();
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
-  }, [solid]);
 
   useEffect(() => {
     setOpen(false);
   }, [pathname]);
 
   return (
-    <header
-      className={`fixed inset-x-0 top-0 z-50 transition-all duration-200 ${
-        isSolid
-          ? 'border-b border-[#222D25] bg-[#131A16]/90 backdrop-blur-xl'
-          : 'border-b border-transparent bg-transparent'
-      }`}
-    >
-      <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-3 md:px-8">
+    <header className="fixed inset-x-0 top-0 z-50 border-b border-[#222D25] bg-[#131A16]/95 backdrop-blur-xl transition-colors">
+      <div className="mx-auto flex h-14 max-w-7xl items-center justify-between gap-4 px-5 md:px-8">
         {/* Logo EcoMind 360 */}
         <Link href="/" className="flex items-center gap-2.5 group">
           <div className="relative h-8 w-8">

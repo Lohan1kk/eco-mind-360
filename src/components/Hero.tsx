@@ -3,7 +3,6 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { motion, AnimatePresence } from 'framer-motion';
 import { 
   MapPin, 
   LayoutDashboard, 
@@ -19,7 +18,7 @@ export function Hero() {
   const activeBiome = BIOMES_LIST.find((b) => b.id === activeBiomeId) || BIOMES_LIST[0];
 
   return (
-    <section className="relative min-h-[88svh] overflow-hidden bg-[#101512] text-[#DCE5DD] flex flex-col justify-between pt-28 pb-12 border-b border-[#222D25]">
+    <section className="relative min-h-[85svh] overflow-hidden bg-[#101512] text-[#DCE5DD] flex flex-col justify-between pt-24 pb-12 border-b border-[#222D25]">
       {/* Background Ambiental Sutil */}
       <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
         <div className="absolute inset-0 opacity-20">
@@ -46,25 +45,15 @@ export function Hero() {
       <div className="relative z-10 section-inner flex-1 flex flex-col justify-center py-8 md:py-12">
         <div className="max-w-3xl space-y-6">
           {/* Badge Orbital */}
-          <motion.div
-            initial={{ opacity: 0, y: -8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3 }}
-            className="badge-360"
-          >
+          <div className="badge-360">
             <span className="inline-flex rounded-full h-1.5 w-1.5 bg-[#83A989]" />
             <span>Monitoramento Orbital 360° Ativo</span>
             <span className="text-[#78877D]">·</span>
             <span className="text-[#A7B3A9]">INPE & NASA FIRMS</span>
-          </motion.div>
+          </div>
 
           {/* Título Principal */}
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.35, delay: 0.05 }}
-            className="space-y-4"
-          >
+          <div className="space-y-4">
             <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-semibold tracking-tight leading-[1.1] text-[#DCE5DD]">
               Inteligência Territorial para os{' '}
               <span className="text-[#91A88F]">
@@ -75,15 +64,10 @@ export function Hero() {
               Da Amazônia ao Sistema Costeiro-Marinho: acompanhe queimadas em tempo real por satélite,
               taxas auditadas de desmatamento (PRODES 2024) e indicadores ecológicos com R$ 0 de custo.
             </p>
-          </motion.div>
+          </div>
 
           {/* Ações */}
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.35, delay: 0.1 }}
-            className="flex flex-wrap items-center gap-3 pt-2"
-          >
+          <div className="flex flex-wrap items-center gap-3 pt-2">
             <Link
               href="/mapa"
               className="btn-primary !py-2.5 !px-5 text-xs font-semibold cursor-pointer"
@@ -108,7 +92,7 @@ export function Hero() {
               <span>Explorar Biomas</span>
               <ArrowUpRight size={14} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
             </Link>
-          </motion.div>
+          </div>
         </div>
       </div>
 
@@ -132,6 +116,7 @@ export function Hero() {
                 return (
                   <button
                     key={biome.id}
+                    type="button"
                     onClick={() => setActiveBiomeId(biome.id)}
                     className={`px-3 py-1.5 rounded-[7px] text-xs font-medium transition-colors flex items-center gap-1.5 ${
                       isSelected
@@ -151,45 +136,39 @@ export function Hero() {
           </div>
 
           <div className="lg:col-span-5">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={activeBiome.id}
-                initial={{ opacity: 0, y: 6 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -6 }}
-                transition={{ duration: 0.2 }}
-                className="p-4 rounded-[10px] bg-[#171F1A] border border-[#29362D] flex items-center justify-between gap-4"
-              >
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="font-display font-semibold text-base text-[#DCE5DD]">
-                      {activeBiome.name}
-                    </span>
-                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-[5px] bg-[#1D2821] text-[#91A88F] border border-[#29362D]">
-                      {activeBiome.percentageBrazil}% BR
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-4 mt-1.5 text-xs text-[#A7B3A9]">
-                    <span className="flex items-center gap-1 text-[#83A989] font-mono">
-                      <Trees size={13} />
-                      {activeBiome.nativeVegetationPercentage}% nativa
-                    </span>
-                    <span className="flex items-center gap-1 text-[#A9A17A] font-mono">
-                      <Flame size={13} />
-                      {activeBiome.activeFireHotspots24h} focos
-                    </span>
-                  </div>
+            <div
+              key={activeBiome.id}
+              className="p-4 rounded-[10px] bg-[#171F1A] border border-[#29362D] flex items-center justify-between gap-4 transition-colors"
+            >
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="font-display font-semibold text-base text-[#DCE5DD]">
+                    {activeBiome.name}
+                  </span>
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded-[5px] bg-[#1D2821] text-[#91A88F] border border-[#29362D]">
+                    {activeBiome.percentageBrazil}% BR
+                  </span>
                 </div>
+                <div className="flex items-center gap-4 mt-1.5 text-xs text-[#A7B3A9]">
+                  <span className="flex items-center gap-1 text-[#83A989] font-mono">
+                    <Trees size={13} />
+                    {activeBiome.nativeVegetationPercentage}% nativa
+                  </span>
+                  <span className="flex items-center gap-1 text-[#A9A17A] font-mono">
+                    <Flame size={13} />
+                    {activeBiome.activeFireHotspots24h} focos
+                  </span>
+                </div>
+              </div>
 
-                <Link
-                  href={`/biomas/${activeBiome.id}`}
-                  className="btn-secondary !py-1.5 !px-3 text-xs font-medium shrink-0"
-                >
-                  <span>Ficha</span>
-                  <ArrowUpRight size={13} />
-                </Link>
-              </motion.div>
-            </AnimatePresence>
+              <Link
+                href={`/biomas/${activeBiome.id}`}
+                className="btn-secondary !py-1.5 !px-3 text-xs font-medium shrink-0"
+              >
+                <span>Ficha</span>
+                <ArrowUpRight size={13} />
+              </Link>
+            </div>
           </div>
         </div>
       </div>

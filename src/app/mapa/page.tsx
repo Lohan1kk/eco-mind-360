@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 
 export default function MapaPage() {
   return (
-    <div className="flex h-[calc(100dvh-3.75rem)] w-full flex-col overflow-hidden relative bg-[#101512]">
+    <div className="flex flex-1 min-h-0 w-full flex-col overflow-hidden relative bg-[#101512]">
       <div className="shrink-0 border-b border-[#222D25] bg-[#131A16] px-4 py-2 md:px-8 md:py-2.5 z-10">
         <AlertaIntro />
       </div>

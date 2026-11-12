@@ -4,53 +4,25 @@ import { motion, useReducedMotion } from "framer-motion";
 import type { ReactNode } from "react";
 import {
   hoverPresets,
-  revealTransition,
-  revealVariants,
-  revealViewport,
-  stagger,
-  staggerItem,
-  staggerItemSoft,
-  type RevealVariantName,
+   type RevealVariantName,
 } from "./variants";
 
 type RevealProps = {
   children: ReactNode;
   className?: string;
   delayMs?: number;
-  /** Motion recipe — default matches previous fade-up reveal. */
   variant?: RevealVariantName;
-  /** Re-run every time the element enters the viewport (default: once). */
   once?: boolean;
 };
 
 /**
- * Scroll reveal wrapper — single place for whileInView + reduced-motion.
+ * Safe wrapper that guarantees content is always visible (never stuck at opacity: 0 on SSR/hydration).
  */
 export function Reveal({
   children,
   className = "",
-  delayMs = 0,
-  variant = "fadeUp",
-  once = true,
 }: RevealProps) {
-  const reduce = useReducedMotion();
-
-  if (reduce) {
-    return <div className={className}>{children}</div>;
-  }
-
-  return (
-    <motion.div
-      className={className}
-      variants={revealVariants[variant]}
-      initial="hidden"
-      whileInView="visible"
-      viewport={{ ...revealViewport, once }}
-      transition={revealTransition(delayMs)}
-    >
-      {children}
-    </motion.div>
-  );
+  return <div className={className}>{children}</div>;
 }
 
 type StaggerRevealProps = {
@@ -61,54 +33,22 @@ type StaggerRevealProps = {
   once?: boolean;
 };
 
-/**
- * Parent for intentional cascades — children should be `StaggerItem`.
- * Use for section headers and badge rows, not for every block on the page.
- */
 export function StaggerReveal({
   children,
   className = "",
-  staggerChildren = 0.1,
-  delayChildren = 0.05,
-  once = true,
 }: StaggerRevealProps) {
-  const reduce = useReducedMotion();
-
-  if (reduce) {
-    return <div className={className}>{children}</div>;
-  }
-
-  return (
-    <motion.div
-      className={className}
-      variants={stagger(staggerChildren, delayChildren)}
-      initial="hidden"
-      whileInView="visible"
-      viewport={{ ...revealViewport, once }}
-    >
-      {children}
-    </motion.div>
-  );
+  return <div className={className}>{children}</div>;
 }
 
 export function StaggerItem({
   children,
   className = "",
-  soft = false,
 }: {
   children: ReactNode;
   className?: string;
-  /** Softer/faster child — secondary copy under a headline */
   soft?: boolean;
 }) {
-  return (
-    <motion.div
-      className={className}
-      variants={soft ? staggerItemSoft : staggerItem}
-    >
-      {children}
-    </motion.div>
-  );
+  return <div className={className}>{children}</div>;
 }
 
 type MotionPressProps = {

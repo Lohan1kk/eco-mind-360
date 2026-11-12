@@ -1,24 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { motion, useReducedMotion } from "framer-motion";
 import { FolkloreQuiz } from "@/components/FolkloreQuiz";
 import { PageIntro } from "@/components/PageIntro";
 import { Quiz } from "@/components/Quiz";
-import {
-  enterTransition,
-  hoverLift,
-  pressTransition,
-  stagger,
-  staggerItemSoft,
-  tapPress,
-} from "@/components/motion";
 
 type Mode = "select" | "eco" | "folklore";
 
 export function QuizPageClient() {
   const [mode, setMode] = useState<Mode>("select");
-  const reduce = useReducedMotion();
 
   return (
     <div className="section-inner">
@@ -45,18 +35,9 @@ export function QuizPageClient() {
 
       <div className="mt-10">
         {mode === "select" ? (
-          <motion.div
-            className="mx-auto grid max-w-3xl gap-4 sm:grid-cols-2"
-            variants={stagger(0.1, 0.06)}
-            initial={reduce ? false : "hidden"}
-            animate="visible"
-          >
-            <motion.button
+          <div className="mx-auto grid max-w-3xl gap-4 sm:grid-cols-2">
+            <button
               type="button"
-              variants={staggerItemSoft}
-              whileHover={reduce ? undefined : hoverLift}
-              whileTap={reduce ? undefined : tapPress}
-              transition={pressTransition}
               onClick={() => setMode("eco")}
               className="rounded-[10px] border border-[#29362D] bg-[#171F1A] cursor-pointer p-6 text-left transition hover:border-[#789B7C]/50 hover:bg-[#1D2821]"
             >
@@ -70,14 +51,10 @@ export function QuizPageClient() {
                 Desmatamento, ferramentas do app e dados do clima — o conteúdo do
                 site.
               </p>
-            </motion.button>
+            </button>
 
-            <motion.button
+            <button
               type="button"
-              variants={staggerItemSoft}
-              whileHover={reduce ? undefined : hoverLift}
-              whileTap={reduce ? undefined : tapPress}
-              transition={pressTransition}
               onClick={() => setMode("folklore")}
               className="rounded-[10px] border border-[#29362D] bg-[#171F1A] cursor-pointer p-6 text-left transition hover:border-[#789B7C]/50 hover:bg-[#1D2821]"
             >
@@ -91,16 +68,12 @@ export function QuizPageClient() {
                 Imagem velada, timer e combo — lore do folclore com laço
                 ambiental.
               </p>
-            </motion.button>
-          </motion.div>
+            </button>
+          </div>
         ) : null}
 
         {mode === "eco" ? (
-          <motion.div
-            initial={reduce ? false : { opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={enterTransition}
-          >
+          <div>
             <div className="mb-6 flex justify-end">
               <button
                 type="button"
@@ -111,15 +84,11 @@ export function QuizPageClient() {
               </button>
             </div>
             <Quiz />
-          </motion.div>
+          </div>
         ) : null}
 
         {mode === "folklore" ? (
-          <motion.div
-            initial={reduce ? false : { opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={enterTransition}
-          >
+          <div>
             <div className="mb-6 flex justify-end">
               <button
                 type="button"
@@ -130,7 +99,7 @@ export function QuizPageClient() {
               </button>
             </div>
             <FolkloreQuiz onChangeMode={() => setMode("select")} />
-          </motion.div>
+          </div>
         ) : null}
       </div>
     </div>
