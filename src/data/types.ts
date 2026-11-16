@@ -24,7 +24,6 @@ export interface BiomeInfo {
   borderColor: string;
   deforestationProdes2024Km2: number | null; // null if marine or not applicable
   deforestationTrendPercent: number | null; // comparison with 2023
-  activeFireHotspots24h: number;
   sources: {
     name: string;
     url: string;

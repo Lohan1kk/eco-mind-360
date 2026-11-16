@@ -1,22 +1,12 @@
-import type { Metadata } from 'next';
-import { AlertaIntro } from '@/components/alerts/AlertaIntro';
-import { AlertaQueimadasClient } from '@/components/alerts/AlertaQueimadasClient';
+import type { Metadata } from "next";
+import MapaQueimadasFirms from "@/components/mapa-firms/MapaQueimadasFirms";
 
 export const metadata: Metadata = {
-  title: 'Alerta de Queimadas',
+  title: "Alerta de Queimadas — NASA FIRMS",
   description:
-    'Mapa mundial e brasileiro de focos de queimada com níveis por FRP (INPE Brasil + NASA FIRMS).',
+    "Mapa brasileiro de focos de calor quase em tempo real (~3 h de latência) com níveis por FRP via NASA FIRMS (VIIRS 375 m e MODIS 1 km).",
 };
 
 export default function AlertaQueimadasPage() {
-  return (
-    <div className="flex flex-1 min-h-0 w-full flex-col overflow-hidden relative bg-[#101512]">
-      <div className="shrink-0 border-b border-[#222D25] bg-[#131A16] px-4 py-2 md:px-8 md:py-2.5 z-10">
-        <AlertaIntro />
-      </div>
-      <div className="min-h-0 flex-1 relative w-full h-full">
-        <AlertaQueimadasClient />
-      </div>
-    </div>
-  );
+  return <MapaQueimadasFirms />;
 }

@@ -1,31 +1,55 @@
 'use client';
 
-import React, { createContext, useContext, useEffect } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 
-type Theme = 'dark';
+export type Theme = 'dark' | 'light';
 
 interface ThemeContextType {
   theme: Theme;
   toggleTheme: () => void;
+  setTheme: (t: Theme) => void;
 }
 
 const ThemeContext = createContext<ThemeContextType>({
   theme: 'dark',
   toggleTheme: () => {},
+  setTheme: () => {},
 });
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
+  const [theme, setThemeState] = useState<Theme>('dark');
+
   useEffect(() => {
-    document.documentElement.classList.add('dark');
+    try {
+      const saved = window.localStorage.getItem('ecomind-theme') as Theme | null;
+      if (saved === 'light' || saved === 'dark') {
+        setThemeState(saved);
+      }
+    } catch {
+      // ignore storage errors
+    }
   }, []);
 
-  const toggleTheme = () => {
-    // Tema exclusivamente Dark Botanical conforme diretriz de arte
-  };
+  useEffect(() => {
+    const root = document.documentElement;
+    root.classList.toggle('dark', theme === 'dark');
+    root.classList.toggle('light', theme === 'light');
+    root.dataset.theme = theme;
+    try {
+      window.localStorage.setItem('ecomind-theme', theme);
+    } catch {
+      // ignore
+    }
+  }, [theme]);
+
+  const setTheme = (next: Theme) => setThemeState(next);
+  const toggleTheme = () => setThemeState((prev) => (prev === 'dark' ? 'light' : 'dark'));
 
   return (
-    <ThemeContext.Provider value={{ theme: 'dark', toggleTheme }}>
-      <div className="dark bg-[#101512] text-[#DCE5DD] min-h-screen">{children}</div>
+    <ThemeContext.Provider value={{ theme, toggleTheme, setTheme }}>
+      <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)] transition-colors duration-200">
+        {children}
+      </div>
     </ThemeContext.Provider>
   );
 }

@@ -30,14 +30,21 @@ export default function AlertasPage() {
   const [activeAlert, setActiveAlert] = useState<EnvironmentalAlert | null>(null);
   const [liveSourceInfo, setLiveSourceInfo] = useState<string | null>(null);
 
-  // Buscar feed em tempo real da NASA / INPE
+  // Buscar feed quase em tempo real da NASA FIRMS / INPE
   useEffect(() => {
     fetch('/api/alerts/firms')
       .then(res => res.json())
       .then(data => {
         if (data.alerts && data.alerts.length > 0) {
           setAlerts(data.alerts);
-          setLiveSourceInfo(data.mode === 'live' ? 'Conexão NASA FIRMS Ativa (Feed 24h)' : 'Base Oficial Auditada (Última auditoria)');
+          const ts = data.lastUpdated
+            ? new Date(data.lastUpdated).toLocaleString('pt-BR')
+            : '';
+          setLiveSourceInfo(
+            data.mode === 'live'
+              ? `Fonte: NASA FIRMS (VIIRS/MODIS) · últimas 24 h · atualizado em ${ts}`
+              : `Cache NASA FIRMS / Base Auditada · ${ts}`
+          );
         }
       })
       .catch(err => {

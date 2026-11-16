@@ -1,6 +1,10 @@
+'use client';
+
 import React from 'react';
 import Link from 'next/link';
 import { BIOMES_LIST } from '@/data/biomes';
+import type { ResumoFocos } from '@/lib/firms/types';
+import { useResumoFocos } from '@/lib/firms/useResumoFocos';
 import { 
   Flame, 
   Shield, 
@@ -10,7 +14,19 @@ import {
   TrendingDown
 } from 'lucide-react';
 
-export function BiomeSummaryGrid() {
+export function BiomeSummaryGrid({ resumo: externalResumo }: { resumo?: ResumoFocos | null }) {
+  const { resumo: hookResumo } = useResumoFocos('24h', externalResumo);
+  const resumo = externalResumo ?? hookResumo;
+
+  const updatedShort = resumo?.atualizadoEm
+    ? new Date(resumo.atualizadoEm).toLocaleString('pt-BR', {
+        day: '2-digit',
+        month: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+      })
+    : null;
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#222D25] pb-4">
@@ -19,7 +35,7 @@ export function BiomeSummaryGrid() {
             Panorama dos 7 Ambientes Brasileiros
           </h2>
           <p className="text-xs sm:text-sm text-[#A7B3A9] mt-1">
-            Ficha sintética com indicadores territoriais consolidados do IBGE, MapBiomas e INPE
+            Ficha sintética com indicadores territoriais consolidados do IBGE, MapBiomas, INPE e NASA FIRMS
           </p>
         </div>
         <Link 
@@ -34,6 +50,7 @@ export function BiomeSummaryGrid() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {BIOMES_LIST.map((biome) => {
           const isMarine = biome.id === 'costeiro_marinho';
+          const count = resumo?.porBioma[biome.id]?.total;
 
           return (
             <div
@@ -121,23 +138,32 @@ export function BiomeSummaryGrid() {
                 </div>
 
                 {/* Indicador de Focos e Desmatamento */}
-                <div className="mt-4 pt-3 border-t border-[#222D25] flex items-center justify-between text-xs">
-                  <div className="flex items-center gap-1.5 text-[#A9A17A] font-medium">
-                    <Flame size={13} />
-                    <span className="font-mono">{biome.activeFireHotspots24h}</span>
-                    <span className="text-[11px] text-[#78877D] font-normal">focos 24h</span>
-                  </div>
-
-                  {biome.deforestationTrendPercent !== null ? (
-                    <div className="flex items-center gap-1 text-[11px] text-[#83A989] font-mono">
-                      <TrendingDown size={13} />
-                      <span>{biome.deforestationTrendPercent}% PRODES 24</span>
+                <div className="mt-4 pt-3 border-t border-[#222D25] space-y-1 text-xs">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1.5 text-[#A9A17A] font-medium">
+                      <Flame size={13} />
+                      <span className="font-mono">
+                        {count !== undefined ? count.toLocaleString('pt-BR') : '—'}
+                      </span>
+                      <span className="text-[11px] text-[#78877D] font-normal">
+                        focos (últimas 24 h)
+                      </span>
                     </div>
-                  ) : (
-                    <span className="text-[10px] text-[#78877D] font-mono">
-                      {isMarine ? 'Eco Marinho (ZEE)' : 'Dados em Análise'}
-                    </span>
-                  )}
+
+                    {biome.deforestationTrendPercent !== null ? (
+                      <div className="flex items-center gap-1 text-[11px] text-[#83A989] font-mono">
+                        <TrendingDown size={13} />
+                        <span>{biome.deforestationTrendPercent}% PRODES 24</span>
+                      </div>
+                    ) : (
+                      <span className="text-[10px] text-[#78877D] font-mono">
+                        {isMarine ? 'Eco Marinho (ZEE)' : 'Dados em Análise'}
+                      </span>
+                    )}
+                  </div>
+                  <div className="text-[10px] font-mono text-[#78877D]">
+                    Fonte: NASA FIRMS{updatedShort ? ` · ${updatedShort}` : ''}
+                  </div>
                 </div>
               </div>
 
@@ -151,7 +177,7 @@ export function BiomeSummaryGrid() {
                   <ArrowUpRight size={13} />
                 </Link>
                 <Link
-                  href="/mapa"
+                  href={`/mapa?bioma=${biome.id}&periodo=24h`}
                   className="btn-secondary !py-1.5 !px-3 text-xs font-medium flex items-center gap-1"
                   title="Ver no mapa interativo"
                 >

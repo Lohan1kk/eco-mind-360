@@ -12,10 +12,23 @@ import {
   Compass
 } from 'lucide-react';
 import { BIOMES_LIST } from '@/data/biomes';
+import type { BiomeId } from '@/data/types';
+import type { ResumoFocos } from '@/lib/firms/types';
+import { useResumoFocos } from '@/lib/firms/useResumoFocos';
+import { FreshnessSeal } from '@/components/firms/FreshnessSeal';
 
-export function Hero() {
-  const [activeBiomeId, setActiveBiomeId] = useState<string>('amazonia');
+export function Hero({ initialResumo }: { initialResumo?: ResumoFocos | null }) {
+  const [activeBiomeId, setActiveBiomeId] = useState<BiomeId>('amazonia');
   const activeBiome = BIOMES_LIST.find((b) => b.id === activeBiomeId) || BIOMES_LIST[0];
+  const { resumo } = useResumoFocos('24h', initialResumo);
+
+  const biomeFocos = resumo?.porBioma[activeBiome.id]?.total;
+  const updatedStr = resumo?.atualizadoEm
+    ? new Date(resumo.atualizadoEm).toLocaleTimeString('pt-BR', {
+        hour: '2-digit',
+        minute: '2-digit',
+      })
+    : null;
 
   return (
     <section className="relative min-h-[85svh] overflow-hidden bg-[#101512] text-[#DCE5DD] flex flex-col justify-between pt-24 pb-12 border-b border-[#222D25]">
@@ -47,9 +60,9 @@ export function Hero() {
           {/* Badge Orbital */}
           <div className="badge-360">
             <span className="inline-flex rounded-full h-1.5 w-1.5 bg-[#83A989]" />
-            <span>Monitoramento Orbital 360° Ativo</span>
+            <span>Monitoramento Orbital 360° Quase em Tempo Real (~3 h)</span>
             <span className="text-[#78877D]">·</span>
-            <span className="text-[#A7B3A9]">INPE & NASA FIRMS</span>
+            <span className="text-[#A7B3A9]">NASA FIRMS (VIIRS/MODIS) & INPE</span>
           </div>
 
           {/* Título Principal */}
@@ -61,7 +74,7 @@ export function Hero() {
               </span>
             </h1>
             <p className="max-w-2xl text-base sm:text-lg text-[#A7B3A9] font-normal leading-relaxed">
-              Da Amazônia ao Sistema Costeiro-Marinho: acompanhe queimadas em tempo real por satélite,
+              Da Amazônia ao Sistema Costeiro-Marinho: acompanhe focos de calor por satélite quase em tempo real (latência orbital de ~3 h),
               taxas auditadas de desmatamento (PRODES 2024) e indicadores ecológicos com R$ 0 de custo.
             </p>
           </div>
@@ -93,6 +106,17 @@ export function Hero() {
               <ArrowUpRight size={14} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
             </Link>
           </div>
+
+          {/* Selo de Frescor sempre visível */}
+          <div className="pt-1">
+            <FreshnessSeal
+              atualizadoEm={resumo?.atualizadoEm}
+              ultimoFocoEm={resumo?.ultimoFocoEm}
+              desatualizado={resumo?.desatualizado}
+              fonte={resumo?.fonte}
+              periodo="24h"
+            />
+          </div>
         </div>
       </div>
 
@@ -103,7 +127,7 @@ export function Hero() {
             <div className="flex items-center justify-between text-xs">
               <span className="flex items-center gap-1.5 uppercase tracking-wider text-[11px] font-mono text-[#91A88F]">
                 <Compass size={13} />
-                Radar dos 7 Ambientes
+                Radar dos 7 Ambientes (últimas 24 h)
               </span>
               <span className="hidden sm:inline text-[#78877D] text-[11px]">
                 Selecione para alternar telemetria
@@ -149,23 +173,29 @@ export function Hero() {
                     {activeBiome.percentageBrazil}% BR
                   </span>
                 </div>
-                <div className="flex items-center gap-4 mt-1.5 text-xs text-[#A7B3A9]">
+                <div className="flex flex-wrap items-center gap-3 mt-1.5 text-xs text-[#A7B3A9]">
                   <span className="flex items-center gap-1 text-[#83A989] font-mono">
                     <Trees size={13} />
                     {activeBiome.nativeVegetationPercentage}% nativa
                   </span>
                   <span className="flex items-center gap-1 text-[#A9A17A] font-mono">
                     <Flame size={13} />
-                    {activeBiome.activeFireHotspots24h} focos
+                    {biomeFocos !== undefined
+                      ? `${biomeFocos.toLocaleString('pt-BR')} focos (últimas 24 h)`
+                      : 'Indisponível'}
                   </span>
+                </div>
+                <div className="mt-1 text-[10px] font-mono text-[#78877D]">
+                  Fonte: NASA FIRMS (VIIRS/MODIS)
+                  {updatedStr ? ` · atualizado às ${updatedStr}` : ''}
                 </div>
               </div>
 
               <Link
-                href={`/biomas/${activeBiome.id}`}
+                href={`/mapa?bioma=${activeBiome.id}&periodo=24h`}
                 className="btn-secondary !py-1.5 !px-3 text-xs font-medium shrink-0"
               >
-                <span>Ficha</span>
+                <span>Ver no Mapa</span>
                 <ArrowUpRight size={13} />
               </Link>
             </div>

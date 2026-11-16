@@ -1,10 +1,12 @@
 @import "leaflet/dist/leaflet.css";
+@import "maplibre-gl/dist/maplibre-gl.css";
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-:root {
+:root,
+html.dark {
   --background: #101512;
   --background-secondary: #131A16;
 
@@ -14,7 +16,7 @@
 
   --foreground: #DCE5DD;
   --foreground-secondary: #A7B3A9;
-  --muted: #78877D;
+  --muted: #88998E;
 
   --primary: #789B7C;
   --primary-hover: #91B596;
@@ -29,7 +31,22 @@
 
   --success: #83A989;
   --warning: #A9A17A;
-  --danger: #A77D78;
+  --danger: #D96B66;
+
+  /* Tokens de identidade dos 7 biomas brasileiros */
+  --biome-amazonia: #789B7C;
+  --biome-cerrado: #D4A359;
+  --biome-mata-atlantica: #5B9A68;
+  --biome-caatinga: #C89D66;
+  --biome-pampa: #84A970;
+  --biome-pantanal: #528B88;
+  --biome-costeiro-marinho: #3B7A9E;
+
+  /* Tokens da escala de calor (FRP: amarelo -> laranja -> vermelho -> vinho) */
+  --fire-baixo: #FACC15;
+  --fire-medio: #FB923C;
+  --fire-alto: #EF4444;
+  --fire-critico: #991B1B;
 
   /* Compatibilidade de tokens existentes */
   --forest-mid: #789B7C;
@@ -47,11 +64,67 @@
   --radius-sm: 7px;
   --radius-md: 10px;
   --radius-lg: 14px;
+  color-scheme: dark;
+}
+
+html.light {
+  --background: #F4F7F4;
+  --background-secondary: #EAEFE9;
+
+  --surface: #FFFFFF;
+  --surface-elevated: #EDF3ED;
+  --surface-hover: #E1EBE2;
+
+  --foreground: #121C16;
+  --foreground-secondary: #2F4236;
+  --muted: #4A5E51;
+
+  --primary: #255C36;
+  --primary-hover: #1D492B;
+  --primary-dark: #163820;
+
+  --forest: #255C36;
+  --sage: #275937;
+  --moss: #3B6947;
+
+  --border: #C5D3C8;
+  --border-subtle: #D5E0D7;
+
+  --success: #1E6B3B;
+  --warning: #946200;
+  --danger: #B91C1C;
+
+  /* Tokens de identidade dos 7 biomas brasileiros (tema claro) */
+  --biome-amazonia: #2E6F40;
+  --biome-cerrado: #B7791F;
+  --biome-mata-atlantica: #276749;
+  --biome-caatinga: #9C5A1A;
+  --biome-pampa: #4C7C34;
+  --biome-pantanal: #28666E;
+  --biome-costeiro-marinho: #1E567A;
+
+  /* Tokens da escala de calor (FRP: amarelo -> laranja -> vermelho -> vinho) */
+  --fire-baixo: #CA8A04;
+  --fire-medio: #EA580C;
+  --fire-alto: #DC2626;
+  --fire-critico: #7F1D1D;
+
+  --forest-mid: #255C36;
+  --sprout: #275937;
+  --sprout-deep: #1D492B;
+  --mist: #121C16;
+  --mist-soft: #FFFFFF;
+  --ash: #2F4236;
+  --earth: #4A5E51;
+  --burn: #B91C1C;
+  --ink: #121C16;
+  --paper: #FFFFFF;
+  --line: #D5E0D7;
+  color-scheme: light;
 }
 
 html {
   scroll-behavior: smooth;
-  color-scheme: dark;
 }
 
 body {
@@ -64,9 +137,42 @@ body {
   overflow-x: hidden;
 }
 
+/* Ajustes automáticos de superfície para o modo claro em classes legadas */
+html.light .bg-\[\#101512\] {
+  background-color: var(--background) !important;
+}
+html.light .bg-\[\#131A16\],
+html.light .bg-\[\#131A16\]\/95 {
+  background-color: var(--background-secondary) !important;
+}
+html.light .bg-\[\#171F1A\],
+html.light .bg-\[\#171F1A\]\/95,
+html.light .bg-\[\#171F1A\]\/98 {
+  background-color: var(--surface) !important;
+}
+html.light .bg-\[\#1D2821\] {
+  background-color: var(--surface-elevated) !important;
+}
+html.light .text-\[\#DCE5DD\] {
+  color: var(--foreground) !important;
+}
+html.light .text-\[\#A7B3A9\] {
+  color: var(--foreground-secondary) !important;
+}
+html.light .text-\[\#78877D\] {
+  color: var(--muted) !important;
+}
+html.light .text-\[\#91A88F\] {
+  color: var(--sage) !important;
+}
+html.light .border-\[\#29362D\],
+html.light .border-\[\#222D25\] {
+  border-color: var(--border) !important;
+}
+
 ::selection {
   background: rgba(120, 155, 124, 0.25);
-  color: #DCE5DD;
+  color: var(--foreground);
 }
 
 .font-display {
@@ -116,19 +222,19 @@ body {
 .glass-panel {
   background: var(--surface);
   border: 1px solid var(--border);
-  box-shadow: 0 8px 28px -6px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 8px 28px -6px rgba(0, 0, 0, 0.25);
   border-radius: 10px;
   transition: border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .glass-panel:hover {
-  border-color: rgba(120, 155, 124, 0.35);
+  border-color: rgba(120, 155, 124, 0.45);
 }
 
 .panel-soft {
   background: var(--surface);
   border: 1px solid var(--border-subtle);
-  box-shadow: 0 6px 24px -6px rgba(0, 0, 0, 0.45);
+  box-shadow: 0 6px 24px -6px rgba(0, 0, 0, 0.2);
   border-radius: 10px;
   transition: border-color 0.2s ease, background-color 0.2s ease;
 }
@@ -140,12 +246,12 @@ body {
 /* Botões com Micro-interações Discretas */
 .btn-primary {
   background: var(--primary);
-  color: #101512;
+  color: #FFFFFF;
   font-weight: 600;
   font-size: 0.8125rem;
   padding: 0.625rem 1.25rem;
   border-radius: 7px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
   transition: background-color 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
   display: inline-flex;
   align-items: center;
@@ -154,9 +260,12 @@ body {
   border: 1px solid rgba(145, 181, 150, 0.25);
 }
 
+html.dark .btn-primary {
+  color: #101512;
+}
+
 .btn-primary:hover {
   background: var(--primary-hover);
-  color: #101512;
 }
 
 .btn-secondary {
@@ -167,7 +276,7 @@ body {
   font-size: 0.8125rem;
   padding: 0.625rem 1.25rem;
   border-radius: 7px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   transition: background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease;
   display: inline-flex;
   align-items: center;
@@ -183,7 +292,7 @@ body {
 
 .btn-ghost {
   color: var(--foreground);
-  background: rgba(23, 31, 26, 0.75);
+  background: var(--surface);
   backdrop-filter: blur(8px);
   border: 1px solid var(--border);
   font-weight: 500;
@@ -203,27 +312,6 @@ body {
   color: var(--foreground);
 }
 
-.btn-dark {
-  background: var(--surface-elevated);
-  color: var(--foreground);
-  border: 1px solid var(--border);
-  font-weight: 500;
-  font-size: 0.8125rem;
-  padding: 0.625rem 1.25rem;
-  border-radius: 7px;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
-  transition: background-color 0.18s ease, border-color 0.18s ease;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-}
-
-.btn-dark:hover {
-  background: var(--surface-hover);
-  border-color: var(--primary);
-}
-
 /* Badge Técnico 360 */
 .badge-360 {
   display: inline-flex;
@@ -239,6 +327,44 @@ body {
   background: var(--surface-elevated);
   color: var(--sage);
   border: 1px solid var(--border);
+}
+
+/* Foco visível acessível WCAG 2.2 AA */
+:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* MapLibre GL overrides — Atlas Moderno */
+.maplibregl-map {
+  font-family: var(--font-body), 'Inter', system-ui, sans-serif !important;
+}
+
+.maplibregl-popup-content {
+  background: var(--surface) !important;
+  color: var(--foreground) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 12px 32px -4px rgba(0, 0, 0, 0.45) !important;
+  padding: 12px !important;
+}
+
+.maplibregl-popup-tip {
+  border-top-color: var(--surface) !important;
+  border-bottom-color: var(--surface) !important;
+}
+
+.maplibregl-ctrl-attrib {
+  background: var(--surface) !important;
+  color: var(--muted) !important;
+  font-size: 10px !important;
+  border-radius: 6px !important;
+  border: 1px solid var(--border) !important;
+  opacity: 0.92;
+}
+
+.maplibregl-ctrl-attrib a {
+  color: var(--foreground-secondary) !important;
 }
 
 /* Scrollbar grafite discreto */
@@ -258,73 +384,6 @@ body {
 
 ::-webkit-scrollbar-thumb:hover {
   background: var(--muted);
-}
-
-/* Custom Leaflet overrides — Dark Botanical */
-.leaflet-container {
-  font-family: var(--font-body), 'Inter', system-ui, sans-serif !important;
-  background: #101512 !important;
-  width: 100% !important;
-  height: 100% !important;
-  min-height: 520px;
-  outline: none;
-}
-
-/* Filtro sutil nas tiles padrão para manter harmonia Dark Botanical */
-.leaflet-tile-pane {
-  filter: brightness(0.85) contrast(1.05) saturate(0.8);
-}
-
-.leaflet-popup-content-wrapper {
-  background: #171F1A !important;
-  color: #DCE5DD !important;
-  backdrop-filter: blur(12px) !important;
-  border: 1px solid #29362D !important;
-  border-radius: 10px !important;
-  box-shadow: 0 12px 28px -6px rgba(0, 0, 0, 0.7) !important;
-  padding: 4px !important;
-}
-
-.leaflet-popup-tip {
-  background: #171F1A !important;
-  border: 1px solid #29362D !important;
-}
-
-.leaflet-popup-close-button {
-  color: #A7B3A9 !important;
-}
-
-.leaflet-control-zoom a,
-.leaflet-control-layers {
-  background: #171F1A !important;
-  color: #DCE5DD !important;
-  border-color: #29362D !important;
-}
-
-.leaflet-control-zoom a:hover {
-  background: #243129 !important;
-  color: #DCE5DD !important;
-}
-
-.leaflet-control-attribution {
-  background: rgba(16, 21, 18, 0.85) !important;
-  color: #78877D !important;
-  font-size: 10px !important;
-}
-
-.leaflet-control-attribution a {
-  color: #A7B3A9 !important;
-}
-
-.biome-map-tooltip {
-  background: #171F1A !important;
-  color: #DCE5DD !important;
-  border: 1px solid #29362D !important;
-  border-radius: 7px !important;
-  padding: 4px 8px !important;
-  font-size: 11px !important;
-  font-weight: 500 !important;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.6) !important;
 }
 
 @media (prefers-reduced-motion: reduce) {

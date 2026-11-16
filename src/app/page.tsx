@@ -8,14 +8,19 @@ import { Glossary } from "@/components/Glossary";
 import { Team } from "@/components/Team";
 import { EvaluationSection } from "@/components/Evaluation";
 import { Encourage } from "@/components/Encourage";
+import { getResumoFocos } from "@/lib/firms/service";
 
-export default function HomePage() {
+export const revalidate = 900;
+
+export default async function HomePage() {
+  const resumoFocos = await getResumoFocos({ periodo: "24h" });
+
   return (
     <>
-      <Hero />
+      <Hero initialResumo={resumoFocos} />
       <TrustStrip />
       <Problem />
-      <BiomesSection />
+      <BiomesSection initialResumo={resumoFocos} />
       <HowItWorks />
       <Tools />
       <Glossary />

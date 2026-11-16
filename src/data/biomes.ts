@@ -22,7 +22,6 @@ export const BIOMES_DATA: Record<string, BiomeInfo> = {
     borderColor: '#365C40',
     deforestationProdes2024Km2: 6288,
     deforestationTrendPercent: -30.6,
-    activeFireHotspots24h: 312,
     sources: [
       {
         name: 'INPE / PRODES Amazônia',
@@ -65,7 +64,6 @@ export const BIOMES_DATA: Record<string, BiomeInfo> = {
     borderColor: '#78877D',
     deforestationProdes2024Km2: 8174,
     deforestationTrendPercent: -25.8,
-    activeFireHotspots24h: 428,
     sources: [
       {
         name: 'INPE / PRODES Cerrado',
@@ -102,7 +100,6 @@ export const BIOMES_DATA: Record<string, BiomeInfo> = {
     borderColor: '#365C40',
     deforestationProdes2024Km2: 106,
     deforestationTrendPercent: -27.0,
-    activeFireHotspots24h: 89,
     sources: [
       {
         name: 'SOS Mata Atlântica / INPE',
@@ -139,7 +136,6 @@ export const BIOMES_DATA: Record<string, BiomeInfo> = {
     borderColor: '#667F61',
     deforestationProdes2024Km2: 1950,
     deforestationTrendPercent: -7.1,
-    activeFireHotspots24h: 154,
     sources: [
       {
         name: 'INPE / PRODES Caatinga',
@@ -176,7 +172,6 @@ export const BIOMES_DATA: Record<string, BiomeInfo> = {
     borderColor: '#294C35',
     deforestationProdes2024Km2: 375,
     deforestationTrendPercent: -3.8,
-    activeFireHotspots24h: 21,
     sources: [
       {
         name: 'INPE / PRODES Pampa',
@@ -213,7 +208,6 @@ export const BIOMES_DATA: Record<string, BiomeInfo> = {
     borderColor: '#294C35',
     deforestationProdes2024Km2: 382,
     deforestationTrendPercent: -5.9,
-    activeFireHotspots24h: 185,
     sources: [
       {
         name: 'INPE / BDQueimadas Pantanal',
@@ -233,10 +227,10 @@ export const BIOMES_DATA: Record<string, BiomeInfo> = {
     id: 'costeiro_marinho',
     name: 'Sistema Costeiro-Marinho',
     category: 'Sistema Costeiro e Marinho',
-    areaKm2: 4114000, // ~514.000 km² faixa costeira terrestre + 3.600.000 km² ZEE marítima
-    percentageBrazil: 42.4, // em relação ao espaço marítimo sob jurisdição brasileira (Amazônia Azul)
-    nativeVegetationPercentage: 74.0, // manguezais e restingas preservadas
-    protectedAreaPercentage: 26.3, // 26,3% da ZEE protegida em UCs marítimas
+    areaKm2: 4114000,
+    percentageBrazil: 42.4,
+    nativeVegetationPercentage: 74.0,
+    protectedAreaPercentage: 26.3,
     states: ['AP', 'PA', 'MA', 'PI', 'CE', 'RN', 'PB', 'PE', 'AL', 'SE', 'BA', 'ES', 'RJ', 'SP', 'PR', 'SC', 'RS'],
     climate: 'Variável de equatorial a subtropical ao longo de mais de 7.491 km de litoral contínuo.',
     description: 'Engloba a plataforma continental, recifes de corais, manguezais, marismas, restingas, dunas, ilhas oceânicas (Fernando de Noronha, Trindade, Abrolhos, Atol das Rocas) e a Zona Econômica Exclusiva (Amazônia Azul).',
@@ -249,9 +243,8 @@ export const BIOMES_DATA: Record<string, BiomeInfo> = {
     ],
     color: '#4C6E58',
     borderColor: '#294C35',
-    deforestationProdes2024Km2: null, // Nota metodológica oficial: PRODES é voltado à vegetação terrestre; manguezais monitorados por MapBiomas/ICMBio
+    deforestationProdes2024Km2: null,
     deforestationTrendPercent: null,
-    activeFireHotspots24h: 38,
     sources: [
       {
         name: 'IBGE - Biomas e Sistema Costeiro-Marinho do Brasil',

@@ -19,18 +19,20 @@ import { LandCoverChart } from '@/components/dashboard/LandCoverChart';
 import { BiomeSummaryGrid } from '@/components/dashboard/BiomeSummaryGrid';
 import { RecentAlertsWidget } from '@/components/dashboard/RecentAlertsWidget';
 import { BIOMES_LIST, BIOMES_DATA } from '@/data/biomes';
+import type { BiomeId } from '@/data/types';
+import { useResumoFocos } from '@/lib/firms/useResumoFocos';
+import { FreshnessSeal } from '@/components/firms/FreshnessSeal';
 
 export default function DashboardPage() {
   const [selectedBiomeFilter, setSelectedBiomeFilter] = useState<string>('all');
-  const [isRefreshing, setIsRefreshing] = useState(false);
+  const { resumo, loading, refresh } = useResumoFocos('24h');
 
   const activeBiome = selectedBiomeFilter !== 'all' ? BIOMES_DATA[selectedBiomeFilter] : null;
 
-  // Métricas agregadas ou específicas do bioma filtrado
   const nativeVegetation = activeBiome ? activeBiome.nativeVegetationPercentage : 64.2;
-  const totalFires = activeBiome 
-    ? activeBiome.activeFireHotspots24h 
-    : BIOMES_LIST.reduce((acc, b) => acc + b.activeFireHotspots24h, 0);
+  const totalFires = activeBiome
+    ? (resumo?.porBioma[activeBiome.id as BiomeId]?.total ?? '—')
+    : (resumo?.total ?? '—');
 
   const deforestationVal = activeBiome 
     ? (activeBiome.deforestationProdes2024Km2 || 'N/A (Costeiro)')
@@ -42,21 +44,33 @@ export default function DashboardPage() {
 
   const protectedArea = activeBiome ? activeBiome.protectedAreaPercentage : 29.8;
 
+  const updatedTimeStr = resumo?.atualizadoEm
+    ? new Date(resumo.atualizadoEm).toLocaleString('pt-BR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      })
+    : 'carregando...';
+
   const handleRefresh = () => {
-    setIsRefreshing(true);
-    setTimeout(() => {
-      setIsRefreshing(false);
-    }, 600);
+    void refresh(true);
   };
 
   const handleExportSummary = () => {
-    const csvContent = "data:text/csv;charset=utf-8," + 
-      "Ambiente,Area_km2,Percentual_BR,Veg_Nativa_Pct,Areas_Protegidas_Pct,PRODES_2024_km2,Focos_24h\n" +
-      BIOMES_LIST.map(b => `${b.name},${b.areaKm2},${b.percentageBrazil},${b.nativeVegetationPercentage},${b.protectedAreaPercentage},${b.deforestationProdes2024Km2 || 0},${b.activeFireHotspots24h}`).join("\n");
+    const csvContent =
+      'data:text/csv;charset=utf-8,' +
+      `# Fonte_Focos: ${resumo?.fonte ?? 'NASA FIRMS (VIIRS/MODIS)'} | Atualizado_em: ${resumo?.atualizadoEm ?? ''}\n` +
+      'Ambiente,Area_km2,Percentual_BR,Veg_Nativa_Pct,Areas_Protegidas_Pct,PRODES_2024_km2,Focos_Ultimas_24h\n' +
+      BIOMES_LIST.map(
+        (b) =>
+          `${b.name},${b.areaKm2},${b.percentageBrazil},${b.nativeVegetationPercentage},${b.protectedAreaPercentage},${b.deforestationProdes2024Km2 || 0},${resumo?.porBioma[b.id]?.total ?? 0}`,
+      ).join('\n');
     const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `ecomind_360_resumo_biomas_${new Date().toISOString().slice(0, 10)}.csv`);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', `ecomind_360_resumo_biomas_${new Date().toISOString().slice(0, 10)}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -66,18 +80,25 @@ export default function DashboardPage() {
     <div className="section-inner max-w-6xl mx-auto py-6 space-y-10">
       {/* Cabeçalho */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-[#222D25] pb-6">
-        <div>
-          <div className="badge-360 mb-2">
+        <div className="space-y-3">
+          <div className="badge-360">
             <Compass size={12} />
             <span>Telemetria & Dados Abertos 360°</span>
           </div>
           <h1 className="font-display text-3xl sm:text-4xl font-semibold text-[#DCE5DD] tracking-tight">
             Dashboard dos 7 Ambientes
           </h1>
-          <p className="mt-2 text-sm sm:text-base text-[#A7B3A9] max-w-2xl leading-relaxed">
-            Consolidação de sensoriamento remoto oficial (INPE, PRODES, MapBiomas e IBGE).
-            Acompanhe o desmatamento, cobertura vegetal nativa e anomalias térmicas.
+          <p className="text-sm sm:text-base text-[#A7B3A9] max-w-2xl leading-relaxed">
+            Consolidação de sensoriamento remoto oficial (NASA FIRMS, INPE, PRODES, MapBiomas e IBGE).
+            Acompanhe o desmatamento, cobertura vegetal nativa e focos de calor quase em tempo real.
           </p>
+          <FreshnessSeal
+            atualizadoEm={resumo?.atualizadoEm}
+            ultimoFocoEm={resumo?.ultimoFocoEm}
+            desatualizado={resumo?.desatualizado}
+            fonte={resumo?.fonte}
+            periodo="24h"
+          />
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
@@ -96,8 +117,9 @@ export default function DashboardPage() {
             onClick={handleRefresh}
             className="btn-secondary !p-2 text-xs"
             title="Recarregar dados satelitais"
+            aria-label="Recarregar dados satelitais"
           >
-            <RefreshCw size={15} className={isRefreshing ? 'animate-spin text-[#91A88F]' : ''} />
+            <RefreshCw size={15} className={loading ? 'animate-spin text-[#91A88F]' : ''} />
           </button>
         </div>
       </div>
@@ -139,7 +161,7 @@ export default function DashboardPage() {
 
         {activeBiome && (
           <Link
-            href="/mapa"
+            href={`/mapa?bioma=${activeBiome.id}&periodo=24h`}
             className="text-xs font-medium text-[#91A88F] hover:text-[#DCE5DD] flex items-center gap-1"
           >
             <MapPin size={13} />
@@ -160,18 +182,17 @@ export default function DashboardPage() {
           icon={Trees}
           trend={{ value: 0.2, label: 'estabilidade líquida', isPositiveGood: true }}
           description={`Proporção da cobertura vegetal original preservada ${activeBiome ? `no bioma ${activeBiome.name}` : 'no Brasil'}.`}
-          source="MapBiomas Brasil (Coleção 9)"
+          source="MapBiomas Brasil (Coleção 9 · Ago/2024)"
         />
 
         <MetricCard
           title="Focos de Calor"
           value={totalFires}
-          unit="focos 24h"
+          unit="últimas 24 h"
           icon={Flame}
           iconColor="text-[#A9A17A]"
-          trend={{ value: 14.8, label: 'vs média semanal', isPositiveGood: false }}
-          description={`Anomalias térmicas registradas na passagem dos sensores ${activeBiome ? `em ${activeBiome.name}` : 'no país'}.`}
-          source="NASA FIRMS / INPE BDQueimadas"
+          description={`Anomalias térmicas registradas na passagem dos sensores VIIRS/MODIS ${activeBiome ? `em ${activeBiome.name}` : 'no país'}.`}
+          source={`NASA FIRMS (VIIRS/MODIS) · ${updatedTimeStr}`}
         />
 
         <MetricCard
@@ -191,7 +212,7 @@ export default function DashboardPage() {
           icon={Activity}
           iconColor="text-[#91A88F]"
           description={`Unidades de Conservação Federais e Estaduais (PI e US) ${activeBiome ? `no ${activeBiome.name}` : 'nacionais'}.`}
-          source="ICMBio / SisBio / MMA"
+          source="ICMBio / SisBio / MMA (2024)"
         />
       </div>
 
@@ -202,7 +223,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Resumo dos 7 Ambientes */}
-      <BiomeSummaryGrid />
+      <BiomeSummaryGrid resumo={resumo} />
 
       {/* Feed de Alertas Recentes */}
       <RecentAlertsWidget />

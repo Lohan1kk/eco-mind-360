@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { 
   AlertTriangle, 
@@ -17,14 +17,32 @@ import { EnvironmentalAlert } from '@/data/types';
 
 export function RecentAlertsWidget() {
   const [filterType, setFilterType] = useState<string>('all');
+  const [alerts, setAlerts] = useState<EnvironmentalAlert[]>(() =>
+    VERIFIED_ALERTS.filter((a) => a.type !== 'foco_calor'),
+  );
+  const [lastUpdated, setLastUpdated] = useState<string | null>(null);
 
-  const filteredAlerts = VERIFIED_ALERTS.filter(alert => {
-    if (filterType === 'all') return true;
-    if (filterType === 'foco') return alert.type === 'foco_calor';
-    if (filterType === 'desmatamento') return alert.type === 'alerta_desmatamento';
-    if (filterType === 'marinho') return alert.type === 'anomalia_marinha';
-    return true;
-  }).slice(0, 5);
+  useEffect(() => {
+    fetch('/api/alerts/firms')
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        if (d?.alerts?.length) {
+          setAlerts(d.alerts);
+          setLastUpdated(d.lastUpdated ?? null);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  const filteredAlerts = alerts
+    .filter((alert) => {
+      if (filterType === 'all') return true;
+      if (filterType === 'foco') return alert.type === 'foco_calor';
+      if (filterType === 'desmatamento') return alert.type === 'alerta_desmatamento';
+      if (filterType === 'marinho') return alert.type === 'anomalia_marinha';
+      return true;
+    })
+    .slice(0, 5);
 
   const getTypeIcon = (type: EnvironmentalAlert['type']) => {
     switch (type) {
@@ -51,7 +69,10 @@ export function RecentAlertsWidget() {
               </h3>
             </div>
             <p className="text-xs text-[#78877D] mt-1">
-              Registros orbitais consolidados (DETER, BDQueimadas e NASA FIRMS)
+              Registros orbitais consolidados (NASA FIRMS VIIRS/MODIS e DETER INPE)
+              {lastUpdated
+                ? ` · atualizado em ${new Date(lastUpdated).toLocaleString('pt-BR')}`
+                : ''}
             </p>
           </div>
 
@@ -76,7 +97,7 @@ export function RecentAlertsWidget() {
                   : 'text-[#A7B3A9] hover:text-[#DCE5DD]'
               }`}
             >
-              Queimadas
+              Queimadas (FIRMS)
             </button>
             <button
               type="button"
@@ -113,7 +134,11 @@ export function RecentAlertsWidget() {
                   </div>
                   <div className="text-[11px] text-[#78877D] mt-1 flex items-center gap-1.5">
                     <MapPin size={11} className="text-[#789B7C]" />
-                    <span>{alert.municipality}/{alert.state} · {alert.date} {alert.time ? `(${alert.time})` : ''} · {alert.satellite}</span>
+                    <span>
+                      {alert.municipality}/{alert.state} · {alert.date}{' '}
+                      {alert.time ? `(${alert.time})` : ''} · {alert.satellite} · Fonte:{' '}
+                      {alert.source}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -147,7 +172,7 @@ export function RecentAlertsWidget() {
 
       <div className="mt-5 pt-4 border-t border-[#222D25] flex items-center justify-between">
         <span className="text-xs text-[#78877D]">
-          Dados abertos auditados do INPE e NASA
+          Fonte: NASA FIRMS (VIIRS/MODIS) e INPE DETER
         </span>
         <Link
           href="/alertas"

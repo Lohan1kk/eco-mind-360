@@ -10,7 +10,7 @@ import {
 import { QrInstall } from "@/components/shell/QrInstall";
 
 const features = [
-  "Monitoramento orbital em tempo real (INPE & NASA FIRMS)",
+  "Monitoramento orbital quase em tempo real (~3 h de latência · NASA FIRMS & INPE)",
   "Cobertura completa dos 7 biomas e ecossistemas brasileiros",
   "Dashboard analítico com histórico PRODES e MapBiomas",
   "Calculadora científica de pegada de carbono (kg CO₂e)",

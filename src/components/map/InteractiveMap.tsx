@@ -526,8 +526,10 @@ export default function InteractiveMap({ initialBiomeId }: { initialBiomeId?: st
                       <span className="font-mono font-medium text-[#91A88F]">{selectedBiomeDetails.protectedAreaPercentage}%</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-[#78877D]">Focos 24h:</span>
-                      <span className="font-mono font-medium text-[#A9A17A]">{selectedBiomeDetails.activeFireHotspots24h} focos</span>
+                      <span className="text-[#78877D]">Focos (NASA FIRMS):</span>
+                      <span className="font-mono font-medium text-[#A9A17A]">
+                        {alerts.filter(a => a.biomeId === selectedBiomeDetails.id && a.type === 'foco_calor').length} focos carregados
+                      </span>
                     </div>
                     {selectedBiomeDetails.deforestationProdes2024Km2 && (
                       <div className="flex justify-between">

@@ -2,7 +2,10 @@
 
 import React, { useState } from 'react';
 import { BIOMES_DATA, BIOMES_LIST } from '@/data/biomes';
+import type { BiomeId } from '@/data/types';
 import { PageIntro } from '@/components/PageIntro';
+import { useResumoFocos } from '@/lib/firms/useResumoFocos';
+import { FreshnessSeal } from '@/components/firms/FreshnessSeal';
 import {
   ResponsiveContainer,
   BarChart,
@@ -22,9 +25,23 @@ import {
 export default function ComparacaoPage() {
   const [biomeAId, setBiomeAId] = useState<string>('amazonia');
   const [biomeBId, setBiomeBId] = useState<string>('cerrado');
+  const { resumo } = useResumoFocos('24h');
 
   const biomeA = BIOMES_DATA[biomeAId] || BIOMES_LIST[0];
   const biomeB = BIOMES_DATA[biomeBId] || BIOMES_LIST[1];
+
+  const focosA = resumo?.porBioma[biomeA.id as BiomeId]?.total ?? 0;
+  const focosB = resumo?.porBioma[biomeB.id as BiomeId]?.total ?? 0;
+  const maxBiomaFocos = Math.max(100, focosA, focosB);
+
+  const updatedLabel = resumo?.atualizadoEm
+    ? new Date(resumo.atualizadoEm).toLocaleString('pt-BR', {
+        day: '2-digit',
+        month: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+      })
+    : null;
 
   const comparisonData = [
     {
@@ -48,14 +65,18 @@ export default function ComparacaoPage() {
     { subject: 'Extensão Territorial', A: Math.min(100, (biomeA.areaKm2 / 4196943) * 100), B: Math.min(100, (biomeB.areaKm2 / 4196943) * 100) },
     { subject: 'Vegetação Nativa', A: biomeA.nativeVegetationPercentage, B: biomeB.nativeVegetationPercentage },
     { subject: 'Cobertura de UCs', A: Math.min(100, biomeA.protectedAreaPercentage * 2), B: Math.min(100, biomeB.protectedAreaPercentage * 2) },
-    { subject: 'Focos 24h (Inverso)', A: Math.max(10, 100 - (biomeA.activeFireHotspots24h / 450) * 80), B: Math.max(10, 100 - (biomeB.activeFireHotspots24h / 450) * 80) },
+    {
+      subject: 'Menor Pressão Térmica (últ. 24 h)',
+      A: Math.max(10, Math.round(100 - (focosA / maxBiomaFocos) * 80)),
+      B: Math.max(10, Math.round(100 - (focosB / maxBiomaFocos) * 80)),
+    },
     { subject: 'Estabilidade 2024', A: biomeA.deforestationTrendPercent ? Math.abs(biomeA.deforestationTrendPercent) * 2.5 : 80, B: biomeB.deforestationTrendPercent ? Math.abs(biomeB.deforestationTrendPercent) * 2.5 : 80 },
   ];
 
   return (
     <div className="section-inner max-w-6xl mx-auto py-8 space-y-8">
       {/* Cabeçalho */}
-      <div className="border-b border-[#222D25] pb-6">
+      <div className="border-b border-[#222D25] pb-6 space-y-4">
         <PageIntro
           eyebrow="Análise Multicritério Oficial"
           title="Comparador Científico de Ambientes"
@@ -64,9 +85,17 @@ export default function ComparacaoPage() {
         >
           <p className="mt-2.5 max-w-2xl text-sm sm:text-base text-[#A7B3A9]">
             Confronte diretamente dois ambientes brasileiros lado a lado com dados de vegetação remanescente,
-            unidades de conservação, desmatamento auditado e focos termais.
+            unidades de conservação, desmatamento auditado e focos de calor das últimas 24 h (NASA FIRMS).
           </p>
         </PageIntro>
+
+        <FreshnessSeal
+          atualizadoEm={resumo?.atualizadoEm}
+          ultimoFocoEm={resumo?.ultimoFocoEm}
+          desatualizado={resumo?.desatualizado}
+          fonte={resumo?.fonte}
+          periodo="24h"
+        />
       </div>
 
       {/* Seletores dos Dois Biomas */}
@@ -158,7 +187,7 @@ export default function ComparacaoPage() {
               Equilíbrio Ecológico & Vulnerabilidade
             </h3>
             <p className="text-xs text-[#78877D] mt-1">
-              Comparação multidimensional normalizada
+              Comparação multidimensional normalizada (inclui focos NASA FIRMS nas últimas 24 h)
             </p>
           </div>
 
@@ -245,9 +274,18 @@ export default function ComparacaoPage() {
                 </td>
               </tr>
               <tr className="hover:bg-[#1D2821]/40">
-                <td className="py-3 px-4 font-medium text-[#A7B3A9]">Focos de Calor (24h)</td>
-                <td className="py-3 px-4 font-mono font-semibold text-[#A9A17A]">{biomeA.activeFireHotspots24h} focos</td>
-                <td className="py-3 px-4 font-mono font-semibold text-[#A9A17A]">{biomeB.activeFireHotspots24h} focos</td>
+                <td className="py-3 px-4 font-medium text-[#A7B3A9]">
+                  Focos de Calor (últimas 24 h)
+                  <span className="block text-[10px] font-mono text-[#78877D]">
+                    Fonte: NASA FIRMS{updatedLabel ? ` · ${updatedLabel}` : ''}
+                  </span>
+                </td>
+                <td className="py-3 px-4 font-mono font-semibold text-[#A9A17A]">
+                  {resumo ? `${focosA.toLocaleString('pt-BR')} focos` : '—'}
+                </td>
+                <td className="py-3 px-4 font-mono font-semibold text-[#A9A17A]">
+                  {resumo ? `${focosB.toLocaleString('pt-BR')} focos` : '—'}
+                </td>
               </tr>
               <tr className="hover:bg-[#1D2821]/40">
                 <td className="py-3 px-4 font-medium text-[#A7B3A9]">Estados de Ocorrência</td>

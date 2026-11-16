@@ -2,6 +2,9 @@ import React from 'react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { BIOMES_DATA, BIOMES_LIST } from '@/data/biomes';
+import type { BiomeId } from '@/data/types';
+import { getResumoFocos } from '@/lib/firms/service';
+import { FreshnessSeal } from '@/components/firms/FreshnessSeal';
 import { 
   Trees, 
   Shield, 
@@ -13,6 +16,8 @@ import {
   Info
 } from 'lucide-react';
 
+export const revalidate = 900;
+
 interface Props {
   params: {
     id: string;
@@ -23,12 +28,22 @@ export function generateStaticParams() {
   return BIOMES_LIST.map((b) => ({ id: b.id }));
 }
 
-export default function BiomeDetailPage({ params }: Props) {
+export default async function BiomeDetailPage({ params }: Props) {
   const biome = BIOMES_DATA[params.id];
 
   if (!biome) {
     notFound();
   }
+
+  const resumo = await getResumoFocos({ periodo: '24h' });
+  const biomeResumo = resumo.porBioma[biome.id as BiomeId];
+  const updatedStr = new Date(resumo.atualizadoEm).toLocaleString('pt-BR', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
 
   return (
     <div className="section-inner max-w-5xl mx-auto py-8 space-y-10">
@@ -45,21 +60,29 @@ export default function BiomeDetailPage({ params }: Props) {
 
       {/* Cabeçalho */}
       <div className="flex flex-col md:flex-row md:items-start justify-between gap-6 border-b border-[#222D25] pb-6">
-        <div>
-          <div className="badge-360 mb-3">
+        <div className="space-y-3">
+          <div className="badge-360">
             <span>{biome.category}</span>
           </div>
           <h1 className="font-display text-3xl sm:text-5xl font-semibold text-[#DCE5DD] tracking-tight">
             {biome.name}
           </h1>
-          <p className="mt-3 max-w-2xl text-sm sm:text-base text-[#A7B3A9] leading-relaxed">
+          <p className="max-w-2xl text-sm sm:text-base text-[#A7B3A9] leading-relaxed">
             {biome.description}
           </p>
 
-          <div className="mt-4 flex flex-wrap items-center gap-2 text-xs text-[#78877D]">
+          <div className="flex flex-wrap items-center gap-2 text-xs text-[#78877D]">
             <span className="font-medium text-[#DCE5DD]">Estados abrangidos:</span>
             <span className="font-mono text-[#A7B3A9]">{biome.states.join(', ')}</span>
           </div>
+
+          <FreshnessSeal
+            atualizadoEm={resumo.atualizadoEm}
+            ultimoFocoEm={resumo.ultimoFocoEm}
+            desatualizado={resumo.desatualizado}
+            fonte={resumo.fonte}
+            periodo="24h"
+          />
         </div>
 
         <div className="flex flex-col items-start md:items-end gap-3 shrink-0">
@@ -67,7 +90,7 @@ export default function BiomeDetailPage({ params }: Props) {
             {biome.percentageBrazil}% do Território BR
           </span>
           <Link
-            href="/mapa"
+            href={`/mapa?bioma=${biome.id}&periodo=24h`}
             className="btn-primary !py-2 !px-4 text-xs font-medium inline-flex items-center gap-1.5"
           >
             <MapPin size={14} />
@@ -110,13 +133,15 @@ export default function BiomeDetailPage({ params }: Props) {
 
         <div className="rounded-[10px] border border-[#29362D] bg-[#171F1A] p-5">
           <span className="text-[10px] font-mono uppercase tracking-wider text-[#78877D]">
-            Focos Orbitais 24h
+            Focos (últimas 24 h)
           </span>
           <p className="font-display text-2xl sm:text-3xl font-semibold text-[#A9A17A] mt-1.5 flex items-center gap-1.5 tabular-nums">
             <Flame size={20} className="text-[#A9A17A]" />
-            {biome.activeFireHotspots24h}
+            {(biomeResumo?.total ?? 0).toLocaleString('pt-BR')}
           </p>
-          <p className="text-xs text-[#78877D] mt-1 font-mono">INPE / NASA FIRMS</p>
+          <p className="text-[11px] text-[#78877D] mt-1 font-mono">
+            Fonte: NASA FIRMS · {updatedStr}
+          </p>
         </div>
       </div>
 
