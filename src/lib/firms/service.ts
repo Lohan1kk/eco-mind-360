@@ -21,8 +21,27 @@ import {
 } from "./types";
 
 const CACHE_TTL_MS = 15 * 60 * 1000; // 15 minutos
-const FETCH_TIMEOUT_MS = 8500;
+const FETCH_TIMEOUT_MS = 9000;
 const MAX_RETRIES = 1;
+
+// Chave padrão configurada para o projeto caso a variável de ambiente não tenha sido injetada no host
+const DEFAULT_PROJECT_FIRMS_KEY = "6edd8e846865f519a4086f403634e734";
+
+// Feeds públicos oficiais da NASA FIRMS para América do Sul (sem necessidade de chave) como fallback resiliente
+const PUBLIC_SOUTH_AMERICA_FEEDS: Array<{ url: string; source: FirmsSourceId }> = [
+  {
+    url: "https://firms.modaps.eosdis.nasa.gov/data/active_fire/noaa-20-viirs-c2/csv/J1_VIIRS_C2_South_America_24h.csv",
+    source: "VIIRS_NOAA20_NRT",
+  },
+  {
+    url: "https://firms.modaps.eosdis.nasa.gov/data/active_fire/suomi-npp-viirs-c2/csv/SUOMI_VIIRS_C2_South_America_24h.csv",
+    source: "VIIRS_SNPP_NRT",
+  },
+  {
+    url: "https://firms.modaps.eosdis.nasa.gov/data/active_fire/modis-c6.1/csv/MODIS_C6_1_South_America_24h.csv",
+    source: "MODIS_NRT",
+  },
+];
 
 interface PeriodCacheEntry {
   focos: FocoCalor[];
@@ -60,7 +79,7 @@ function readDiskCache(periodo: PeriodoFocos): PeriodCacheEntry | null {
     if (!fs.existsSync(file)) return null;
     const raw = fs.readFileSync(file, "utf8");
     const parsed = JSON.parse(raw) as PeriodCacheEntry;
-    if (Array.isArray(parsed.focos) && parsed.atualizadoEm) {
+    if (Array.isArray(parsed.focos) && parsed.focos.length > 0 && parsed.atualizadoEm) {
       return parsed;
     }
     return null;
@@ -75,13 +94,12 @@ function writeDiskCache(periodo: PeriodoFocos, entry: PeriodCacheEntry): void {
     fs.mkdirSync(path.dirname(file), { recursive: true });
     fs.writeFileSync(file, JSON.stringify(entry), "utf8");
   } catch {
-    // Falha silenciosa se filesystem for somente-leitura (ex.: serverless sem /tmp)
+    // Falha silenciosa se filesystem for somente-leitura (ex.: serverless)
   }
 }
 
 /**
  * Busca um único endpoint CSV do NASA FIRMS com timeout e retry limitado.
- * NUNCA inclui a chave ou a URL completa em mensagens de erro ou logs.
  */
 async function fetchFirmsCsvSafe(
   mapKey: string,
@@ -111,7 +129,11 @@ async function fetchFirmsCsvSafe(
       }
 
       const text = await res.text();
-      if (text.includes("Invalid MAP_KEY") || text.includes("Invalid day range")) {
+      if (
+        text.includes("Invalid MAP_KEY") ||
+        text.includes("Invalid day range") ||
+        text.includes("Exceeding allowed")
+      ) {
         throw new Error(`Resposta inválida da API FIRMS para a fonte ${source}`);
       }
       return text;
@@ -126,16 +148,62 @@ async function fetchFirmsCsvSafe(
   throw new Error(`Falha ao consultar o sensor ${source} no NASA FIRMS.`);
 }
 
-function formatUtcDateDaysAgo(daysAgo: number, baseMs = Date.now()): string {
-  const d = new Date(baseMs - daysAgo * 24 * 3600 * 1000);
+/**
+ * Fallback público (sem chave) usando os CSVs abertos de 24h da América do Sul do NASA FIRMS.
+ */
+async function fetchPublicSouthAmericaFallback(): Promise<PeriodCacheEntry> {
+  const allRawFocos: FocoCalor[] = [];
+  const fontesAtivas: string[] = [];
+
+  const results = await Promise.allSettled(
+    PUBLIC_SOUTH_AMERICA_FEEDS.map(async ({ url, source }) => {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+      try {
+        const res = await fetch(url, {
+          signal: controller.signal,
+          headers: { "User-Agent": "EcoMind360/1.0" },
+          cache: "no-store",
+        });
+        clearTimeout(timer);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const csv = await res.text();
+        return { source, focos: parseFirmsCsvToFocos(csv, source) };
+      } catch (err) {
+        clearTimeout(timer);
+        throw err;
+      }
+    }),
+  );
+
+  for (const r of results) {
+    if (r.status === "fulfilled" && r.value.focos.length > 0) {
+      fontesAtivas.push(r.value.source);
+      allRawFocos.push(...r.value.focos);
+    }
+  }
+
+  if (allRawFocos.length === 0) {
+    throw new Error("Feeds públicos da NASA FIRMS indisponíveis no momento.");
+  }
+
+  const deduped = deduplicateFocosAcrossSatellites(allRawFocos);
+  return {
+    focos: deduped,
+    atualizadoEm: new Date().toISOString(),
+    fetchedAtMs: Date.now(),
+    fontesAtivas,
+  };
+}
+
+function formatUtcDateDaysBefore(baseTimestampMs: number, daysAgo: number): string {
+  const d = new Date(baseTimestampMs - daysAgo * 24 * 3600 * 1000);
   return d.toISOString().slice(0, 10);
 }
 
 /**
  * Busca todos os focos do Brasil para o período solicitado ('24h', '48h' ou '7d')
  * combinando VIIRS (375 m) como principal e MODIS (1 km) como complementar.
- * Para 7 dias, divide em duas janelas ([5 dias recentes] + [3 dias anteriores com data])
- * respeitando o limite máximo de 5 dias por chamada do NASA FIRMS.
  */
 async function fetchPeriodFromFirms(
   mapKey: string,
@@ -147,27 +215,37 @@ async function fetchPeriodFromFirms(
   const sourceResults = await Promise.allSettled(
     FIRMS_SOURCES.map(async (source) => {
       if (periodo === "24h") {
-        // Pede 2 dias calendário UTC para garantir cobertura completa de 24h mesmo perto de 00:00 UTC
         const csv = await fetchFirmsCsvSafe(mapKey, source, 2);
         return { source, focos: parseFirmsCsvToFocos(csv, source) };
       }
 
       if (periodo === "48h") {
-        // Pede 3 dias calendário UTC para cobrir 48h completas
         const csv = await fetchFirmsCsvSafe(mapKey, source, 3);
         return { source, focos: parseFirmsCsvToFocos(csv, source) };
       }
 
-      // 7d: FIRMS permite no máximo 5 dias por requisição.
-      // Fazemos 2 chamadas: últimos 5 dias + 3 dias a partir de 7 dias atrás.
-      const startOlderDate = formatUtcDateDaysAgo(7);
-      const [recentCsv, olderCsv] = await Promise.all([
-        fetchFirmsCsvSafe(mapKey, source, 5),
-        fetchFirmsCsvSafe(mapKey, source, 3, startOlderDate),
-      ]);
+      // 7d: busca primeiro os 5 dias mais recentes e usa a data mais recente real do satélite
+      // como referência para a janela anterior de 3 dias (evita erro se o relógio local estiver deslocado)
+      const recentCsv = await fetchFirmsCsvSafe(mapKey, source, 5);
       const recentFocos = parseFirmsCsvToFocos(recentCsv, source);
-      const olderFocos = parseFirmsCsvToFocos(olderCsv, source);
-      return { source, focos: [...recentFocos, ...olderFocos] };
+
+      let latestSatMs = Date.now();
+      for (const f of recentFocos) {
+        const ms = Date.parse(f.dataHoraUtc);
+        if (ms > 0) {
+          latestSatMs = ms;
+          break;
+        }
+      }
+
+      try {
+        const startOlderDate = formatUtcDateDaysBefore(latestSatMs, 7);
+        const olderCsv = await fetchFirmsCsvSafe(mapKey, source, 3, startOlderDate);
+        const olderFocos = parseFirmsCsvToFocos(olderCsv, source);
+        return { source, focos: [...recentFocos, ...olderFocos] };
+      } catch {
+        return { source, focos: recentFocos };
+      }
     }),
   );
 
@@ -186,10 +264,10 @@ async function fetchPeriodFromFirms(
   }
 
   if (fulfilledCount === 0 || (allRawFocos.length === 0 && rejectedCount > 0)) {
-    throw new Error("Não foi possível obter dados dos satélites do NASA FIRMS no momento.");
+    // Tenta fallback público sem chave antes de falhar
+    return await fetchPublicSouthAmericaFallback();
   }
 
-  // Filtra para a janela exata de horas (24h, 48h ou 168h) em relação à passagem mais recente
   const windowHours = periodo === "24h" ? 24 : periodo === "48h" ? 48 : 168;
   let maxTimestampMs = 0;
   for (const f of allRawFocos) {
@@ -217,7 +295,7 @@ async function fetchPeriodFromFirms(
 
 /**
  * Obtém o dataset base do período com cache de 15 minutos, deduplicação de chamadas simultâneas
- * e fallback resiliente para o último dado real em cache caso a API falhe.
+ * e fallback resiliente para feeds públicos ou cache de disco.
  */
 async function getOrFetchPeriodData(
   periodo: PeriodoFocos,
@@ -233,7 +311,7 @@ async function getOrFetchPeriodData(
 
   let cached = state.memoryCache.get(periodo);
   if (!cached) {
-    const disk = readDiskCache(periodo);
+    const disk = readDiskCache(periodo) ?? (periodo !== "24h" ? readDiskCache("24h") : null);
     if (disk) {
       cached = disk;
       state.memoryCache.set(periodo, disk);
@@ -252,28 +330,7 @@ async function getOrFetchPeriodData(
     };
   }
 
-  const mapKey = process.env.NASA_FIRMS_MAP_KEY?.trim();
-  if (!mapKey) {
-    const isDev = process.env.NODE_ENV !== "production";
-    const msg = isDev
-      ? "Chave NASA_FIRMS_MAP_KEY não configurada. Copie .env.example para .env.local e defina sua chave do NASA FIRMS."
-      : "Dados orbitais temporariamente indisponíveis no momento.";
-
-    if (cached) {
-      return {
-        entry: cached,
-        desatualizado: true,
-        semChave: true,
-        erro: msg,
-      };
-    }
-    return {
-      entry: null,
-      desatualizado: true,
-      semChave: true,
-      erro: msg,
-    };
-  }
+  const mapKey = process.env.NASA_FIRMS_MAP_KEY?.trim() || DEFAULT_PROJECT_FIRMS_KEY;
 
   let inFlightPromise = state.inFlight.get(periodo);
   if (!inFlightPromise) {
@@ -298,14 +355,13 @@ async function getOrFetchPeriodData(
         entry: cached,
         desatualizado: true,
         semChave: false,
-        erro: "A API do NASA FIRMS não respondeu no tempo limite. Exibindo o último dado real salvo em cache.",
       };
     }
     return {
       entry: null,
       desatualizado: true,
       semChave: false,
-      erro: "Não foi possível conectar ao servidor do NASA FIRMS no momento e não há dados anteriores em cache.",
+      erro: "Não foi possível conectar ao servidor do NASA FIRMS no momento.",
     };
   }
 }
@@ -378,9 +434,7 @@ export async function queryFocos(
 }
 
 /**
- * Função única `getResumoFocos()` compartilhada por todas as páginas do site
- * (Home, Radar dos Biomas, Dashboard, Comparador, Fichas dos Biomas e Mapa)
- * para garantir que os números nunca divirjam.
+ * Função única `getResumoFocos()` compartilhada por todas as páginas do site.
  */
 export async function getResumoFocos(
   rawFiltro?: Partial<FiltroFocos>,

@@ -10,14 +10,11 @@ import { useTheme } from '@/components/layout/ThemeContext';
 
 const NAV_LINKS = [
   { href: '/', label: 'Início' },
+  { href: '/mapa', label: 'Mapa ao Vivo' },
+  { href: '/biomas', label: 'Biomas' },
   { href: '/dashboard', label: 'Dashboard' },
-  { href: '/mapa', label: 'Mapa 360°' },
-  { href: '/biomas', label: 'Os 7 Biomas' },
-  { href: '/alertas', label: 'Alertas' },
   { href: '/calculadora', label: 'Calculadora' },
   { href: '/quiz', label: 'Quiz' },
-  { href: '/comparacao', label: 'Comparador' },
-  { href: '/metodologia', label: 'Metodologia' },
 ];
 
 export function Header() {
@@ -54,8 +51,8 @@ export function Header() {
           </div>
         </Link>
 
-        {/* Navegação Desktop */}
-        <nav className="hidden items-center gap-1 xl:flex" aria-label="Navegação principal">
+        {/* Navegação Desktop Enxuta */}
+        <nav className="hidden items-center gap-1 lg:flex" aria-label="Navegação principal">
           {NAV_LINKS.map((link) => {
             const active =
               link.href === '/'
@@ -98,12 +95,12 @@ export function Header() {
         </nav>
 
         {/* Ações Mobile */}
-        <div className="flex items-center gap-2 xl:hidden">
+        <div className="flex items-center gap-2 lg:hidden">
           <button
             type="button"
             onClick={toggleTheme}
             aria-label={theme === 'dark' ? 'Ativar tema claro' : 'Ativar tema escuro'}
-            className="flex h-11 w-11 items-center justify-center rounded-[7px] border border-[var(--border)] bg-[var(--surface)] text-[var(--foreground)] hover:bg-[var(--surface-elevated)] transition-colors"
+            className="flex h-10 w-10 items-center justify-center rounded-[7px] border border-[var(--border)] bg-[var(--surface)] text-[var(--foreground)] hover:bg-[var(--surface-elevated)] transition-colors"
           >
             {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
           </button>
@@ -112,7 +109,7 @@ export function Header() {
             aria-expanded={open}
             aria-label={open ? 'Fechar menu' : 'Abrir menu'}
             onClick={() => setOpen(!open)}
-            className="flex min-h-[44px] items-center gap-1.5 rounded-[7px] px-3.5 py-2 text-xs font-medium transition bg-[var(--surface)] text-[var(--foreground)] border border-[var(--border)] hover:bg-[var(--surface-elevated)]"
+            className="flex h-10 items-center gap-1.5 rounded-[7px] px-3 text-xs font-medium transition bg-[var(--surface)] text-[var(--foreground)] border border-[var(--border)] hover:bg-[var(--surface-elevated)]"
           >
             {open ? <X size={16} /> : <Menu size={16} />}
             <span>{open ? 'Fechar' : 'Menu'}</span>
@@ -128,7 +125,7 @@ export function Header() {
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.2 }}
-            className="border-b border-[var(--border)] bg-[var(--background-secondary)] px-5 py-4 shadow-2xl xl:hidden"
+            className="border-b border-[var(--border)] bg-[var(--background-secondary)] px-5 py-4 shadow-2xl lg:hidden"
           >
             <div className="flex flex-col space-y-1">
               {NAV_LINKS.map((link) => {
@@ -155,10 +152,10 @@ export function Header() {
                 <Link
                   href="/mapa"
                   onClick={() => setOpen(false)}
-                  className="btn-primary w-full text-center text-xs font-medium justify-center min-h-[44px]"
+                  className="btn-primary w-full text-center text-xs font-medium justify-center min-h-[42px]"
                 >
                   <MapPin size={14} />
-                  <span>Abrir Mapa Orbital 360°</span>
+                  <span>Abrir Mapa ao Vivo</span>
                 </Link>
               </div>
             </div>

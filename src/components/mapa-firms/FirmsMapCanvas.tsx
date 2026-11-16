@@ -12,7 +12,7 @@ export const MAP_STYLES = {
 } as const;
 
 export function getDefaultGibsDate(): string {
-  // Usa 30h atrás em UTC para garantir mosaico consolidado sem falhas de publicação orbital
+  // Usa 30h atrás em UTC para garantir mosaico consolidado
   return new Date(Date.now() - 30 * 3600 * 1000).toISOString().slice(0, 10);
 }
 
@@ -57,6 +57,7 @@ export default function FirmsMapCanvas({
   const styleLoadedRef = useRef(false);
   const biomesGeoJsonRef = useRef<FeatureCollection<Geometry> | null>(null);
   const currentStyleThemeRef = useRef<"dark" | "light" | null>(null);
+
   const focosByIdRef = useRef(focosById);
   focosByIdRef.current = focosById;
   const geojsonRef = useRef(geojson);
@@ -76,377 +77,409 @@ export default function FirmsMapCanvas({
     typeof window !== "undefined" &&
     window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
 
-  // Função que adiciona ou atualiza todas as fontes e camadas no MapLibre
   const setupLayers = (map: maplibregl.Map, isDark: boolean) => {
     const c = camadasRef.current;
     const gibsDate = getDefaultGibsDate();
 
-    // 1. Camada opcional de imagem orbital NASA GIBS (WMTS sem chave)
-    if (!map.getSource("nasa-gibs")) {
-      map.addSource("nasa-gibs", {
-        type: "raster",
-        tiles: [
-          `https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/VIIRS_NOAA20_CorrectedReflectance_TrueColor/default/${gibsDate}/GoogleMapsCompatible_Level9/{z}/{y}/{x}.jpg`,
-        ],
-        tileSize: 256,
-        maxzoom: 9,
-        attribution: "NASA GIBS / VIIRS NOAA-20 True Color",
-      });
-    }
-    if (!map.getLayer("nasa-gibs-layer")) {
-      map.addLayer({
-        id: "nasa-gibs-layer",
-        type: "raster",
-        source: "nasa-gibs",
-        layout: {
-          visibility: c.gibs ? "visible" : "none",
-        },
-        paint: {
-          "raster-opacity": 0.78,
-        },
-      });
-    }
-
-    // 2. Camada de contorno oficial dos 7 Biomas do IBGE
     const emptyFc: FeatureCollection<Geometry> = {
       type: "FeatureCollection",
       features: [],
     };
-    if (!map.getSource("biomas-ibge")) {
-      map.addSource("biomas-ibge", {
-        type: "geojson",
-        data: biomesGeoJsonRef.current ?? emptyFc,
-      });
+
+    try {
+      // 1. Camada opcional de imagem orbital NASA GIBS (WMTS sem chave)
+      if (!map.getSource("nasa-gibs")) {
+        map.addSource("nasa-gibs", {
+          type: "raster",
+          tiles: [
+            `https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/VIIRS_NOAA20_CorrectedReflectance_TrueColor/default/${gibsDate}/GoogleMapsCompatible_Level9/{z}/{y}/{x}.jpg`,
+          ],
+          tileSize: 256,
+          maxzoom: 9,
+          attribution: "NASA GIBS / VIIRS NOAA-20",
+        });
+      }
+      if (!map.getLayer("nasa-gibs-layer")) {
+        map.addLayer({
+          id: "nasa-gibs-layer",
+          type: "raster",
+          source: "nasa-gibs",
+          layout: {
+            visibility: c.gibs ? "visible" : "none",
+          },
+          paint: {
+            "raster-opacity": 0.78,
+          },
+        });
+      }
+    } catch {
+      // Ignora caso o tile server GIBS esteja indisponível
     }
 
-    const biomeColorExpr: maplibregl.ExpressionSpecification = [
-      "match",
-      ["coalesce", ["get", "id"], ""],
-      "amazonia",
-      "#789B7C",
-      "cerrado",
-      "#D4A359",
-      "mata_atlantica",
-      "#5B9A68",
-      "caatinga",
-      "#C89D66",
-      "pampa",
-      "#84A970",
-      "pantanal",
-      "#528B88",
-      "costeiro_marinho",
-      "#3B7A9E",
-      "#789B7C",
-    ];
-
-    if (!map.getLayer("biomas-fill")) {
-      map.addLayer({
-        id: "biomas-fill",
-        type: "fill",
-        source: "biomas-ibge",
-        layout: {
-          visibility: c.biomas ? "visible" : "none",
-        },
-        paint: {
-          "fill-color": biomeColorExpr,
-          "fill-opacity": isDark ? 0.16 : 0.2,
-        },
-      });
-    }
-
-    if (!map.getLayer("biomas-outline")) {
-      map.addLayer({
-        id: "biomas-outline",
-        type: "line",
-        source: "biomas-ibge",
-        layout: {
-          visibility: c.biomas ? "visible" : "none",
-        },
-        paint: {
-          "line-color": biomeColorExpr,
-          "line-width": 1.6,
-          "line-opacity": 0.85,
-        },
-      });
-    }
-
-    // 3. Fonte não clusterizada para o modo Densidade (Heatmap)
-    if (!map.getSource("focos-raw")) {
-      map.addSource("focos-raw", {
-        type: "geojson",
-        data: geojsonRef.current,
-      });
-    }
-
-    if (!map.getLayer("focos-heatmap")) {
-      map.addLayer({
-        id: "focos-heatmap",
-        type: "heatmap",
-        source: "focos-raw",
-        maxzoom: 11,
-        layout: {
-          visibility: c.heatmap ? "visible" : "none",
-        },
-        paint: {
-          "heatmap-weight": [
-            "interpolate",
-            ["linear"],
-            ["coalesce", ["get", "frp"], 1],
-            0,
-            0.15,
-            15,
-            0.4,
-            40,
-            0.75,
-            100,
-            1,
-          ],
-          "heatmap-intensity": ["interpolate", ["linear"], ["zoom"], 3, 1, 9, 2.5],
-          "heatmap-color": [
-            "interpolate",
-            ["linear"],
-            ["heatmap-density"],
-            0,
-            "rgba(0, 0, 0, 0)",
-            0.2,
-            "rgba(250, 204, 21, 0.55)",
-            0.45,
-            "rgba(251, 146, 60, 0.78)",
-            0.75,
-            "rgba(239, 68, 68, 0.9)",
-            1,
-            "rgba(153, 27, 27, 0.98)",
-          ],
-          "heatmap-radius": ["interpolate", ["linear"], ["zoom"], 3, 12, 8, 26],
-          "heatmap-opacity": 0.88,
-        },
-      });
-    }
-
-    // 4. Fonte clusterizada de focos na GPU para alta performance (> 5.000 pontos a 60 fps)
-    if (!map.getSource("focos-clustered")) {
-      map.addSource("focos-clustered", {
-        type: "geojson",
-        data: geojsonRef.current,
-        cluster: true,
-        clusterMaxZoom: 6,
-        clusterRadius: 42,
-        clusterProperties: {
-          maxFrp: ["max", ["get", "frp"]],
-        },
-      });
-    }
-
-    if (!map.getLayer("focos-clusters")) {
-      map.addLayer({
-        id: "focos-clusters",
-        type: "circle",
-        source: "focos-clustered",
-        filter: ["has", "point_count"],
-        layout: {
-          visibility: c.focos ? "visible" : "none",
-        },
-        paint: {
-          "circle-color": [
-            "step",
-            ["coalesce", ["get", "maxFrp"], 0],
-            "#FACC15",
-            15,
-            "#FB923C",
-            40,
-            "#EF4444",
-            100,
-            "#991B1B",
-          ],
-          "circle-radius": [
-            "step",
-            ["get", "point_count"],
-            15,
-            25,
-            19,
-            100,
-            24,
-            500,
-            30,
-          ],
-          "circle-opacity": 0.9,
-          "circle-stroke-width": 2,
-          "circle-stroke-color": isDark ? "#101512" : "#FFFFFF",
-        },
-      });
-    }
-
-    if (!map.getLayer("focos-cluster-count")) {
-      map.addLayer({
-        id: "focos-cluster-count",
-        type: "symbol",
-        source: "focos-clustered",
-        filter: ["has", "point_count"],
-        layout: {
-          visibility: c.focos ? "visible" : "none",
-          "text-field": "{point_count_abbreviated}",
-          "text-size": 11,
-        },
-        paint: {
-          "text-color": [
-            "step",
-            ["coalesce", ["get", "maxFrp"], 0],
-            "#101512",
-            40,
-            "#FFFFFF",
-          ],
-          "text-halo-color": "rgba(0,0,0,0.25)",
-          "text-halo-width": 0.8,
-        },
-      });
-    }
-
-    // Círculos individuais na GPU: COR pela escala de intensidade + TAMANHO proporcional ao FRP
-    if (!map.getLayer("focos-unclustered")) {
-      map.addLayer({
-        id: "focos-unclustered",
-        type: "circle",
-        source: "focos-clustered",
-        filter: ["!", ["has", "point_count"]],
-        layout: {
-          visibility: c.focos ? "visible" : "none",
-        },
-        paint: {
-          "circle-color": [
-            "match",
-            ["get", "int"],
-            "critico",
-            "#991B1B",
-            "alto",
-            "#EF4444",
-            "medio",
-            "#FB923C",
-            "#FACC15",
-          ],
-          "circle-radius": [
-            "interpolate",
-            ["linear"],
-            ["zoom"],
-            3,
-            [
-              "interpolate",
-              ["linear"],
-              ["coalesce", ["get", "frp"], 1],
-              0,
-              3.5,
-              15,
-              5,
-              40,
-              7.5,
-              100,
-              10.5,
-              300,
-              14,
-            ],
-            8,
-            [
-              "interpolate",
-              ["linear"],
-              ["coalesce", ["get", "frp"], 1],
-              0,
-              5,
-              15,
-              7.5,
-              40,
-              10.5,
-              100,
-              14.5,
-              300,
-              19,
-            ],
-          ],
-          "circle-opacity": 0.92,
-          "circle-stroke-width": [
-            "match",
-            ["get", "int"],
-            "critico",
-            2.2,
-            "alto",
-            1.6,
-            1.2,
-          ],
-          "circle-stroke-color": [
-            "match",
-            ["get", "int"],
-            "critico",
-            "#FCA5A5",
-            isDark ? "#101512" : "#FFFFFF",
-          ],
-        },
-      });
-    }
-
-    // Anel de destaque do foco selecionado
-    if (!map.getLayer("focos-selected-ring")) {
-      map.addLayer({
-        id: "focos-selected-ring",
-        type: "circle",
-        source: "focos-raw",
-        filter: ["==", ["get", "id"], selectedFocoRef.current?.id ?? ""],
-        paint: {
-          "circle-radius": 18,
-          "circle-color": "rgba(250, 204, 21, 0.18)",
-          "circle-stroke-width": 2.5,
-          "circle-stroke-color": "#FFFFFF",
-        },
-      });
-    }
-
-    // 5. Localização do usuário (100% local no cliente)
-    const userFc: FeatureCollection<Geometry> = userLocationRef.current
-      ? {
-          type: "FeatureCollection",
-          features: [
-            {
-              type: "Feature",
-              geometry: {
-                type: "Point",
-                coordinates: [userLocationRef.current.lon, userLocationRef.current.lat],
-              },
-              properties: {},
-            },
-          ],
+    try {
+      // 2. Camada de contorno oficial dos 7 Biomas do IBGE
+      if (!map.getSource("biomas-ibge")) {
+        map.addSource("biomas-ibge", {
+          type: "geojson",
+          data: biomesGeoJsonRef.current ?? emptyFc,
+        });
+      } else {
+        const bSrc = map.getSource("biomas-ibge") as maplibregl.GeoJSONSource | undefined;
+        if (bSrc && biomesGeoJsonRef.current) {
+          bSrc.setData(biomesGeoJsonRef.current);
         }
-      : emptyFc;
+      }
 
-    if (!map.getSource("user-location")) {
-      map.addSource("user-location", {
-        type: "geojson",
-        data: userFc,
-      });
+      const biomeColorExpr: maplibregl.ExpressionSpecification = [
+        "match",
+        ["coalesce", ["get", "id"], ""],
+        "amazonia",
+        "#789B7C",
+        "cerrado",
+        "#D4A359",
+        "mata_atlantica",
+        "#5B9A68",
+        "caatinga",
+        "#C89D66",
+        "pampa",
+        "#84A970",
+        "pantanal",
+        "#528B88",
+        "costeiro_marinho",
+        "#3B7A9E",
+        "#789B7C",
+      ];
+
+      if (!map.getLayer("biomas-fill")) {
+        map.addLayer({
+          id: "biomas-fill",
+          type: "fill",
+          source: "biomas-ibge",
+          layout: {
+            visibility: c.biomas ? "visible" : "none",
+          },
+          paint: {
+            "fill-color": biomeColorExpr,
+            "fill-opacity": isDark ? 0.16 : 0.2,
+          },
+        });
+      }
+
+      if (!map.getLayer("biomas-outline")) {
+        map.addLayer({
+          id: "biomas-outline",
+          type: "line",
+          source: "biomas-ibge",
+          layout: {
+            visibility: c.biomas ? "visible" : "none",
+          },
+          paint: {
+            "line-color": biomeColorExpr,
+            "line-width": 1.6,
+            "line-opacity": 0.85,
+          },
+        });
+      }
+    } catch {
+      // Ignora erro na camada de biomas
     }
 
-    if (!map.getLayer("user-location-pulse")) {
-      map.addLayer({
-        id: "user-location-pulse",
-        type: "circle",
-        source: "user-location",
-        paint: {
-          "circle-radius": 14,
-          "circle-color": "rgba(59, 130, 246, 0.25)",
-          "circle-stroke-width": 2,
-          "circle-stroke-color": "#3B82F6",
-        },
-      });
+    try {
+      // 3. Fonte não clusterizada para o modo Densidade (Heatmap) e destaque selecionado
+      if (!map.getSource("focos-raw")) {
+        map.addSource("focos-raw", {
+          type: "geojson",
+          data: geojsonRef.current,
+        });
+      } else {
+        const rSrc = map.getSource("focos-raw") as maplibregl.GeoJSONSource | undefined;
+        rSrc?.setData(geojsonRef.current);
+      }
+
+      if (!map.getLayer("focos-heatmap")) {
+        map.addLayer({
+          id: "focos-heatmap",
+          type: "heatmap",
+          source: "focos-raw",
+          maxzoom: 11,
+          layout: {
+            visibility: c.heatmap ? "visible" : "none",
+          },
+          paint: {
+            "heatmap-weight": [
+              "interpolate",
+              ["linear"],
+              ["coalesce", ["get", "frp"], 1],
+              0,
+              0.15,
+              15,
+              0.4,
+              40,
+              0.75,
+              100,
+              1,
+            ],
+            "heatmap-intensity": ["interpolate", ["linear"], ["zoom"], 3, 1, 9, 2.5],
+            "heatmap-color": [
+              "interpolate",
+              ["linear"],
+              ["heatmap-density"],
+              0,
+              "rgba(0, 0, 0, 0)",
+              0.2,
+              "rgba(250, 204, 21, 0.55)",
+              0.45,
+              "rgba(251, 146, 60, 0.78)",
+              0.75,
+              "rgba(239, 68, 68, 0.9)",
+              1,
+              "rgba(153, 27, 27, 0.98)",
+            ],
+            "heatmap-radius": ["interpolate", ["linear"], ["zoom"], 3, 12, 8, 26],
+            "heatmap-opacity": 0.88,
+          },
+        });
+      }
+    } catch {
+      // Ignora erro no heatmap
     }
 
-    if (!map.getLayer("user-location-dot")) {
-      map.addLayer({
-        id: "user-location-dot",
-        type: "circle",
-        source: "user-location",
-        paint: {
-          "circle-radius": 6,
-          "circle-color": "#3B82F6",
-          "circle-stroke-width": 2,
-          "circle-stroke-color": "#FFFFFF",
-        },
-      });
+    try {
+      // 4. Fonte clusterizada de focos na GPU para alta performance
+      if (!map.getSource("focos-clustered")) {
+        map.addSource("focos-clustered", {
+          type: "geojson",
+          data: geojsonRef.current,
+          cluster: true,
+          clusterMaxZoom: 6,
+          clusterRadius: 42,
+          clusterProperties: {
+            maxFrp: ["max", ["get", "frp"]],
+          },
+        });
+      } else {
+        const cSrc = map.getSource("focos-clustered") as maplibregl.GeoJSONSource | undefined;
+        cSrc?.setData(geojsonRef.current);
+      }
+
+      if (!map.getLayer("focos-clusters")) {
+        map.addLayer({
+          id: "focos-clusters",
+          type: "circle",
+          source: "focos-clustered",
+          filter: ["has", "point_count"],
+          layout: {
+            visibility: c.focos ? "visible" : "none",
+          },
+          paint: {
+            "circle-color": [
+              "step",
+              ["coalesce", ["get", "maxFrp"], 0],
+              "#FACC15",
+              15,
+              "#FB923C",
+              40,
+              "#EF4444",
+              100,
+              "#991B1B",
+            ],
+            "circle-radius": [
+              "step",
+              ["get", "point_count"],
+              15,
+              25,
+              19,
+              100,
+              24,
+              500,
+              30,
+            ],
+            "circle-opacity": 0.9,
+            "circle-stroke-width": 2,
+            "circle-stroke-color": isDark ? "#101512" : "#FFFFFF",
+          },
+        });
+      }
+
+      if (!map.getLayer("focos-cluster-count")) {
+        map.addLayer({
+          id: "focos-cluster-count",
+          type: "symbol",
+          source: "focos-clustered",
+          filter: ["has", "point_count"],
+          layout: {
+            visibility: c.focos ? "visible" : "none",
+            "text-field": "{point_count_abbreviated}",
+            "text-font": ["Open Sans Bold", "Open Sans Regular"],
+            "text-size": 11,
+          },
+          paint: {
+            "text-color": [
+              "step",
+              ["coalesce", ["get", "maxFrp"], 0],
+              "#101512",
+              40,
+              "#FFFFFF",
+            ],
+            "text-halo-color": "rgba(0,0,0,0.25)",
+            "text-halo-width": 0.8,
+          },
+        });
+      }
+
+      // Círculos individuais na GPU: COR pela escala de intensidade + TAMANHO proporcional ao FRP
+      if (!map.getLayer("focos-unclustered")) {
+        map.addLayer({
+          id: "focos-unclustered",
+          type: "circle",
+          source: "focos-clustered",
+          filter: ["!", ["has", "point_count"]],
+          layout: {
+            visibility: c.focos ? "visible" : "none",
+          },
+          paint: {
+            "circle-color": [
+              "match",
+              ["get", "int"],
+              "critico",
+              "#991B1B",
+              "alto",
+              "#EF4444",
+              "medio",
+              "#FB923C",
+              "#FACC15",
+            ],
+            "circle-radius": [
+              "interpolate",
+              ["linear"],
+              ["zoom"],
+              3,
+              [
+                "interpolate",
+                ["linear"],
+                ["coalesce", ["get", "frp"], 1],
+                0,
+                3.5,
+                15,
+                5,
+                40,
+                7.5,
+                100,
+                10.5,
+                300,
+                14,
+              ],
+              8,
+              [
+                "interpolate",
+                ["linear"],
+                ["coalesce", ["get", "frp"], 1],
+                0,
+                5,
+                15,
+                7.5,
+                40,
+                10.5,
+                100,
+                14.5,
+                300,
+                19,
+              ],
+            ],
+            "circle-opacity": 0.92,
+            "circle-stroke-width": [
+              "match",
+              ["get", "int"],
+              "critico",
+              2.2,
+              "alto",
+              1.6,
+              1.2,
+            ],
+            "circle-stroke-color": [
+              "match",
+              ["get", "int"],
+              "critico",
+              "#FCA5A5",
+              isDark ? "#101512" : "#FFFFFF",
+            ],
+          },
+        });
+      }
+
+      // Anel de destaque do foco selecionado
+      if (!map.getLayer("focos-selected-ring")) {
+        map.addLayer({
+          id: "focos-selected-ring",
+          type: "circle",
+          source: "focos-raw",
+          filter: ["==", ["get", "id"], selectedFocoRef.current?.id ?? ""],
+          paint: {
+            "circle-radius": 18,
+            "circle-color": "rgba(250, 204, 21, 0.18)",
+            "circle-stroke-width": 2.5,
+            "circle-stroke-color": "#FFFFFF",
+          },
+        });
+      }
+    } catch {
+      // Ignora erro em camadas de focos
+    }
+
+    try {
+      // 5. Localização do usuário (100% local no cliente)
+      const userFc: FeatureCollection<Geometry> = userLocationRef.current
+        ? {
+            type: "FeatureCollection",
+            features: [
+              {
+                type: "Feature",
+                geometry: {
+                  type: "Point",
+                  coordinates: [userLocationRef.current.lon, userLocationRef.current.lat],
+                },
+                properties: {},
+              },
+            ],
+          }
+        : emptyFc;
+
+      if (!map.getSource("user-location")) {
+        map.addSource("user-location", {
+          type: "geojson",
+          data: userFc,
+        });
+      }
+
+      if (!map.getLayer("user-location-pulse")) {
+        map.addLayer({
+          id: "user-location-pulse",
+          type: "circle",
+          source: "user-location",
+          paint: {
+            "circle-radius": 14,
+            "circle-color": "rgba(59, 130, 246, 0.25)",
+            "circle-stroke-width": 2,
+            "circle-stroke-color": "#3B82F6",
+          },
+        });
+      }
+
+      if (!map.getLayer("user-location-dot")) {
+        map.addLayer({
+          id: "user-location-dot",
+          type: "circle",
+          source: "user-location",
+          paint: {
+            "circle-radius": 6,
+            "circle-color": "#3B82F6",
+            "circle-stroke-width": 2,
+            "circle-stroke-color": "#FFFFFF",
+          },
+        });
+      }
+    } catch {
+      // Ignora erro na camada de localização
     }
   };
 
@@ -454,7 +487,6 @@ export default function FirmsMapCanvas({
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
 
-    // Verifica suporte a WebGL
     try {
       const canvas = document.createElement("canvas");
       const gl =
@@ -504,18 +536,17 @@ export default function FirmsMapCanvas({
         showCompass: true,
         showZoom: true,
       }),
-      "top-right",
+      "bottom-right",
     );
 
-    map.on("load", () => {
+    const handleStyleReady = () => {
       styleLoadedRef.current = true;
       setupLayers(map, currentStyleThemeRef.current === "dark");
-    });
+      map.resize();
+    };
 
-    map.on("style.load", () => {
-      styleLoadedRef.current = true;
-      setupLayers(map, currentStyleThemeRef.current === "dark");
-    });
+    map.on("load", handleStyleReady);
+    map.on("style.load", handleStyleReady);
 
     map.on("moveend", () => {
       const center = map.getCenter();
@@ -569,13 +600,22 @@ export default function FirmsMapCanvas({
       map.getCanvas().style.cursor = "";
     });
 
+    // Garante redimensionamento correto em layouts flex/responsivos
+    let resizeObserver: ResizeObserver | null = null;
+    if (typeof ResizeObserver !== "undefined" && containerRef.current) {
+      resizeObserver = new ResizeObserver(() => {
+        mapRef.current?.resize();
+      });
+      resizeObserver.observe(containerRef.current);
+    }
+
     // Carrega o GeoJSON oficial dos 7 biomas do IBGE
     fetch("/data/geojson/biomas-brasil.json")
       .then((res) => (res.ok ? res.json() : null))
       .then((data: FeatureCollection<Geometry> | null) => {
         if (!data) return;
         biomesGeoJsonRef.current = data;
-        if (mapRef.current && styleLoadedRef.current) {
+        if (mapRef.current) {
           const src = mapRef.current.getSource("biomas-ibge") as
             | maplibregl.GeoJSONSource
             | undefined;
@@ -587,6 +627,7 @@ export default function FirmsMapCanvas({
       .catch(() => {});
 
     return () => {
+      resizeObserver?.disconnect();
       styleLoadedRef.current = false;
       map.remove();
       mapRef.current = null;
@@ -608,18 +649,27 @@ export default function FirmsMapCanvas({
   // Atualiza dados dos focos quando o filtro/API muda
   useEffect(() => {
     const map = mapRef.current;
-    if (!map || !styleLoadedRef.current) return;
-    const clusteredSrc = map.getSource("focos-clustered") as
-      | maplibregl.GeoJSONSource
-      | undefined;
-    if (clusteredSrc) {
-      clusteredSrc.setData(geojson);
-    }
-    const rawSrc = map.getSource("focos-raw") as
-      | maplibregl.GeoJSONSource
-      | undefined;
-    if (rawSrc) {
-      rawSrc.setData(geojson);
+    if (!map) return;
+
+    const applyData = () => {
+      const clusteredSrc = map.getSource("focos-clustered") as
+        | maplibregl.GeoJSONSource
+        | undefined;
+      if (clusteredSrc) {
+        clusteredSrc.setData(geojson);
+      }
+      const rawSrc = map.getSource("focos-raw") as
+        | maplibregl.GeoJSONSource
+        | undefined;
+      if (rawSrc) {
+        rawSrc.setData(geojson);
+      }
+    };
+
+    if (styleLoadedRef.current || map.isStyleLoaded()) {
+      applyData();
+    } else {
+      map.once("load", applyData);
     }
   }, [geojson]);
 
@@ -718,11 +768,13 @@ export default function FirmsMapCanvas({
   }, [flyToTarget, prefersReducedMotion]);
 
   return (
-    <div
-      ref={containerRef}
-      className="h-full w-full"
-      role="region"
-      aria-label="Mapa interativo de focos de calor do Brasil com dados do NASA FIRMS"
-    />
+    <div className="relative h-full w-full min-h-[480px]">
+      <div
+        ref={containerRef}
+        className="absolute inset-0 h-full w-full"
+        role="region"
+        aria-label="Mapa interativo de focos de calor do Brasil com dados do NASA FIRMS"
+      />
+    </div>
   );
 }

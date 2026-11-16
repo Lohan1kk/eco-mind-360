@@ -5,7 +5,6 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import {
   AlertTriangle,
-  BookOpen,
   Check,
   ChevronDown,
   ChevronUp,
@@ -65,14 +64,11 @@ function MapaCanvasSkeleton() {
     <div
       className="flex h-full w-full flex-col items-center justify-center gap-3 bg-[var(--background)] p-6 text-center"
       role="status"
-      aria-label="Carregando motor cartográfico"
+      aria-label="Carregando mapa"
     >
       <Loader2 className="h-8 w-8 animate-spin text-[var(--primary)]" aria-hidden="true" />
       <p className="text-sm font-medium text-[var(--foreground)]">
-        Inicializando atlas vetorial e telemetria NASA FIRMS...
-      </p>
-      <p className="text-xs font-mono text-[var(--muted)]">
-        Carregando malha oficial do IBGE e sensores VIIRS (375 m) / MODIS (1 km)
+        Carregando mapa interativo...
       </p>
     </div>
   );
@@ -100,9 +96,6 @@ let cachedMunicipiosMemory: IbgeMunicipioItem[] | null = null;
 const geocodeCacheMemory = new Map<string, { lat: number; lon: number }>();
 const reverseMunicipioCache = new Map<string, string>();
 
-/**
- * Contador numérico com transição suave que respeita `prefers-reduced-motion`.
- */
 function AnimatedCount({ value }: { value: number }) {
   const [display, setDisplay] = useState(value);
 
@@ -140,9 +133,6 @@ function AnimatedCount({ value }: { value: number }) {
   return <>{display.toLocaleString("pt-BR")}</>;
 }
 
-/**
- * Ícone geométrico + cor para distinguir classes de intensidade sem depender apenas de cor (WCAG 2.2 AA).
- */
 function IntensityShapeBadge({
   intensidade,
   size = "sm",
@@ -188,22 +178,18 @@ export default function MapaQueimadasFirms() {
 
   const [showFiltersPanel, setShowFiltersPanel] = useState(false);
   const [showLayersPopover, setShowLayersPopover] = useState(false);
-  const [showLegendModal, setShowLegendModal] = useState(false);
+  const [showTop20Table, setShowTop20Table] = useState(false);
 
-  // Mobile bottom sheet com 3 alturas: 'collapsed' (recolhido), 'medium' (médio), 'expanded' (expandido)
-  const [sheetHeight, setSheetHeight] = useState<"collapsed" | "medium" | "expanded">("medium");
+  const [sheetHeight, setSheetHeight] = useState<"collapsed" | "medium" | "expanded">("collapsed");
 
-  // Busca por cidade/UF com debounce
   const [cityQuery, setCityQuery] = useState("");
   const [citySuggestions, setCitySuggestions] = useState<IbgeMunicipioItem[]>([]);
   const [searchingCity, setSearchingCity] = useState(false);
 
-  // Botão "Meu local" (exclusivo no cliente)
   const [userLocation, setUserLocation] = useState<{ lat: number; lon: number } | null>(null);
   const [geoStatusMsg, setGeoStatusMsg] = useState<string | null>(null);
   const [locatingUser, setLocatingUser] = useState(false);
 
-  // FlyTo command para o MapLibre
   const [flyToTarget, setFlyToTarget] = useState<{
     lat: number;
     lon: number;
@@ -211,13 +197,11 @@ export default function MapaQueimadasFirms() {
     token: number;
   } | null>(null);
 
-  // Botão Copiar Link
   const [copiedLink, setCopiedLink] = useState(false);
   const [nowMs, setNowMs] = useState<number>(() => Date.now());
 
   const abortControllerRef = useRef<AbortController | null>(null);
 
-  // 1. Restaura filtros, posição e camadas pela URL ao abrir a página
   useEffect(() => {
     if (typeof window === "undefined") return;
     const restored = parseMapUrlState(window.location.search);
@@ -225,7 +209,6 @@ export default function MapaQueimadasFirms() {
     setUrlReady(true);
   }, []);
 
-  // 2. Sincroniza estado com a URL (query string) sem recarregar a página
   useEffect(() => {
     if (!urlReady || typeof window === "undefined") return;
     const qs = serializeMapUrlState(mapState);
@@ -233,13 +216,11 @@ export default function MapaQueimadasFirms() {
     window.history.replaceState(null, "", nextUrl);
   }, [mapState, urlReady]);
 
-  // Atualiza relógio para o selo de frescor
   useEffect(() => {
     const id = window.setInterval(() => setNowMs(Date.now()), 30000);
     return () => window.clearInterval(id);
   }, []);
 
-  // 3. Busca dados reais na rota /api/focos
   const fetchFocos = useCallback(
     async (filtros: FiltroFocos, forceRefresh = false) => {
       if (abortControllerRef.current) {
@@ -299,7 +280,6 @@ export default function MapaQueimadasFirms() {
     void fetchFocos(mapState.filtros, false);
   }, [urlReady, mapState.filtros, fetchFocos]);
 
-  // Lookup reverso opcional de município ao selecionar um foco
   useEffect(() => {
     if (!selectedFoco) {
       setSelectedMunicipio(null);
@@ -343,7 +323,6 @@ export default function MapaQueimadasFirms() {
     };
   }, [selectedFoco]);
 
-  // Autocomplete de municípios do IBGE com debounce de 300 ms e cache
   useEffect(() => {
     const q = cityQuery.trim().toLowerCase();
     if (q.length < 2) {
@@ -440,7 +419,7 @@ export default function MapaQueimadasFirms() {
         }
       }
     } catch {
-      // fallback para o centro da UF
+      // fallback UF
     }
 
     const ufObj = BRAZIL_UFS.find((u) => u.sigla === item.ufSigla);
@@ -454,7 +433,6 @@ export default function MapaQueimadasFirms() {
     }
   };
 
-  // Manipuladores de filtro
   const updateFiltro = <K extends keyof FiltroFocos>(
     key: K,
     value: FiltroFocos[K],
@@ -535,12 +513,11 @@ export default function MapaQueimadasFirms() {
     }
   };
 
-  // Botão "Meu local" (100% no navegador, nunca enviado ao servidor nem salvo)
   const handleMeuLocal = () => {
     setGeoStatusMsg(null);
     if (typeof navigator === "undefined" || !navigator.geolocation) {
       setGeoStatusMsg(
-        "Seu navegador não oferece suporte a geolocalização. Você pode buscar sua cidade pelo campo de busca acima.",
+        "Seu navegador não oferece suporte a geolocalização. Use a busca por cidade acima.",
       );
       return;
     }
@@ -558,11 +535,11 @@ export default function MapaQueimadasFirms() {
         setLocatingUser(false);
         if (err.code === err.PERMISSION_DENIED) {
           setGeoStatusMsg(
-            "Permissão de localização negada. Para ver focos num raio de 50 km, autorize o acesso à localização no navegador (sua posição nunca sai do seu aparelho).",
+            "Permissão de localização negada. Autorize no navegador ou busque sua cidade acima.",
           );
         } else {
           setGeoStatusMsg(
-            "Não foi possível obter sua localização atual. Tente usar a busca por cidade ou UF.",
+            "Não foi possível obter sua localização. Tente buscar sua cidade acima.",
           );
         }
       },
@@ -581,13 +558,11 @@ export default function MapaQueimadasFirms() {
     return map;
   }, [focos]);
 
-  // Análise de raio de 50 km para "Meu local"
   const nearbyStats = useMemo(() => {
     if (!userLocation) return null;
     return analyzeNearbyFocos(userLocation.lat, userLocation.lon, focos, 50);
   }, [userLocation, focos]);
 
-  // Ranking por bioma ordenado por quantidade de focos
   const biomeRanking = useMemo(() => {
     if (!resumo) return [];
     return BIOMES_LIST.map((b) => {
@@ -602,14 +577,12 @@ export default function MapaQueimadasFirms() {
     }).sort((a, b) => b.total - a.total);
   }, [resumo]);
 
-  // 20 focos mais intensos para a tabela acessível (Passo 2.12)
   const top20Focos = useMemo(() => {
     return [...focos]
       .sort((a, b) => b.frp - a.frp || Date.parse(b.dataHoraUtc) - Date.parse(a.dataHoraUtc))
       .slice(0, 20);
   }, [focos]);
 
-  // Exportação CSV com cabeçalho documentando fonte, período e data
   const handleExportCsv = () => {
     const todayStr = new Date().toISOString().slice(0, 10);
     const updatedIso = resumo?.atualizadoEm ?? new Date().toISOString();
@@ -617,7 +590,6 @@ export default function MapaQueimadasFirms() {
       `# Fonte: ${resumo?.fonte ?? "NASA FIRMS (VIIRS 375 m / MODIS 1 km)"}`,
       `# Periodo: ${formatPeriodoLabel(mapState.filtros.periodo)} (${mapState.filtros.periodo})`,
       `# Atualizado_em_UTC: ${updatedIso}`,
-      `# Criterio_Intensidade_EcoMind360: Critico>=100MW | Alto>=40MW | Medio>=15MW | Baixo<15MW`,
       "id,latitude,longitude,data_hora_utc,satelite,instrumento,fonte_firms,confianca,frp_mw,intensidade,dia_noite,bioma,uf",
     ];
 
@@ -665,7 +637,6 @@ export default function MapaQueimadasFirms() {
 
   return (
     <div className="flex flex-col w-full bg-[var(--background)] text-[var(--foreground)]">
-      {/* Anúncio acessível (WCAG 2.2 AA aria-live) quando os filtros mudam */}
       <div className="sr-only" aria-live="polite" aria-atomic="true">
         {loading
           ? "Carregando focos de calor do NASA FIRMS..."
@@ -676,29 +647,29 @@ export default function MapaQueimadasFirms() {
             : ""}
       </div>
 
-      {/* SEÇÃO 1: CONTAINER DO MAPA EM TELA QUASE CHEIA + PAINEL LATERAL / BOTTOM SHEET */}
+      {/* CONTAINER DO MAPA + PAINEL LATERAL ENXUTO */}
       <section
-        aria-label="Atlas Interativo de Focos de Calor"
+        aria-label="Mapa Interativo de Focos de Calor"
         className="relative flex flex-col lg:flex-row w-full h-[calc(100dvh-3.5rem)] min-h-[540px] overflow-hidden border-b border-[var(--border)]"
       >
         {/* ÁREA DO MAPA */}
-        <div className="relative flex-1 h-full w-full overflow-hidden">
+        <div className="relative flex-1 h-full w-full min-h-[480px] overflow-hidden">
           {webGlFailed ? (
             <div className="flex h-full w-full flex-col items-center justify-center gap-4 bg-[var(--surface)] p-6 text-center">
               <AlertTriangle className="h-10 w-10 text-[var(--warning)]" aria-hidden="true" />
               <div className="max-w-md space-y-2">
                 <h2 className="font-display text-lg font-semibold text-[var(--foreground)]">
-                  Aceleração gráfica (WebGL) indisponível neste dispositivo
+                  WebGL indisponível neste dispositivo
                 </h2>
                 <p className="text-xs leading-relaxed text-[var(--foreground-secondary)]">
-                  O mapa interativo utiliza WebGL para renderizar milhares de focos a 60 quadros por segundo.
-                  Você pode consultar e exportar todos os dados reais diretamente na{" "}
-                  <a
-                    href="#tabela-alternativa-focos"
+                  Consulte e exporte os dados diretamente na{" "}
+                  <button
+                    type="button"
+                    onClick={() => setShowTop20Table(true)}
                     className="font-semibold text-[var(--primary)] underline"
                   >
-                    tabela acessível de focos abaixo
-                  </a>
+                    tabela de focos abaixo
+                  </button>
                   .
                 </p>
               </div>
@@ -726,14 +697,13 @@ export default function MapaQueimadasFirms() {
             />
           )}
 
-          {/* BARRA FLUTUANTE SUPERIOR (ESTILO ATLAS MODERNO) */}
-          <div className="pointer-events-none absolute inset-x-2.5 top-2.5 z-20 flex flex-col gap-2 sm:inset-x-4 sm:top-4">
+          {/* BARRA SUPERIOR COMPACTA */}
+          <div className="pointer-events-none absolute inset-x-2.5 top-2.5 z-20 flex flex-col gap-2 sm:inset-x-4 sm:top-3">
             <div className="flex flex-wrap items-center justify-between gap-2">
-              {/* Grupo Esquerdo: Selo de Frescor + Seletor Rápido de Período */}
-              <div className="pointer-events-auto flex flex-wrap items-center gap-2 rounded-[12px] border border-[var(--border)] bg-[var(--surface)]/95 p-1.5 shadow-soft backdrop-blur-md">
-                {/* Período: 24h, 48h, 7d */}
+              {/* Esquerda: Período + Status Conciso */}
+              <div className="pointer-events-auto flex items-center gap-1.5 rounded-[10px] border border-[var(--border)] bg-[var(--surface)]/95 p-1 shadow-soft backdrop-blur-md">
                 <div
-                  className="inline-flex items-center rounded-[8px] bg-[var(--background-secondary)] p-0.5"
+                  className="inline-flex items-center rounded-[7px] bg-[var(--background-secondary)] p-0.5"
                   role="group"
                   aria-label="Período de monitoramento"
                 >
@@ -741,7 +711,7 @@ export default function MapaQueimadasFirms() {
                     [
                       { id: "24h", label: "24h" },
                       { id: "48h", label: "48h" },
-                      { id: "7d", label: "7 dias" },
+                      { id: "7d", label: "7d" },
                     ] as const
                   ).map((p) => {
                     const active = mapState.filtros.periodo === p.id;
@@ -751,7 +721,7 @@ export default function MapaQueimadasFirms() {
                         type="button"
                         onClick={() => updateFiltro("periodo", p.id)}
                         aria-pressed={active}
-                        className={`min-h-[38px] min-w-[44px] rounded-[6px] px-2.5 py-1 text-xs font-mono font-medium transition-colors ${
+                        className={`min-h-[34px] rounded-[5px] px-2.5 py-1 text-xs font-mono font-medium transition-colors ${
                           active
                             ? "bg-[var(--primary)] text-white dark:text-[#101512] font-semibold"
                             : "text-[var(--foreground-secondary)] hover:text-[var(--foreground)]"
@@ -763,64 +733,49 @@ export default function MapaQueimadasFirms() {
                   })}
                 </div>
 
-                {/* Selo de Frescor sempre visível */}
-                <div className="flex items-center gap-1.5 px-2 py-1 text-[11px] font-mono">
+                <div className="hidden sm:flex items-center gap-1.5 px-2 text-[11px] font-mono text-[var(--foreground-secondary)]">
                   <span
                     className={`h-2 w-2 shrink-0 rounded-full ${
-                      resumo?.desatualizado
-                        ? "bg-[var(--warning)]"
-                        : "bg-[var(--success)]"
+                      resumo?.desatualizado ? "bg-[var(--warning)]" : "bg-[var(--success)]"
                     }`}
-                    aria-hidden="true"
                   />
-                  <span className="text-[var(--foreground)] font-medium">
-                    Fonte: NASA FIRMS (VIIRS/MODIS)
-                  </span>
-                  <span className="text-[var(--muted)]" aria-hidden="true">·</span>
-                  <span className="text-[var(--foreground-secondary)]">
+                  <span>NASA FIRMS</span>
+                  <span>·</span>
+                  <span>
                     {loading
                       ? "atualizando..."
-                      : `atualizado ${formatMinutesAgo(resumo?.atualizadoEm, nowMs)}`}
+                      : formatMinutesAgo(resumo?.atualizadoEm, nowMs)}
                   </span>
-                  {resumo?.desatualizado && resumo.atualizadoEm && (
-                    <span className="rounded bg-[#A9A17A]/20 px-1.5 py-0.5 text-[10px] text-[var(--warning)]">
-                      Cache ({new Date(resumo.atualizadoEm).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })})
-                    </span>
-                  )}
                 </div>
 
                 <button
                   type="button"
                   onClick={() => void fetchFocos(mapState.filtros, true)}
                   disabled={refreshing || loading}
-                  aria-label="Atualizar focos do satélite agora"
+                  aria-label="Atualizar dados agora"
                   title="Atualizar dados agora"
-                  className="flex min-h-[38px] min-w-[38px] items-center justify-center rounded-[8px] border border-[var(--border)] bg-[var(--surface-elevated)] text-[var(--foreground-secondary)] hover:text-[var(--foreground)] disabled:opacity-50"
+                  className="flex h-8 w-8 items-center justify-center rounded-[7px] text-[var(--foreground-secondary)] hover:bg-[var(--surface-elevated)] hover:text-[var(--foreground)] disabled:opacity-50"
                 >
                   <RefreshCw
-                    size={14}
+                    size={13}
                     className={refreshing || loading ? "animate-spin text-[var(--primary)]" : ""}
                   />
                 </button>
               </div>
 
-              {/* Grupo Direito: Busca por Cidade/UF + Filtros + Camadas + Meu Local + Copiar Link */}
+              {/* Direita: Busca + Filtros + Camadas + Meu Local */}
               <div className="pointer-events-auto flex flex-wrap items-center gap-1.5">
-                {/* Busca por Cidade / UF */}
+                {/* Busca de Cidade */}
                 <div className="relative">
                   <div className="flex items-center rounded-[10px] border border-[var(--border)] bg-[var(--surface)]/95 shadow-soft backdrop-blur-md">
-                    <Search
-                      size={14}
-                      className="ml-3 shrink-0 text-[var(--muted)]"
-                      aria-hidden="true"
-                    />
+                    <Search size={13} className="ml-2.5 shrink-0 text-[var(--muted)]" />
                     <input
                       type="search"
                       value={cityQuery}
                       onChange={(e) => setCityQuery(e.target.value)}
-                      placeholder="Buscar cidade ou UF..."
-                      aria-label="Buscar cidade ou UF para centralizar o mapa"
-                      className="min-h-[44px] w-40 sm:w-52 bg-transparent px-2.5 py-1.5 text-xs text-[var(--foreground)] placeholder:text-[var(--muted)] focus:outline-none"
+                      placeholder="Buscar cidade..."
+                      aria-label="Buscar cidade ou UF"
+                      className="h-9 w-36 sm:w-44 bg-transparent px-2 text-xs text-[var(--foreground)] placeholder:text-[var(--muted)] focus:outline-none"
                     />
                     {cityQuery && (
                       <button
@@ -829,10 +784,10 @@ export default function MapaQueimadasFirms() {
                           setCityQuery("");
                           setCitySuggestions([]);
                         }}
-                        aria-label="Limpar busca de cidade"
-                        className="mr-1.5 flex h-7 w-7 items-center justify-center rounded text-[var(--muted)] hover:text-[var(--foreground)]"
+                        aria-label="Limpar busca"
+                        className="mr-1 flex h-6 w-6 items-center justify-center rounded text-[var(--muted)] hover:text-[var(--foreground)]"
                       >
-                        <X size={13} />
+                        <X size={12} />
                       </button>
                     )}
                   </div>
@@ -840,18 +795,17 @@ export default function MapaQueimadasFirms() {
                   {citySuggestions.length > 0 && (
                     <ul
                       role="listbox"
-                      aria-label="Sugestões de municípios do IBGE"
-                      className="absolute left-0 right-0 top-full mt-1 max-h-60 overflow-y-auto rounded-[10px] border border-[var(--border)] bg-[var(--surface)] p-1 shadow-lift z-30"
+                      className="absolute left-0 right-0 top-full mt-1 max-h-56 overflow-y-auto rounded-[10px] border border-[var(--border)] bg-[var(--surface)] p-1 shadow-lift z-30"
                     >
                       {citySuggestions.map((item) => (
                         <li key={item.id}>
                           <button
                             type="button"
                             onClick={() => void handleSelectMunicipio(item)}
-                            className="flex w-full items-center justify-between rounded-[7px] px-3 py-2 text-left text-xs text-[var(--foreground)] hover:bg-[var(--surface-elevated)]"
+                            className="flex w-full items-center justify-between rounded-[7px] px-2.5 py-1.5 text-left text-xs text-[var(--foreground)] hover:bg-[var(--surface-elevated)]"
                           >
                             <span className="font-medium truncate">{item.nome}</span>
-                            <span className="ml-2 shrink-0 rounded bg-[var(--surface-elevated)] px-1.5 py-0.5 font-mono text-[10px] text-[var(--sage)]">
+                            <span className="ml-2 shrink-0 font-mono text-[10px] text-[var(--sage)]">
                               {item.ufSigla}
                             </span>
                           </button>
@@ -861,12 +815,12 @@ export default function MapaQueimadasFirms() {
                   )}
                   {searchingCity && citySuggestions.length === 0 && cityQuery.length >= 2 && (
                     <div className="absolute left-0 right-0 top-full mt-1 rounded-[10px] border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-[11px] text-[var(--muted)] shadow-soft">
-                      Consultando malha municipal do IBGE...
+                      Buscando...
                     </div>
                   )}
                 </div>
 
-                {/* Botão de Filtros Avançados */}
+                {/* Filtros */}
                 <button
                   type="button"
                   onClick={() => {
@@ -874,21 +828,20 @@ export default function MapaQueimadasFirms() {
                     setShowLayersPopover(false);
                   }}
                   aria-expanded={showFiltersPanel}
-                  aria-label="Abrir painel de filtros"
-                  className={`flex min-h-[44px] items-center gap-1.5 rounded-[10px] border px-3 py-2 text-xs font-medium shadow-soft backdrop-blur-md transition-colors ${
+                  className={`flex h-9 items-center gap-1.5 rounded-[10px] border px-3 text-xs font-medium shadow-soft backdrop-blur-md transition-colors ${
                     showFiltersPanel || hasActiveFilters
                       ? "border-[var(--primary)] bg-[var(--surface-elevated)] text-[var(--foreground)]"
                       : "border-[var(--border)] bg-[var(--surface)]/95 text-[var(--foreground-secondary)] hover:text-[var(--foreground)]"
                   }`}
                 >
-                  <Filter size={14} className="text-[var(--primary)]" />
+                  <Filter size={13} className="text-[var(--primary)]" />
                   <span>Filtros</span>
                   {hasActiveFilters && (
-                    <span className="h-2 w-2 rounded-full bg-[var(--primary)]" />
+                    <span className="h-1.5 w-1.5 rounded-full bg-[var(--primary)]" />
                   )}
                 </button>
 
-                {/* Botão de Camadas */}
+                {/* Camadas */}
                 <div className="relative">
                   <button
                     type="button"
@@ -897,41 +850,26 @@ export default function MapaQueimadasFirms() {
                       setShowFiltersPanel(false);
                     }}
                     aria-expanded={showLayersPopover}
-                    aria-label="Alternar camadas do mapa"
-                    className={`flex min-h-[44px] items-center gap-1.5 rounded-[10px] border px-3 py-2 text-xs font-medium shadow-soft backdrop-blur-md transition-colors ${
+                    className={`flex h-9 items-center gap-1.5 rounded-[10px] border px-3 text-xs font-medium shadow-soft backdrop-blur-md transition-colors ${
                       showLayersPopover
                         ? "border-[var(--primary)] bg-[var(--surface-elevated)] text-[var(--foreground)]"
                         : "border-[var(--border)] bg-[var(--surface)]/95 text-[var(--foreground-secondary)] hover:text-[var(--foreground)]"
                     }`}
                   >
-                    <Layers size={14} className="text-[var(--primary)]" />
+                    <Layers size={13} className="text-[var(--primary)]" />
                     <span className="hidden sm:inline">Camadas</span>
                   </button>
 
                   {showLayersPopover && (
                     <div
                       role="dialog"
-                      aria-label="Painel de camadas cartográficas"
-                      className="absolute right-0 top-full mt-2 w-72 rounded-[12px] border border-[var(--border)] bg-[var(--surface)] p-3.5 shadow-lift z-30 space-y-2.5 text-xs"
+                      aria-label="Camadas do mapa"
+                      className="absolute right-0 top-full mt-2 w-64 rounded-[12px] border border-[var(--border)] bg-[var(--surface)] p-3 shadow-lift z-30 space-y-1.5 text-xs"
                     >
-                      <div className="flex items-center justify-between border-b border-[var(--border)] pb-2">
-                        <span className="font-mono text-[11px] uppercase tracking-wider text-[var(--sage)]">
-                          Camadas do Atlas
-                        </span>
-                        <button
-                          type="button"
-                          onClick={() => setShowLayersPopover(false)}
-                          aria-label="Fechar painel de camadas"
-                          className="p-1 text-[var(--muted)] hover:text-[var(--foreground)]"
-                        >
-                          <X size={14} />
-                        </button>
-                      </div>
-
-                      <label className="flex min-h-[40px] cursor-pointer items-center justify-between gap-2 rounded-[8px] px-2 py-1.5 hover:bg-[var(--surface-elevated)]">
-                        <span className="flex items-center gap-2 font-medium text-[var(--foreground)]">
-                          <Flame size={14} className="text-[#FB923C]" />
-                          Focos de calor (FRP)
+                      <label className="flex cursor-pointer items-center justify-between gap-2 rounded-[7px] px-2 py-1.5 hover:bg-[var(--surface-elevated)]">
+                        <span className="flex items-center gap-2 font-medium">
+                          <Flame size={13} className="text-[#FB923C]" />
+                          Focos de calor
                         </span>
                         <input
                           type="checkbox"
@@ -941,10 +879,10 @@ export default function MapaQueimadasFirms() {
                         />
                       </label>
 
-                      <label className="flex min-h-[40px] cursor-pointer items-center justify-between gap-2 rounded-[8px] px-2 py-1.5 hover:bg-[var(--surface-elevated)]">
-                        <span className="flex items-center gap-2 font-medium text-[var(--foreground)]">
-                          <Trees size={14} className="text-[var(--primary)]" />
-                          Contorno dos 7 Biomas (IBGE)
+                      <label className="flex cursor-pointer items-center justify-between gap-2 rounded-[7px] px-2 py-1.5 hover:bg-[var(--surface-elevated)]">
+                        <span className="flex items-center gap-2 font-medium">
+                          <Trees size={13} className="text-[var(--primary)]" />
+                          Limites dos 7 Biomas
                         </span>
                         <input
                           type="checkbox"
@@ -954,14 +892,14 @@ export default function MapaQueimadasFirms() {
                         />
                       </label>
 
-                      <label className="flex min-h-[40px] cursor-pointer items-center justify-between gap-2 rounded-[8px] px-2 py-1.5 hover:bg-[var(--surface-elevated)]">
+                      <label className="flex cursor-pointer items-center justify-between gap-2 rounded-[7px] px-2 py-1.5 hover:bg-[var(--surface-elevated)]">
                         <div>
-                          <span className="flex items-center gap-2 font-medium text-[var(--foreground)]">
-                            <Satellite size={14} className="text-[#38BDF8]" />
-                            Satélite NASA GIBS (WMTS)
+                          <span className="flex items-center gap-2 font-medium">
+                            <Satellite size={13} className="text-[#38BDF8]" />
+                            Imagem de Satélite (NASA)
                           </span>
                           <span className="block text-[10px] font-mono text-[var(--muted)] pl-5">
-                            VIIRS True Color · mosaico {gibsDateLabel}
+                            Mosaico {gibsDateLabel}
                           </span>
                         </div>
                         <input
@@ -972,16 +910,11 @@ export default function MapaQueimadasFirms() {
                         />
                       </label>
 
-                      <label className="flex min-h-[40px] cursor-pointer items-center justify-between gap-2 rounded-[8px] px-2 py-1.5 hover:bg-[var(--surface-elevated)]">
-                        <div>
-                          <span className="flex items-center gap-2 font-medium text-[var(--foreground)]">
-                            <Sparkles size={14} className="text-[#EF4444]" />
-                            Mapa de Densidade (Heatmap)
-                          </span>
-                          <span className="block text-[10px] font-mono text-[var(--muted)] pl-5">
-                            Mancha térmica ponderada por FRP
-                          </span>
-                        </div>
+                      <label className="flex cursor-pointer items-center justify-between gap-2 rounded-[7px] px-2 py-1.5 hover:bg-[var(--surface-elevated)]">
+                        <span className="flex items-center gap-2 font-medium">
+                          <Sparkles size={13} className="text-[#EF4444]" />
+                          Mancha de Calor (Heatmap)
+                        </span>
                         <input
                           type="checkbox"
                           checked={mapState.camadas.heatmap}
@@ -993,39 +926,32 @@ export default function MapaQueimadasFirms() {
                   )}
                 </div>
 
-                {/* Botão Meu Local */}
+                {/* Meu Local */}
                 <button
                   type="button"
                   onClick={handleMeuLocal}
                   disabled={locatingUser}
-                  aria-label="Centralizar no meu local e calcular focos num raio de 50 km"
-                  title="Meu local (focos num raio de 50 km)"
-                  className="flex min-h-[44px] items-center gap-1.5 rounded-[10px] border border-[var(--border)] bg-[var(--surface)]/95 px-3 py-2 text-xs font-medium text-[var(--foreground-secondary)] hover:text-[var(--foreground)] shadow-soft backdrop-blur-md transition-colors"
+                  title="Focos num raio de 50 km do meu local"
+                  className="flex h-9 items-center gap-1.5 rounded-[10px] border border-[var(--border)] bg-[var(--surface)]/95 px-2.5 text-xs font-medium text-[var(--foreground-secondary)] hover:text-[var(--foreground)] shadow-soft backdrop-blur-md"
                 >
                   <Crosshair
-                    size={14}
+                    size={13}
                     className={locatingUser ? "animate-spin text-[var(--primary)]" : "text-[var(--primary)]"}
                   />
-                  <span className="hidden md:inline">Meu local</span>
+                  <span className="hidden md:inline">Perto de mim</span>
                 </button>
 
-                {/* Botão Copiar Link */}
+                {/* Copiar Link */}
                 <button
                   type="button"
                   onClick={() => void handleCopyLink()}
-                  aria-label="Copiar link compartilhável com os filtros e posição atuais"
-                  className="flex min-h-[44px] items-center gap-1.5 rounded-[10px] border border-[var(--border)] bg-[var(--surface)]/95 px-3 py-2 text-xs font-medium text-[var(--foreground-secondary)] hover:text-[var(--foreground)] shadow-soft backdrop-blur-md transition-colors"
+                  title="Copiar link desta visualização"
+                  className="flex h-9 items-center gap-1.5 rounded-[10px] border border-[var(--border)] bg-[var(--surface)]/95 px-2.5 text-xs font-medium text-[var(--foreground-secondary)] hover:text-[var(--foreground)] shadow-soft backdrop-blur-md"
                 >
                   {copiedLink ? (
-                    <>
-                      <Check size={14} className="text-[var(--success)]" />
-                      <span className="text-[var(--success)] font-semibold">Link copiado!</span>
-                    </>
+                    <Check size={13} className="text-[var(--success)]" />
                   ) : (
-                    <>
-                      <Copy size={14} className="text-[var(--primary)]" />
-                      <span className="hidden md:inline">Copiar link</span>
-                    </>
+                    <Copy size={13} className="text-[var(--primary)]" />
                   )}
                 </button>
               </div>
@@ -1035,43 +961,40 @@ export default function MapaQueimadasFirms() {
             {showFiltersPanel && (
               <div
                 role="region"
-                aria-label="Filtros detalhados de focos de calor"
-                className="pointer-events-auto rounded-[12px] border border-[var(--border)] bg-[var(--surface)]/98 p-4 shadow-lift backdrop-blur-xl"
+                aria-label="Filtros de focos"
+                className="pointer-events-auto rounded-[12px] border border-[var(--border)] bg-[var(--surface)]/98 p-3.5 shadow-lift backdrop-blur-xl"
               >
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3 text-xs">
-                  {/* Bioma */}
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 text-xs">
                   <label className="space-y-1">
                     <span className="block font-mono text-[10px] uppercase text-[var(--muted)]">
-                      Bioma / Ambiente
+                      Bioma
                     </span>
                     <select
                       value={mapState.filtros.bioma}
                       onChange={(e) =>
                         updateFiltro("bioma", e.target.value as FiltroFocos["bioma"])
                       }
-                      className="min-h-[42px] w-full rounded-[8px] border border-[var(--border)] bg-[var(--background-secondary)] px-2.5 py-1.5 text-xs text-[var(--foreground)]"
+                      className="h-9 w-full rounded-[7px] border border-[var(--border)] bg-[var(--background-secondary)] px-2 text-xs text-[var(--foreground)]"
                     >
-                      <option value="all">Todos os 7 Ambientes</option>
+                      <option value="all">Todos os 7</option>
                       {BIOMES_LIST.map((b) => (
                         <option key={b.id} value={b.id}>
                           {b.name}
                         </option>
                       ))}
-                      <option value="fora_dos_biomas">Fora dos biomas (Oceano/Fronteira)</option>
                     </select>
                   </label>
 
-                  {/* Estado (UF) */}
                   <label className="space-y-1">
                     <span className="block font-mono text-[10px] uppercase text-[var(--muted)]">
-                      Estado (UF - IBGE)
+                      Estado (UF)
                     </span>
                     <select
                       value={mapState.filtros.uf}
                       onChange={(e) => updateFiltro("uf", e.target.value)}
-                      className="min-h-[42px] w-full rounded-[8px] border border-[var(--border)] bg-[var(--background-secondary)] px-2.5 py-1.5 text-xs text-[var(--foreground)]"
+                      className="h-9 w-full rounded-[7px] border border-[var(--border)] bg-[var(--background-secondary)] px-2 text-xs text-[var(--foreground)]"
                     >
-                      <option value="all">Todas as 27 UFs</option>
+                      <option value="all">Todos os Estados</option>
                       {BRAZIL_UFS.map((u) => (
                         <option key={u.sigla} value={u.sigla}>
                           {u.sigla} — {u.nome}
@@ -1080,10 +1003,9 @@ export default function MapaQueimadasFirms() {
                     </select>
                   </label>
 
-                  {/* Classe de Intensidade Mínima */}
                   <label className="space-y-1">
                     <span className="block font-mono text-[10px] uppercase text-[var(--muted)]">
-                      Intensidade mínima
+                      Intensidade
                     </span>
                     <select
                       value={mapState.filtros.intensidadeMin}
@@ -1093,19 +1015,18 @@ export default function MapaQueimadasFirms() {
                           e.target.value as FiltroFocos["intensidadeMin"],
                         )
                       }
-                      className="min-h-[42px] w-full rounded-[8px] border border-[var(--border)] bg-[var(--background-secondary)] px-2.5 py-1.5 text-xs text-[var(--foreground)]"
+                      className="h-9 w-full rounded-[7px] border border-[var(--border)] bg-[var(--background-secondary)] px-2 text-xs text-[var(--foreground)]"
                     >
-                      <option value="all">Todas as classes</option>
-                      <option value="medio">Médio ou maior (≥ 15 MW)</option>
-                      <option value="alto">Alto ou maior (≥ 40 MW)</option>
-                      <option value="critico">Apenas Crítico (≥ 100 MW)</option>
+                      <option value="all">Todas</option>
+                      <option value="medio">Médio+ (≥ 15 MW)</option>
+                      <option value="alto">Alto+ (≥ 40 MW)</option>
+                      <option value="critico">Crítico (≥ 100 MW)</option>
                     </select>
                   </label>
 
-                  {/* FRP Mínimo numérico */}
                   <label className="space-y-1">
                     <span className="block font-mono text-[10px] uppercase text-[var(--muted)]">
-                      FRP mínimo (MW)
+                      FRP mín. (MW)
                     </span>
                     <input
                       type="number"
@@ -1116,129 +1037,112 @@ export default function MapaQueimadasFirms() {
                       onChange={(e) =>
                         updateFiltro("frpMin", Math.max(0, Number(e.target.value) || 0))
                       }
-                      className="min-h-[42px] w-full rounded-[8px] border border-[var(--border)] bg-[var(--background-secondary)] px-2.5 py-1.5 text-xs font-mono text-[var(--foreground)]"
+                      className="h-9 w-full rounded-[7px] border border-[var(--border)] bg-[var(--background-secondary)] px-2 text-xs font-mono text-[var(--foreground)]"
                     />
                   </label>
 
-                  {/* Fonte / Satélite */}
                   <label className="space-y-1">
                     <span className="block font-mono text-[10px] uppercase text-[var(--muted)]">
-                      Sensor / Satélite
+                      Satélite
                     </span>
                     <select
                       value={mapState.filtros.fonte}
                       onChange={(e) =>
                         updateFiltro("fonte", e.target.value as FiltroFocos["fonte"])
                       }
-                      className="min-h-[42px] w-full rounded-[8px] border border-[var(--border)] bg-[var(--background-secondary)] px-2.5 py-1.5 text-xs text-[var(--foreground)]"
+                      className="h-9 w-full rounded-[7px] border border-[var(--border)] bg-[var(--background-secondary)] px-2 text-xs text-[var(--foreground)]"
                     >
-                      <option value="all">VIIRS (375 m) + MODIS (1 km)</option>
+                      <option value="all">VIIRS + MODIS</option>
                       <option value="VIIRS">Apenas VIIRS (375 m)</option>
-                      <option value="VIIRS_NOAA20_NRT">VIIRS NOAA-20 (375 m)</option>
-                      <option value="VIIRS_NOAA21_NRT">VIIRS NOAA-21 (375 m)</option>
-                      <option value="VIIRS_SNPP_NRT">VIIRS Suomi-NPP (375 m)</option>
-                      <option value="MODIS_NRT">MODIS Terra/Aqua (1 km)</option>
+                      <option value="MODIS_NRT">Apenas MODIS (1 km)</option>
                     </select>
                   </label>
 
-                  {/* Turno (Dia / Noite) */}
                   <label className="space-y-1">
                     <span className="block font-mono text-[10px] uppercase text-[var(--muted)]">
-                      Passagem (Dia / Noite)
+                      Turno
                     </span>
                     <select
                       value={mapState.filtros.diaNoite}
                       onChange={(e) =>
                         updateFiltro("diaNoite", e.target.value as FiltroFocos["diaNoite"])
                       }
-                      className="min-h-[42px] w-full rounded-[8px] border border-[var(--border)] bg-[var(--background-secondary)] px-2.5 py-1.5 text-xs text-[var(--foreground)]"
+                      className="h-9 w-full rounded-[7px] border border-[var(--border)] bg-[var(--background-secondary)] px-2 text-xs text-[var(--foreground)]"
                     >
-                      <option value="all">Diurno e Noturno</option>
-                      <option value="D">Apenas Diurno (D)</option>
-                      <option value="N">Apenas Noturno (N)</option>
+                      <option value="all">Dia e Noite</option>
+                      <option value="D">Diurno</option>
+                      <option value="N">Noturno</option>
                     </select>
                   </label>
                 </div>
 
-                <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-[var(--border)] pt-2.5 text-xs">
-                  <span className="text-[var(--muted)]">
-                    Todos os filtros e coordenadas ficam salvos automaticamente no link da página.
-                  </span>
-                  <div className="flex items-center gap-2">
-                    {hasActiveFilters && (
-                      <button
-                        type="button"
-                        onClick={resetFiltros}
-                        className="inline-flex min-h-[38px] items-center gap-1.5 rounded-[7px] border border-[var(--border)] bg-[var(--surface-elevated)] px-3 py-1 text-xs font-medium text-[var(--foreground)] hover:border-[var(--primary)]"
-                      >
-                        <RotateCcw size={13} />
-                        <span>Limpar filtros</span>
-                      </button>
-                    )}
+                <div className="mt-2.5 flex items-center justify-end gap-2 border-t border-[var(--border)] pt-2">
+                  {hasActiveFilters && (
                     <button
                       type="button"
-                      onClick={() => setShowFiltersPanel(false)}
-                      className="btn-primary !py-1.5 !px-3.5 text-xs"
+                      onClick={resetFiltros}
+                      className="inline-flex items-center gap-1 rounded-[6px] border border-[var(--border)] bg-[var(--surface-elevated)] px-2.5 py-1 text-xs text-[var(--foreground)]"
                     >
-                      Concluir
+                      <RotateCcw size={12} />
+                      <span>Limpar</span>
                     </button>
-                  </div>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => setShowFiltersPanel(false)}
+                    className="btn-primary !py-1 !px-3 text-xs"
+                  >
+                    Fechar
+                  </button>
                 </div>
               </div>
             )}
 
-            {/* AVISOS DE GEOLOCALIZAÇÃO ("MEU LOCAL") */}
+            {/* CARD DE RAIO 50 KM ("PERTO DE MIM") */}
             {(userLocation || geoStatusMsg) && (
-              <div className="pointer-events-auto max-w-md rounded-[10px] border border-[var(--border)] bg-[var(--surface)]/95 p-3 text-xs shadow-lift backdrop-blur-md">
+              <div className="pointer-events-auto max-w-sm rounded-[10px] border border-[var(--border)] bg-[var(--surface)]/95 p-3 text-xs shadow-lift backdrop-blur-md">
                 <div className="flex items-start justify-between gap-2">
                   <div className="space-y-1">
                     <p className="font-semibold text-[var(--foreground)] flex items-center gap-1.5">
-                      <Crosshair size={14} className="text-[#3B82F6]" />
-                      <span>Monitoramento no seu entorno (raio de 50 km)</span>
+                      <Crosshair size={13} className="text-[#3B82F6]" />
+                      <span>Raio de 50 km do seu local</span>
                     </p>
                     {geoStatusMsg ? (
-                      <p className="text-[var(--warning)] leading-relaxed">{geoStatusMsg}</p>
+                      <p className="text-[var(--warning)]">{geoStatusMsg}</p>
                     ) : nearbyStats ? (
-                      <div className="space-y-1 text-[var(--foreground-secondary)]">
+                      <div className="space-y-0.5 text-[var(--foreground-secondary)]">
                         <p>
-                          Focos num raio de 50 km:{" "}
+                          Focos próximos:{" "}
                           <strong className="font-mono text-[var(--foreground)]">
                             {nearbyStats.countWithinRadius}
                           </strong>
                         </p>
-                        <p>
-                          Foco mais próximo:{" "}
-                          {nearbyStats.nearestDistanceKm !== null ? (
-                            <>
-                              <strong className="font-mono text-[var(--foreground)]">
-                                {nearbyStats.nearestDistanceKm.toLocaleString("pt-BR")} km
-                              </strong>
-                              {nearbyStats.nearestFoco && (
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    const nf = nearbyStats.nearestFoco!;
-                                    setSelectedFoco(nf);
-                                    setFlyToTarget({
-                                      lat: nf.latitude,
-                                      lon: nf.longitude,
-                                      zoom: 10,
-                                      token: Date.now(),
-                                    });
-                                  }}
-                                  className="ml-2 font-medium text-[var(--primary)] underline"
-                                >
-                                  Ver foco ({nearbyStats.nearestFoco.frp.toFixed(1)} MW)
-                                </button>
-                              )}
-                            </>
-                          ) : (
-                            "nenhum foco no filtro atual"
-                          )}
-                        </p>
-                        <p className="text-[10px] font-mono text-[var(--muted)]">
-                          Privacidade garantida: sua localização é calculada apenas no seu navegador.
-                        </p>
+                        {nearbyStats.nearestDistanceKm !== null && (
+                          <p>
+                            Mais próximo a{" "}
+                            <strong className="font-mono text-[var(--foreground)]">
+                              {nearbyStats.nearestDistanceKm.toLocaleString("pt-BR")} km
+                            </strong>
+                            {nearbyStats.nearestFoco && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const nf = nearbyStats.nearestFoco!;
+                                  setSelectedFoco(nf);
+                                  setFlyToTarget({
+                                    lat: nf.latitude,
+                                    lon: nf.longitude,
+                                    zoom: 10,
+                                    token: Date.now(),
+                                  });
+                                }}
+                                className="ml-2 font-medium text-[var(--primary)] underline"
+                              >
+                                Ver no mapa
+                              </button>
+                            )}
+                          </p>
+                        )}
                       </div>
                     ) : null}
                   </div>
@@ -1248,38 +1152,11 @@ export default function MapaQueimadasFirms() {
                       setUserLocation(null);
                       setGeoStatusMsg(null);
                     }}
-                    aria-label="Fechar card de localização"
+                    aria-label="Fechar"
                     className="p-1 text-[var(--muted)] hover:text-[var(--foreground)]"
                   >
-                    <X size={14} />
+                    <X size={13} />
                   </button>
-                </div>
-              </div>
-            )}
-
-            {/* ESTADO SEM CHAVE OU ERRO OU VAZIO */}
-            {resumo?.semChave && (
-              <div
-                role="alert"
-                className="pointer-events-auto max-w-lg rounded-[10px] border border-[#A9A17A]/60 bg-[var(--surface)]/95 p-3.5 text-xs shadow-lift backdrop-blur-md"
-              >
-                <div className="flex items-start gap-2.5">
-                  <AlertTriangle size={16} className="shrink-0 text-[var(--warning)] mt-0.5" />
-                  <div className="space-y-1">
-                    <p className="font-semibold text-[var(--foreground)]">
-                      {resumo.erro ||
-                        "Dados orbitais temporariamente indisponíveis."}
-                    </p>
-                    {resumo.desatualizado && resumo.total > 0 && (
-                      <p className="text-[var(--foreground-secondary)]">
-                        Exibindo último conjunto real em cache de{" "}
-                        <span className="font-mono">
-                          {new Date(resumo.atualizadoEm).toLocaleString("pt-BR")}
-                        </span>
-                        .
-                      </p>
-                    )}
-                  </div>
                 </div>
               </div>
             )}
@@ -1287,115 +1164,59 @@ export default function MapaQueimadasFirms() {
             {fetchError && (
               <div
                 role="alert"
-                className="pointer-events-auto max-w-md rounded-[10px] border border-[var(--danger)]/50 bg-[var(--surface)]/95 p-3.5 text-xs shadow-lift backdrop-blur-md"
+                className="pointer-events-auto max-w-md rounded-[10px] border border-[var(--danger)]/50 bg-[var(--surface)]/95 p-3 text-xs shadow-lift backdrop-blur-md flex items-center justify-between gap-3"
               >
-                <div className="flex items-center justify-between gap-3">
-                  <span className="text-[var(--danger)] font-medium">{fetchError}</span>
-                  <button
-                    type="button"
-                    onClick={() => void fetchFocos(mapState.filtros, true)}
-                    className="btn-secondary !py-1.5 !px-3 text-xs shrink-0"
-                  >
-                    Tentar de novo
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {!loading && !fetchError && resumo && resumo.total === 0 && !resumo.semChave && (
-              <div
-                role="status"
-                className="pointer-events-auto max-w-md rounded-[10px] border border-[var(--border)] bg-[var(--surface)]/95 p-3.5 text-xs shadow-lift backdrop-blur-md flex items-center justify-between gap-3"
-              >
-                <span>Nenhum foco encontrado com esses filtros.</span>
-                {hasActiveFilters && (
-                  <button
-                    type="button"
-                    onClick={resetFiltros}
-                    className="btn-secondary !py-1.5 !px-3 text-xs shrink-0"
-                  >
-                    Limpar filtros
-                  </button>
-                )}
+                <span className="text-[var(--danger)] font-medium">{fetchError}</span>
+                <button
+                  type="button"
+                  onClick={() => void fetchFocos(mapState.filtros, true)}
+                  className="btn-secondary !py-1 !px-2.5 text-xs shrink-0"
+                >
+                  Tentar de novo
+                </button>
               </div>
             )}
           </div>
 
-          {/* LEGENDA SEMPRE ACESSÍVEL DA ESCALA FRP (CANTO INFERIOR ESQUERDO) */}
-          <div className="pointer-events-none absolute bottom-24 left-2.5 z-20 lg:bottom-4 sm:left-4">
+          {/* LEGENDA COMPACTA CANTO INFERIOR ESQUERDO */}
+          <div className="pointer-events-none absolute bottom-20 left-2.5 z-20 lg:bottom-4 sm:left-4">
             <div
-              className="pointer-events-auto rounded-[12px] border border-[var(--border)] bg-[var(--surface)]/95 p-3 shadow-lift backdrop-blur-md text-xs max-w-[260px]"
-              aria-label="Legenda da escala de Potência Radiativa do Fogo (FRP)"
+              className="pointer-events-auto rounded-[10px] border border-[var(--border)] bg-[var(--surface)]/92 px-3 py-2 shadow-soft backdrop-blur-md text-[11px]"
+              aria-label="Legenda de intensidade"
             >
-              <div className="flex items-center justify-between gap-2 mb-2">
-                <span className="font-mono text-[10px] uppercase tracking-wider text-[var(--sage)] font-semibold">
-                  Escala FRP (Critério EcoMind)
+              <div className="flex flex-wrap items-center gap-3">
+                <span className="font-mono text-[10px] uppercase tracking-wider text-[var(--muted)]">
+                  Intensidade (FRP):
                 </span>
-                <button
-                  type="button"
-                  onClick={() => setShowLegendModal((v) => !v)}
-                  aria-label="Mais informações sobre a escala FRP"
-                  className="text-[var(--muted)] hover:text-[var(--foreground)] p-0.5"
-                >
-                  <Info size={13} />
-                </button>
-              </div>
-
-              <ul className="space-y-1.5">
-                {(["critico", "alto", "medio", "baixo"] as const).map((lvl) => {
+                {(["baixo", "medio", "alto", "critico"] as const).map((lvl) => {
                   const meta = INTENSIDADE_META[lvl];
-                  const dotSize =
-                    lvl === "critico"
-                      ? "h-4 w-4"
-                      : lvl === "alto"
-                        ? "h-3.5 w-3.5"
-                        : lvl === "medio"
-                          ? "h-2.5 w-2.5"
-                          : "h-2 w-2";
                   return (
-                    <li key={lvl} className="flex items-center justify-between gap-3 text-[11px]">
-                      <span className="flex items-center gap-2 font-medium text-[var(--foreground)]">
-                        <span className="inline-flex w-4 items-center justify-center">
-                          <span
-                            className={`inline-block rounded-full border border-black/40 ${dotSize}`}
-                            style={{ backgroundColor: meta.colorDark }}
-                            aria-hidden="true"
-                          />
-                        </span>
-                        <IntensityShapeBadge intensidade={lvl} />
-                        <span>{meta.label}</span>
-                      </span>
-                      <span className="font-mono text-[10px] text-[var(--foreground-secondary)]">
-                        {meta.faixa}
-                      </span>
-                    </li>
+                    <span key={lvl} className="inline-flex items-center gap-1 font-medium text-[var(--foreground)]">
+                      <span
+                        className="inline-block h-2.5 w-2.5 rounded-full"
+                        style={{ backgroundColor: meta.colorDark }}
+                      />
+                      <span>{meta.label}</span>
+                    </span>
                   );
                 })}
-              </ul>
-
-              {showLegendModal && (
-                <p className="mt-2 border-t border-[var(--border)] pt-2 text-[10px] leading-relaxed text-[var(--foreground-secondary)]">
-                  Tamanho do círculo e símbolo geométrico acompanham a potência em Megawatts (MW).
-                  Esta divisão em 4 faixas é um critério didático do projeto EcoMind 360°.
-                </p>
-              )}
+              </div>
             </div>
           </div>
 
-          {/* POPUP / CARD DE DETALHES AO TOCAR UM FOCO (PASSO 2.5) */}
+          {/* CARD DE DETALHES AO CLICAR NUM FOCO */}
           {selectedFoco && (
             <div
               role="dialog"
-              aria-label="Detalhes do foco de calor selecionado"
-              className="pointer-events-auto absolute right-2.5 top-20 z-30 w-[calc(100vw-1.25rem)] max-w-sm rounded-[14px] border border-[var(--border)] bg-[var(--surface)]/98 p-4 shadow-lift backdrop-blur-xl sm:right-4 sm:top-20"
+              aria-label="Detalhes do foco selecionado"
+              className="pointer-events-auto absolute right-2.5 top-16 z-30 w-[calc(100vw-1.25rem)] max-w-xs rounded-[12px] border border-[var(--border)] bg-[var(--surface)]/98 p-3.5 shadow-lift backdrop-blur-xl sm:right-4"
             >
-              <div className="flex items-start justify-between gap-2 border-b border-[var(--border)] pb-2.5">
+              <div className="flex items-start justify-between gap-2 border-b border-[var(--border)] pb-2">
                 <div>
                   <div className="flex items-center gap-1.5">
                     <IntensityShapeBadge intensidade={selectedFoco.intensidade} size="md" />
-                    <span className="font-mono text-[11px] uppercase tracking-wider font-semibold text-[var(--foreground)]">
-                      Intensidade {INTENSIDADE_META[selectedFoco.intensidade].label} ·{" "}
-                      {selectedFoco.frp.toFixed(1)} MW
+                    <span className="font-mono text-[11px] uppercase font-semibold text-[var(--foreground)]">
+                      {INTENSIDADE_META[selectedFoco.intensidade].label} · {selectedFoco.frp.toFixed(1)} MW
                     </span>
                   </div>
                   <h3 className="font-display text-sm font-semibold text-[var(--foreground)] mt-0.5">
@@ -1407,213 +1228,131 @@ export default function MapaQueimadasFirms() {
                 <button
                   type="button"
                   onClick={() => setSelectedFoco(null)}
-                  aria-label="Fechar detalhes do foco"
-                  className="flex h-8 w-8 items-center justify-center rounded-[7px] text-[var(--muted)] hover:bg-[var(--surface-elevated)] hover:text-[var(--foreground)]"
+                  aria-label="Fechar"
+                  className="flex h-7 w-7 items-center justify-center rounded-[6px] text-[var(--muted)] hover:bg-[var(--surface-elevated)] hover:text-[var(--foreground)]"
                 >
-                  <X size={16} />
+                  <X size={15} />
                 </button>
               </div>
 
-              <dl className="mt-3 grid grid-cols-2 gap-x-3 gap-y-2 text-xs">
+              <dl className="mt-2.5 grid grid-cols-2 gap-x-3 gap-y-1.5 text-xs">
                 <div>
-                  <dt className="text-[10px] font-mono uppercase text-[var(--muted)]">
-                    Coordenadas
-                  </dt>
-                  <dd className="font-mono font-medium text-[var(--foreground)]">
-                    {selectedFoco.latitude.toFixed(4)}°, {selectedFoco.longitude.toFixed(4)}°
+                  <dt className="text-[10px] font-mono text-[var(--muted)]">Coordenadas</dt>
+                  <dd className="font-mono text-[var(--foreground)]">
+                    {selectedFoco.latitude.toFixed(3)}°, {selectedFoco.longitude.toFixed(3)}°
                   </dd>
                 </div>
                 <div>
-                  <dt className="text-[10px] font-mono uppercase text-[var(--muted)]">
-                    Potência (FRP)
-                  </dt>
-                  <dd className="font-mono font-semibold text-[var(--foreground)]">
-                    {selectedFoco.frp.toFixed(1)} MW ({INTENSIDADE_META[selectedFoco.intensidade].label})
-                  </dd>
-                </div>
-                <div>
-                  <dt className="text-[10px] font-mono uppercase text-[var(--muted)]">
-                    Horário Local (BR)
-                  </dt>
+                  <dt className="text-[10px] font-mono text-[var(--muted)]">Horário (BR)</dt>
                   <dd className="font-mono text-[var(--foreground)]">
                     {new Date(selectedFoco.dataHoraUtc).toLocaleString("pt-BR", {
                       day: "2-digit",
                       month: "2-digit",
-                      year: "numeric",
                       hour: "2-digit",
                       minute: "2-digit",
                     })}
                   </dd>
                 </div>
                 <div>
-                  <dt className="text-[10px] font-mono uppercase text-[var(--muted)]">
-                    Horário Orbital (UTC)
-                  </dt>
-                  <dd className="font-mono text-[var(--foreground-secondary)]">
-                    {selectedFoco.dataHoraUtc.replace("T", " ").slice(0, 16)} UTC
+                  <dt className="text-[10px] font-mono text-[var(--muted)]">Satélite</dt>
+                  <dd className="text-[var(--foreground)]">
+                    {selectedFoco.satelite} ({selectedFoco.instrumento})
                   </dd>
                 </div>
                 <div>
-                  <dt className="text-[10px] font-mono uppercase text-[var(--muted)]">
-                    Satélite / Sensor
-                  </dt>
-                  <dd className="text-[var(--foreground)] font-medium">
-                    {selectedFoco.satelite} · {selectedFoco.instrumento} (
-                    {selectedFoco.instrumento === "VIIRS" ? "375 m" : "1 km"})
-                  </dd>
-                </div>
-                <div>
-                  <dt className="text-[10px] font-mono uppercase text-[var(--muted)]">
-                    Confiança / Turno
-                  </dt>
+                  <dt className="text-[10px] font-mono text-[var(--muted)]">Confiança</dt>
                   <dd className="text-[var(--foreground)] capitalize">
-                    {selectedFoco.confianca} ({selectedFoco.confiancaBruta}) ·{" "}
-                    {selectedFoco.diaNoite === "D" ? "Diurno" : "Noturno"}
+                    {selectedFoco.confianca}
                   </dd>
                 </div>
               </dl>
 
-              {/* Aviso científico obrigatório (Passo 2.5) */}
-              <div className="mt-3 rounded-[8px] border border-[var(--border)] bg-[var(--background-secondary)] p-2.5 text-[11px] leading-relaxed text-[var(--foreground-secondary)]">
-                <strong className="text-[var(--foreground)]">Nota importante:</strong> Foco de calor não é incêndio confirmado: é um alerta orbital para investigar.
-              </div>
-
-              <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-[var(--border)] pt-2.5 text-[11px]">
+              <div className="mt-2.5 flex items-center justify-between border-t border-[var(--border)] pt-2 text-[11px]">
                 <a
                   href={`https://firms.modaps.eosdis.nasa.gov/map/#d:24hrs;@${selectedFoco.longitude},${selectedFoco.latitude},10z`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1 font-medium text-[var(--primary)] hover:underline"
                 >
-                  <span>Fonte: NASA FIRMS</span>
-                  <ExternalLink size={12} />
-                </a>
-                <a
-                  href="https://terrabrasilis.dpi.inpe.br/queimadas/bdqueimadas/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 font-medium text-[var(--sage)] hover:underline"
-                >
-                  <span>INPE Queimadas</span>
-                  <ExternalLink size={12} />
+                  <span>Abrir no NASA FIRMS</span>
+                  <ExternalLink size={11} />
                 </a>
               </div>
             </div>
           )}
         </div>
 
-        {/* PAINEL DE RESUMO (LATERAL NO DESKTOP, BOTTOM SHEET COM 3 ALTURAS NO MOBILE) */}
+        {/* PAINEL LATERAL ENXUTO (340px no desktop, recolhido por padrão no mobile) */}
         <aside
-          aria-label="Resumo e ranking de focos de calor"
-          className={`z-20 flex flex-col border-t lg:border-t-0 lg:border-l border-[var(--border)] bg-[var(--surface)] transition-all duration-200 lg:static lg:h-full lg:w-[390px] xl:w-[410px] shrink-0 ${
+          aria-label="Resumo de focos por bioma"
+          className={`z-20 flex flex-col border-t lg:border-t-0 lg:border-l border-[var(--border)] bg-[var(--surface)] transition-all duration-200 lg:static lg:h-full lg:w-[340px] shrink-0 ${
             sheetHeight === "collapsed"
-              ? "fixed inset-x-0 bottom-14 h-20 lg:h-full"
+              ? "fixed inset-x-0 bottom-14 h-14 lg:h-full"
               : sheetHeight === "medium"
-                ? "fixed inset-x-0 bottom-14 h-[44dvh] lg:h-full"
-                : "fixed inset-x-0 bottom-14 h-[80dvh] lg:h-full"
+                ? "fixed inset-x-0 bottom-14 h-[42dvh] lg:h-full"
+                : "fixed inset-x-0 bottom-14 h-[76dvh] lg:h-full"
           }`}
         >
-          {/* Controle de 3 alturas do Bottom Sheet no Mobile */}
-          <div className="flex items-center justify-between border-b border-[var(--border)] px-4 py-2 lg:hidden">
+          {/* Barra mobile */}
+          <div className="flex items-center justify-between border-b border-[var(--border)] px-4 py-2.5 lg:hidden">
             <div className="flex items-center gap-2">
               <Flame size={15} className="text-[#FB923C]" />
               <span className="font-display text-xs font-semibold text-[var(--foreground)]">
-                Resumo ({resumo ? resumo.total.toLocaleString("pt-BR") : "..."} focos)
+                {resumo ? `${resumo.total.toLocaleString("pt-BR")} focos ativos` : "Carregando..."}
               </span>
             </div>
-            <div className="inline-flex items-center gap-1" role="group" aria-label="Altura do painel">
-              {(
-                [
-                  { id: "collapsed", label: "Recolher" },
-                  { id: "medium", label: "Médio" },
-                  { id: "expanded", label: "Expandir" },
-                ] as const
-              ).map((h) => (
-                <button
-                  key={h.id}
-                  type="button"
-                  onClick={() => setSheetHeight(h.id)}
-                  aria-pressed={sheetHeight === h.id}
-                  className={`min-h-[36px] rounded-[6px] px-2 py-1 text-[10px] font-mono ${
-                    sheetHeight === h.id
-                      ? "bg-[var(--primary)] text-white dark:text-[#101512] font-semibold"
-                      : "bg-[var(--surface-elevated)] text-[var(--foreground-secondary)]"
-                  }`}
-                >
-                  {h.label}
-                </button>
-              ))}
-              <button
-                type="button"
-                onClick={() =>
-                  setSheetHeight((prev) =>
-                    prev === "expanded"
-                      ? "collapsed"
-                      : prev === "medium"
-                        ? "expanded"
-                        : "medium",
-                  )
-                }
-                aria-label="Alternar altura do painel"
-                className="flex h-9 w-9 items-center justify-center rounded-[6px] bg-[var(--surface-elevated)] text-[var(--foreground)]"
-              >
-                {sheetHeight === "expanded" ? <ChevronDown size={15} /> : <ChevronUp size={15} />}
-              </button>
-            </div>
+            <button
+              type="button"
+              onClick={() =>
+                setSheetHeight((prev) => (prev === "collapsed" ? "medium" : "collapsed"))
+              }
+              className="inline-flex items-center gap-1 rounded-[6px] bg-[var(--surface-elevated)] px-2.5 py-1 text-xs font-medium text-[var(--foreground)]"
+            >
+              <span>{sheetHeight === "collapsed" ? "Ver resumo" : "Recolher"}</span>
+              {sheetHeight === "collapsed" ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+            </button>
           </div>
 
-          {/* Conteúdo rolável do Painel de Resumo */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-5 text-xs">
-            {/* KPIs Principais: Total de Focos e FRP Máximo */}
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="font-mono text-[10px] uppercase tracking-wider text-[var(--sage)]">
-                  Telemetria no Filtro Atual ({formatPeriodoLabel(mapState.filtros.periodo)})
+          {/* Conteúdo do painel */}
+          <div className="flex-1 overflow-y-auto p-4 space-y-4 text-xs">
+            {/* Total + FRP Máximo */}
+            <div className="grid grid-cols-2 gap-2.5">
+              <div className="rounded-[10px] border border-[var(--border)] bg-[var(--background-secondary)] p-3">
+                <span className="text-[10px] font-mono uppercase text-[var(--muted)]">
+                  Focos ({mapState.filtros.periodo})
                 </span>
-                {hasActiveFilters && (
+                <p className="mt-1 font-display text-2xl font-semibold tabular-nums text-[var(--foreground)]">
+                  {loading && !resumo ? "..." : <AnimatedCount value={resumo?.total ?? 0} />}
+                </p>
+              </div>
+
+              <div className="rounded-[10px] border border-[var(--border)] bg-[var(--background-secondary)] p-3">
+                <span className="text-[10px] font-mono uppercase text-[var(--muted)]">
+                  Pico de Potência
+                </span>
+                <p className="mt-1 font-display text-2xl font-semibold tabular-nums text-[#FB923C]">
+                  {resumo ? `${resumo.frpMaximo.toLocaleString("pt-BR")} MW` : "..."}
+                </p>
+              </div>
+            </div>
+
+            {/* Filtro rápido por classe de intensidade */}
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between">
+                <span className="font-mono text-[10px] uppercase tracking-wider text-[var(--muted)]">
+                  Por Intensidade
+                </span>
+                {mapState.filtros.intensidadeMin !== "all" && (
                   <button
                     type="button"
-                    onClick={resetFiltros}
-                    className="text-[11px] font-medium text-[var(--primary)] hover:underline"
+                    onClick={() => updateFiltro("intensidadeMin", "all")}
+                    className="text-[11px] text-[var(--primary)] hover:underline"
                   >
-                    Ver Brasil inteiro
+                    Mostrar todas
                   </button>
                 )}
               </div>
-
-              <div className="grid grid-cols-2 gap-2.5">
-                <div className="rounded-[10px] border border-[var(--border)] bg-[var(--background-secondary)] p-3">
-                  <span className="text-[10px] font-mono uppercase text-[var(--muted)]">
-                    Total de Focos
-                  </span>
-                  <p className="mt-1 font-display text-2xl font-semibold tabular-nums text-[var(--foreground)]">
-                    {loading && !resumo ? "..." : <AnimatedCount value={resumo?.total ?? 0} />}
-                  </p>
-                  <span className="text-[10px] font-mono text-[var(--foreground-secondary)]">
-                    {resumo ? `Fonte: NASA FIRMS` : "Carregando..."}
-                  </span>
-                </div>
-
-                <div className="rounded-[10px] border border-[var(--border)] bg-[var(--background-secondary)] p-3">
-                  <span className="text-[10px] font-mono uppercase text-[var(--muted)]">
-                    FRP Máximo / Total
-                  </span>
-                  <p className="mt-1 font-display text-2xl font-semibold tabular-nums text-[#FB923C]">
-                    {resumo ? `${resumo.frpMaximo.toLocaleString("pt-BR")} MW` : "..."}
-                  </p>
-                  <span className="text-[10px] font-mono text-[var(--foreground-secondary)]">
-                    Soma: {resumo ? `${resumo.frpTotal.toLocaleString("pt-BR")} MW` : "..."}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* Distribuição por Intensidade (FRP) */}
-            <div className="space-y-2">
-              <span className="block font-mono text-[10px] uppercase tracking-wider text-[var(--muted)]">
-                Distribuição por Classe de Intensidade (FRP)
-              </span>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-2 gap-1.5">
                 {(["critico", "alto", "medio", "baixo"] as const).map((lvl) => {
                   const count = resumo?.porIntensidade[lvl] ?? 0;
                   const meta = INTENSIDADE_META[lvl];
@@ -1622,28 +1361,19 @@ export default function MapaQueimadasFirms() {
                     <button
                       key={lvl}
                       type="button"
-                      onClick={() =>
-                        updateFiltro("intensidadeMin", active ? "all" : lvl)
-                      }
+                      onClick={() => updateFiltro("intensidadeMin", active ? "all" : lvl)}
                       aria-pressed={active}
-                      className={`flex min-h-[44px] items-center justify-between rounded-[8px] border px-2.5 py-2 text-left transition-colors ${
+                      className={`flex items-center justify-between rounded-[8px] border px-2.5 py-2 text-left transition-colors ${
                         active
                           ? "border-[var(--primary)] bg-[var(--surface-elevated)]"
                           : "border-[var(--border)] bg-[var(--background-secondary)] hover:bg-[var(--surface-elevated)]"
                       }`}
                     >
-                      <span className="flex items-center gap-1.5">
+                      <span className="flex items-center gap-1.5 font-medium text-[var(--foreground)]">
                         <IntensityShapeBadge intensidade={lvl} />
-                        <span>
-                          <span className="block font-medium text-[var(--foreground)]">
-                            {meta.label}
-                          </span>
-                          <span className="block text-[10px] font-mono text-[var(--muted)]">
-                            {meta.faixa}
-                          </span>
-                        </span>
+                        <span>{meta.label}</span>
                       </span>
-                      <span className="font-mono text-sm font-semibold tabular-nums text-[var(--foreground)]">
+                      <span className="font-mono font-semibold tabular-nums text-[var(--foreground)]">
                         {count.toLocaleString("pt-BR")}
                       </span>
                     </button>
@@ -1652,24 +1382,24 @@ export default function MapaQueimadasFirms() {
               </div>
             </div>
 
-            {/* Ranking por Bioma (Clicar num bioma filtra o mapa) */}
-            <div className="space-y-2">
+            {/* Ranking por Bioma */}
+            <div className="space-y-1.5">
               <div className="flex items-center justify-between">
                 <span className="font-mono text-[10px] uppercase tracking-wider text-[var(--muted)]">
-                  Ranking por Ambiente (clique para filtrar)
+                  Focos por Bioma (clique para focar)
                 </span>
                 {mapState.filtros.bioma !== "all" && (
                   <button
                     type="button"
                     onClick={() => updateFiltro("bioma", "all")}
-                    className="text-[11px] font-mono text-[var(--primary)] hover:underline"
+                    className="text-[11px] text-[var(--primary)] hover:underline"
                   >
-                    Todos
+                    Ver Brasil
                   </button>
                 )}
               </div>
 
-              <div className="space-y-1.5">
+              <div className="space-y-1">
                 {biomeRanking.map((b) => {
                   const maxTotal = Math.max(1, biomeRanking[0]?.total ?? 1);
                   const pct = Math.min(100, Math.round((b.total / maxTotal) * 100));
@@ -1679,11 +1409,9 @@ export default function MapaQueimadasFirms() {
                     <button
                       key={b.id}
                       type="button"
-                      onClick={() =>
-                        updateFiltro("bioma", isSelected ? "all" : b.id)
-                      }
+                      onClick={() => updateFiltro("bioma", isSelected ? "all" : b.id)}
                       aria-pressed={isSelected}
-                      className={`w-full min-h-[44px] rounded-[8px] border p-2.5 text-left transition-colors ${
+                      className={`w-full rounded-[8px] border px-2.5 py-2 text-left transition-colors ${
                         isSelected
                           ? "border-[var(--primary)] bg-[var(--surface-elevated)]"
                           : "border-[var(--border)] bg-[var(--background-secondary)] hover:bg-[var(--surface-elevated)]"
@@ -1692,20 +1420,16 @@ export default function MapaQueimadasFirms() {
                       <div className="flex items-center justify-between gap-2 text-xs">
                         <span className="flex items-center gap-2 font-medium text-[var(--foreground)]">
                           <span
-                            className="h-2.5 w-2.5 shrink-0 rounded-full"
+                            className="h-2 w-2 shrink-0 rounded-full"
                             style={{ backgroundColor: b.color }}
-                            aria-hidden="true"
                           />
                           <span>{b.nome}</span>
                         </span>
                         <span className="font-mono font-semibold tabular-nums text-[var(--foreground)]">
-                          {b.total.toLocaleString("pt-BR")}{" "}
-                          <span className="text-[10px] font-normal text-[var(--muted)]">
-                            focos
-                          </span>
+                          {b.total.toLocaleString("pt-BR")}
                         </span>
                       </div>
-                      <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-[var(--surface)]">
+                      <div className="mt-1 h-1 w-full overflow-hidden rounded-full bg-[var(--surface)]">
                         <div
                           className="h-full rounded-full transition-all duration-300"
                           style={{
@@ -1717,150 +1441,124 @@ export default function MapaQueimadasFirms() {
                     </button>
                   );
                 })}
-
-                {resumo && resumo.foraDosBiomas > 0 && (
-                  <div className="flex items-center justify-between rounded-[8px] border border-[var(--border-subtle)] bg-[var(--background-secondary)] px-3 py-2 text-[11px] text-[var(--muted)]">
-                    <span>Fora dos biomas (oceano / faixa de fronteira)</span>
-                    <span className="font-mono font-semibold text-[var(--foreground-secondary)]">
-                      {resumo.foraDosBiomas.toLocaleString("pt-BR")} focos
-                    </span>
-                  </div>
-                )}
               </div>
             </div>
 
-            {/* Texto Educativo Curto no Painel (Passo 3.5) */}
-            <div className="rounded-[10px] border border-[var(--border)] bg-[var(--background-secondary)] p-3.5 space-y-2 text-xs">
-              <div className="flex items-center gap-1.5 font-semibold text-[var(--foreground)]">
-                <BookOpen size={14} className="text-[var(--primary)]" />
-                <span>Entenda os Dados Orbitais</span>
-              </div>
-              <p className="text-[11px] leading-relaxed text-[var(--foreground-secondary)]">
-                <strong>O que é um foco de calor?</strong> É uma anomalia térmica na superfície registrada pelos sensores infravermelhos <strong>VIIRS (375 m)</strong> e <strong>MODIS (1 km)</strong> quando o satélite passa sobre o local.
-              </p>
-              <p className="text-[11px] leading-relaxed text-[var(--foreground-secondary)]">
-                <strong>O que é FRP?</strong> A <em>Potência Radiativa do Fogo</em> (medida em Megawatts, MW) estima a taxa de energia térmica liberada pela combustão.
-              </p>
-              <p className="text-[11px] leading-relaxed text-[var(--foreground-secondary)]">
-                <strong>Foco ≠ Área queimada:</strong> Um foco indica um ponto ativo na passagem do satélite, e não o total de hectares queimados (cicatriz).
-              </p>
-              <div className="pt-1 flex items-center justify-between">
-                <Link
-                  href="/metodologia"
-                  className="inline-flex items-center gap-1 text-[11px] font-semibold text-[var(--primary)] hover:underline"
+            {/* Rodapé discreto do painel com ações secundárias */}
+            <div className="pt-2 border-t border-[var(--border)] space-y-2">
+              <div className="flex items-center justify-between gap-2">
+                <button
+                  type="button"
+                  onClick={() => setShowTop20Table((v) => !v)}
+                  className="inline-flex items-center gap-1.5 text-xs font-medium text-[var(--primary)] hover:underline"
                 >
-                  <span>Ler metodologia completa →</span>
+                  <Table2 size={13} />
+                  <span>{showTop20Table ? "Ocultar tabela Top 20" : "Ver Top 20 em tabela"}</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleExportCsv}
+                  disabled={top20Focos.length === 0}
+                  className="inline-flex items-center gap-1 text-xs font-medium text-[var(--foreground-secondary)] hover:text-[var(--foreground)] disabled:opacity-50"
+                >
+                  <Download size={13} />
+                  <span>Baixar CSV</span>
+                </button>
+              </div>
+
+              <p className="text-[11px] text-[var(--muted)] leading-relaxed flex items-center justify-between">
+                <span>Dados orbitais NASA FIRMS (VIIRS/MODIS).</span>
+                <Link href="/metodologia" className="text-[var(--sage)] hover:underline">
+                  Como funciona →
                 </Link>
-                <a
-                  href="#tabela-alternativa-focos"
-                  className="inline-flex items-center gap-1 text-[11px] font-medium text-[var(--sage)] hover:underline"
-                >
-                  <Table2 size={12} />
-                  <span>Ver tabela (Top 20)</span>
-                </a>
-              </div>
+              </p>
             </div>
           </div>
         </aside>
       </section>
 
-      {/* SEÇÃO 2: ALTERNATIVA SEM MAPA / TABELA ACESSÍVEL DOS 20 FOCOS MAIS INTENSOS (PASSO 2.12) */}
-      <section
-        id="tabela-alternativa-focos"
-        aria-labelledby="titulo-tabela-focos"
-        className="section-inner max-w-7xl mx-auto py-8 space-y-4"
-      >
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-[var(--border)] pb-4">
-          <div className="space-y-1.5">
-            <div className="badge-360">
-              <Table2 size={12} />
-              <span>Alternativa Textual Acessível (WCAG 2.2 AA)</span>
+      {/* TABELA DE TOP 20 FOCOS (RECOLHIDA POR PADRÃO PARA NÃO POLUIR A PÁGINA) */}
+      {showTop20Table && (
+        <section
+          id="tabela-alternativa-focos"
+          aria-labelledby="titulo-tabela-focos"
+          className="section-inner max-w-7xl mx-auto py-8 space-y-4"
+        >
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-[var(--border)] pb-4">
+            <div className="space-y-1">
+              <h2
+                id="titulo-tabela-focos"
+                className="font-display text-lg sm:text-xl font-semibold text-[var(--foreground)]"
+              >
+                Os 20 Focos Mais Intensos no Filtro Atual
+              </h2>
+              <FreshnessSeal
+                atualizadoEm={resumo?.atualizadoEm}
+                ultimoFocoEm={resumo?.ultimoFocoEm}
+                desatualizado={resumo?.desatualizado}
+                fonte={resumo?.fonte}
+                periodo={mapState.filtros.periodo}
+                compact
+              />
             </div>
-            <h2
-              id="titulo-tabela-focos"
-              className="font-display text-xl sm:text-2xl font-semibold text-[var(--foreground)]"
-            >
-              Os 20 Focos de Calor Mais Intensos no Filtro Atual
-            </h2>
-            <p className="text-xs sm:text-sm text-[var(--foreground-secondary)]">
-              Listagem direta ordenada pela Potência Radiativa do Fogo (FRP em MW), sincronizada com os mesmos filtros selecionados no mapa.
-            </p>
+
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={handleExportCsv}
+                disabled={top20Focos.length === 0}
+                className="btn-secondary !py-1.5 !px-3 text-xs disabled:opacity-50"
+              >
+                <Download size={13} />
+                <span>Exportar CSV</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowTop20Table(false)}
+                className="btn-secondary !py-1.5 !px-3 text-xs"
+              >
+                Fechar tabela
+              </button>
+            </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2.5">
-            <FreshnessSeal
-              atualizadoEm={resumo?.atualizadoEm}
-              ultimoFocoEm={resumo?.ultimoFocoEm}
-              desatualizado={resumo?.desatualizado}
-              fonte={resumo?.fonte}
-              periodo={mapState.filtros.periodo}
-              compact
-            />
-
-            <button
-              type="button"
-              onClick={handleExportCsv}
-              disabled={top20Focos.length === 0}
-              className="btn-secondary !py-2 !px-3.5 text-xs min-h-[44px] disabled:opacity-50"
-            >
-              <Download size={14} />
-              <span>Exportar CSV ({top20Focos.length})</span>
-            </button>
-          </div>
-        </div>
-
-        <div className="overflow-x-auto rounded-[12px] border border-[var(--border)] bg-[var(--surface)] shadow-soft">
-          <table className="w-full text-left text-xs text-[var(--foreground)]">
-            <caption className="sr-only">
-              Tabela dos 20 focos de calor mais intensos detectados pelo NASA FIRMS para o filtro atual, com fonte e horário UTC.
-            </caption>
-            <thead className="border-b border-[var(--border)] bg-[var(--background-secondary)] font-mono text-[11px] uppercase text-[var(--muted)]">
-              <tr>
-                <th scope="col" className="py-3 px-3.5">#</th>
-                <th scope="col" className="py-3 px-3.5">Intensidade / FRP</th>
-                <th scope="col" className="py-3 px-3.5">Bioma (IBGE)</th>
-                <th scope="col" className="py-3 px-3.5">UF</th>
-                <th scope="col" className="py-3 px-3.5">Coordenadas</th>
-                <th scope="col" className="py-3 px-3.5">Data / Hora (UTC)</th>
-                <th scope="col" className="py-3 px-3.5">Satélite / Sensor</th>
-                <th scope="col" className="py-3 px-3.5">Confiança</th>
-                <th scope="col" className="py-3 px-3.5 text-right">Ação</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[var(--border-subtle)] font-mono">
-              {top20Focos.length > 0 ? (
-                top20Focos.map((f, index) => (
-                  <tr
-                    key={f.id}
-                    className="hover:bg-[var(--surface-elevated)] transition-colors"
-                  >
-                    <td className="py-3 px-3.5 text-[var(--muted)]">{index + 1}</td>
-                    <td className="py-3 px-3.5">
+          <div className="overflow-x-auto rounded-[12px] border border-[var(--border)] bg-[var(--surface)] shadow-soft">
+            <table className="w-full text-left text-xs text-[var(--foreground)]">
+              <thead className="border-b border-[var(--border)] bg-[var(--background-secondary)] font-mono text-[11px] uppercase text-[var(--muted)]">
+                <tr>
+                  <th scope="col" className="py-3 px-3.5">#</th>
+                  <th scope="col" className="py-3 px-3.5">Intensidade / FRP</th>
+                  <th scope="col" className="py-3 px-3.5">Bioma</th>
+                  <th scope="col" className="py-3 px-3.5">UF</th>
+                  <th scope="col" className="py-3 px-3.5">Coordenadas</th>
+                  <th scope="col" className="py-3 px-3.5">Horário (UTC)</th>
+                  <th scope="col" className="py-3 px-3.5">Satélite</th>
+                  <th scope="col" className="py-3 px-3.5 text-right">Ação</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[var(--border-subtle)] font-mono">
+                {top20Focos.map((f, index) => (
+                  <tr key={f.id} className="hover:bg-[var(--surface-elevated)] transition-colors">
+                    <td className="py-2.5 px-3.5 text-[var(--muted)]">{index + 1}</td>
+                    <td className="py-2.5 px-3.5">
                       <span className="inline-flex items-center gap-1.5 font-semibold text-[var(--foreground)]">
                         <IntensityShapeBadge intensidade={f.intensidade} />
                         <span>{f.frp.toFixed(1)} MW</span>
-                        <span className="font-sans text-[11px] font-normal text-[var(--foreground-secondary)]">
-                          ({INTENSIDADE_META[f.intensidade].label})
-                        </span>
                       </span>
                     </td>
-                    <td className="py-3 px-3.5 font-sans font-medium text-[var(--foreground)]">
-                      {f.biomaNome}
+                    <td className="py-2.5 px-3.5 font-sans font-medium">{f.biomaNome}</td>
+                    <td className="py-2.5 px-3.5">{f.uf ?? "—"}</td>
+                    <td className="py-2.5 px-3.5 text-[var(--foreground-secondary)]">
+                      {f.latitude.toFixed(3)}°, {f.longitude.toFixed(3)}°
                     </td>
-                    <td className="py-3 px-3.5">{f.uf ?? "—"}</td>
-                    <td className="py-3 px-3.5 text-[var(--foreground-secondary)]">
-                      {f.latitude.toFixed(4)}°, {f.longitude.toFixed(4)}°
+                    <td className="py-2.5 px-3.5 text-[var(--foreground-secondary)]">
+                      {f.dataHoraUtc.replace("T", " ").slice(0, 16)}
                     </td>
-                    <td className="py-3 px-3.5 text-[var(--foreground-secondary)]">
-                      {f.dataHoraUtc.replace("T", " ").slice(0, 16)} UTC
-                    </td>
-                    <td className="py-3 px-3.5 font-sans">
+                    <td className="py-2.5 px-3.5 font-sans">
                       {f.satelite} ({f.instrumento})
                     </td>
-                    <td className="py-3 px-3.5 font-sans capitalize">
-                      {f.confianca} ({f.confiancaBruta})
-                    </td>
-                    <td className="py-3 px-3.5 text-right font-sans">
+                    <td className="py-2.5 px-3.5 text-right font-sans">
                       <button
                         type="button"
                         onClick={() => {
@@ -1873,27 +1571,19 @@ export default function MapaQueimadasFirms() {
                           });
                           window.scrollTo({ top: 0, behavior: "smooth" });
                         }}
-                        className="inline-flex min-h-[36px] items-center gap-1 rounded-[6px] border border-[var(--border)] bg-[var(--surface-elevated)] px-2.5 py-1 text-[11px] font-medium text-[var(--foreground)] hover:border-[var(--primary)]"
+                        className="inline-flex items-center gap-1 rounded-[6px] border border-[var(--border)] bg-[var(--surface-elevated)] px-2.5 py-1 text-[11px] font-medium text-[var(--foreground)] hover:border-[var(--primary)]"
                       >
                         <MapPin size={12} className="text-[var(--primary)]" />
-                        <span>Destacar no mapa</span>
+                        <span>Ver no mapa</span>
                       </button>
                     </td>
                   </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={9} className="py-8 text-center font-sans text-[var(--muted)]">
-                    {loading
-                      ? "Carregando registros orbitais do NASA FIRMS..."
-                      : "Nenhum foco de calor encontrado para os filtros selecionados."}
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </section>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      )}
     </div>
   );
 }

@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import zlib from "node:zlib";
 import { queryFocos } from "@/lib/firms/service";
 
 export const revalidate = 900; // 15 minutos
@@ -33,47 +32,11 @@ export async function GET(request: Request) {
         }
       : data;
 
-    const jsonString = JSON.stringify(payload);
-    const acceptEncoding = request.headers.get("accept-encoding") ?? "";
-
-    const baseHeaders: Record<string, string> = {
-      "Content-Type": "application/json; charset=utf-8",
-      "Cache-Control": "public, s-maxage=900, stale-while-revalidate=3600",
-      Vary: "Accept-Encoding",
-    };
-
-    if (jsonString.length > 16384) {
-      if (acceptEncoding.includes("br")) {
-        const compressed = zlib.brotliCompressSync(Buffer.from(jsonString, "utf8"), {
-          params: {
-            [zlib.constants.BROTLI_PARAM_QUALITY]: 4,
-          },
-        });
-        return new Response(compressed, {
-          status: 200,
-          headers: {
-            ...baseHeaders,
-            "Content-Encoding": "br",
-          },
-        });
-      }
-      if (acceptEncoding.includes("gzip")) {
-        const compressed = zlib.gzipSync(Buffer.from(jsonString, "utf8"), {
-          level: 6,
-        });
-        return new Response(compressed, {
-          status: 200,
-          headers: {
-            ...baseHeaders,
-            "Content-Encoding": "gzip",
-          },
-        });
-      }
-    }
-
-    return new Response(jsonString, {
+    return NextResponse.json(payload, {
       status: 200,
-      headers: baseHeaders,
+      headers: {
+        "Cache-Control": "public, s-maxage=900, stale-while-revalidate=3600",
+      },
     });
   } catch {
     return NextResponse.json(
