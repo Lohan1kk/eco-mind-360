@@ -171,18 +171,21 @@ async function fetchPeriodFromFirms(
     }),
   );
 
-  let anyFulfilled = false;
+  let fulfilledCount = 0;
+  let rejectedCount = 0;
   for (const res of sourceResults) {
     if (res.status === "fulfilled") {
-      anyFulfilled = true;
+      fulfilledCount += 1;
       if (res.value.focos.length > 0) {
         fontesAtivas.push(res.value.source);
         allRawFocos.push(...res.value.focos);
       }
+    } else {
+      rejectedCount += 1;
     }
   }
 
-  if (!anyFulfilled) {
+  if (fulfilledCount === 0 || (allRawFocos.length === 0 && rejectedCount > 0)) {
     throw new Error("Não foi possível obter dados dos satélites do NASA FIRMS no momento.");
   }
 

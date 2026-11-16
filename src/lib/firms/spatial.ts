@@ -1,10 +1,10 @@
-import fs from "node:fs";
-import path from "node:path";
 import RBush from "rbush";
 import booleanPointInPolygon from "@turf/boolean-point-in-polygon";
 import { point } from "@turf/helpers";
 import type { FeatureCollection, Geometry, Polygon, Position } from "geojson";
 import type { BiomeId } from "@/data/types";
+import biomasGeoRaw from "../../../public/data/geojson/biomas-brasil.json";
+import ufsGeoRaw from "../../../public/data/geojson/estados-brasil.json";
 import { BIOME_NAMES } from "./constants";
 import type { BiomaClassificado } from "./types";
 
@@ -56,23 +56,17 @@ function computeRingBbox(ring: Position[]): {
   return { minX, minY, maxX, maxY };
 }
 
-function loadGeoJsonFile(relPath: string): FeatureCollection<Geometry> {
-  const fullPath = path.join(process.cwd(), relPath);
-  const raw = fs.readFileSync(fullPath, "utf8").replace(/^\uFEFF/, "");
-  return JSON.parse(raw) as FeatureCollection<Geometry>;
-}
-
 /**
  * Constrói o índice espacial RBush uma única vez em memória no servidor e o reutiliza
- * em todas as requisições e agregações subsequentes.
+ * em todas as requisições e agregações subsequentes (compatível com Vercel Serverless).
  */
 export function getSpatialIndex(): SpatialIndexSingleton {
   if (cachedSpatialIndex) {
     return cachedSpatialIndex;
   }
 
-  const biomasGeo = loadGeoJsonFile("public/data/geojson/biomas-brasil.json");
-  const ufsGeo = loadGeoJsonFile("public/data/geojson/estados-brasil.json");
+  const biomasGeo = biomasGeoRaw as unknown as FeatureCollection<Geometry>;
+  const ufsGeo = ufsGeoRaw as unknown as FeatureCollection<Geometry>;
 
   const biomeTree = new RBush<BiomeBboxItem>();
   const biomeItems: BiomeBboxItem[] = [];
