@@ -1,65 +1,122 @@
-import React from 'react';
-import Image from 'next/image';
-import Link from 'next/link';
+"use client";
+
+import React, { useState } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import * as Dialog from "@radix-ui/react-dialog";
+import { MessageSquare, X } from "lucide-react";
+import { EvaluationSection } from "@/components/Evaluation";
 
 export function Footer() {
+  const [evalOpen, setEvalOpen] = useState(false);
+  const currentYear = new Date().getFullYear();
+
   return (
-    <footer className="relative overflow-hidden border-t border-[#222D25] bg-[#131A16] text-[#A7B3A9] py-16">
-      <div className="section-inner relative z-10 flex flex-col gap-12 md:flex-row md:items-start md:justify-between">
-        <div className="max-w-sm space-y-4">
+    <footer className="border-t border-[var(--border)] bg-[var(--surface)] text-[var(--foreground-secondary)] py-14">
+      <div className="section-inner grid grid-cols-1 gap-10 md:grid-cols-3">
+        {/* Coluna 1: Identidade */}
+        <div className="space-y-3">
           <div className="flex items-center gap-2.5">
             <Image
               src="/brand/icon-ecomind.png"
-              alt="EcoMind 360"
-              width={32}
-              height={32}
-              className="h-8 w-8 object-contain"
+              alt="EcoMind 360°"
+              width={28}
+              height={28}
+              sizes="28px"
+              className="h-7 w-7 object-contain"
             />
-            <span className="font-display text-lg font-semibold text-[#DCE5DD]">
-              EcoMind{' '}
-              <span className="font-mono text-[10px] px-1.5 py-0.5 rounded-[5px] bg-[#1D2821] text-[#91A88F] border border-[#29362D] font-medium">
-                360°
-              </span>
+            <span className="font-display text-xl text-[var(--foreground)]">
+              EcoMind 360°
             </span>
           </div>
-          <p className="text-xs leading-relaxed text-[#A7B3A9]">
-            Plataforma aberta de inteligência territorial para os 7 ambientes brasileiros.
-            Sensoriamento orbital quase em tempo real integrado às bases oficiais do INPE, NASA, MapBiomas e IBGE.
+          <p className="text-xs leading-relaxed text-[var(--muted)] max-w-xs">
+            Monitoramento orbital e indicadores territoriais dos 7 ambientes brasileiros com dados públicos do INPE, NASA FIRMS, MapBiomas e IBGE.
           </p>
-          <div className="pt-1 text-[11px] text-[#78877D] font-mono">
-            <span>Ana Flávia</span> · <span>André Zauli</span> · <span>Lucas Lohan</span> · <span>Gabriel Rosa</span>
-          </div>
         </div>
 
-        <nav aria-label="Rodapé" className="flex flex-wrap gap-x-16 gap-y-8 text-xs">
-          <div className="flex flex-col space-y-2.5">
-            <span className="font-mono font-medium uppercase tracking-wider text-[#91A88F] text-[10px]">
-              Navegação 360°
-            </span>
-            <Link href="/" className="text-[#A7B3A9] hover:text-[#DCE5DD] transition-colors">Início</Link>
-            <Link href="/dashboard" className="text-[#A7B3A9] hover:text-[#DCE5DD] transition-colors">Dashboard Territorial</Link>
-            <Link href="/mapa" className="text-[#A7B3A9] hover:text-[#DCE5DD] transition-colors">Mapa de Queimadas</Link>
-            <Link href="/biomas" className="text-[#A7B3A9] hover:text-[#DCE5DD] transition-colors">Os 7 Ambientes</Link>
-            <Link href="/alertas" className="text-[#A7B3A9] hover:text-[#DCE5DD] transition-colors">Alertas Orbitais</Link>
+        {/* Coluna 2: Acesso Rápido */}
+        <nav aria-label="Links do rodapé" className="grid grid-cols-2 gap-4 text-xs">
+          <div className="flex flex-col space-y-2">
+            <span className="font-medium text-[var(--foreground)]">Monitorar</span>
+            <Link href="/mapa" className="hover:text-[var(--primary)] transition-colors">
+              Mapa ao Vivo
+            </Link>
+            <Link href="/dashboard" className="hover:text-[var(--primary)] transition-colors">
+              Dashboard
+            </Link>
+            <Link href="/biomas" className="hover:text-[var(--primary)] transition-colors">
+              Os 7 Ambientes
+            </Link>
+            <Link href="/alertas" className="hover:text-[var(--primary)] transition-colors">
+              Alertas
+            </Link>
           </div>
-
-          <div className="flex flex-col space-y-2.5">
-            <span className="font-mono font-medium uppercase tracking-wider text-[#91A88F] text-[10px]">
-              Prática & Análise
-            </span>
-            <Link href="/calculadora" className="text-[#A7B3A9] hover:text-[#DCE5DD] transition-colors">Calculadora de Carbono</Link>
-            <Link href="/comparacao" className="text-[#A7B3A9] hover:text-[#DCE5DD] transition-colors">Comparador Multicritério</Link>
-            <Link href="/metodologia" className="text-[#A7B3A9] hover:text-[#DCE5DD] transition-colors">Metodologia Científica</Link>
-            <Link href="/baixar" className="text-[#A7B3A9] hover:text-[#DCE5DD] transition-colors">Instalar App PWA</Link>
+          <div className="flex flex-col space-y-2">
+            <span className="font-medium text-[var(--foreground)]">Aprender e agir</span>
+            <Link href="/calculadora" className="hover:text-[var(--primary)] transition-colors">
+              Calculadora
+            </Link>
+            <Link href="/comparacao" className="hover:text-[var(--primary)] transition-colors">
+              Comparador
+            </Link>
+            <Link href="/metodologia" className="hover:text-[var(--primary)] transition-colors">
+              Metodologia
+            </Link>
+            <Link href="/baixar" className="hover:text-[var(--primary)] transition-colors">
+              Instalar App
+            </Link>
           </div>
         </nav>
+
+        {/* Coluna 3: Projeto Escolar e Avaliação em Dialog */}
+        <div className="flex flex-col items-start md:items-end justify-between gap-4 text-xs">
+          <div className="md:text-right space-y-1">
+            <p className="font-medium text-[var(--foreground)]">Colégio Paulo de Tarso</p>
+            <p className="text-[var(--muted)]">
+              Ana Flávia · André Zauli · Lucas Lohan · Gabriel Rosa
+            </p>
+          </div>
+
+          <Dialog.Root open={evalOpen} onOpenChange={setEvalOpen}>
+            <Dialog.Trigger asChild>
+              <button
+                type="button"
+                className="btn-secondary !min-h-[40px] !py-2 !px-3.5 text-xs"
+              >
+                <MessageSquare size={14} strokeWidth={1.5} className="text-[var(--primary)]" />
+                <span>Avalie o projeto</span>
+              </button>
+            </Dialog.Trigger>
+            <Dialog.Portal>
+              <Dialog.Overlay className="fixed inset-0 z-50 bg-black/35 backdrop-blur-xs" />
+              <Dialog.Content
+                data-lenis-prevent
+                className="fixed left-1/2 top-1/2 z-50 max-h-[88vh] w-[calc(100vw-2rem)] max-w-xl -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-[16px] border border-[var(--border)] bg-[var(--surface)] p-6 shadow-lift focus:outline-none"
+              >
+                <div className="flex items-center justify-between border-b border-[var(--border)] pb-3 mb-4">
+                  <Dialog.Title className="font-display text-2xl text-[var(--foreground)]">
+                    Avalie o EcoMind 360°
+                  </Dialog.Title>
+                  <Dialog.Close asChild>
+                    <button
+                      type="button"
+                      aria-label="Fechar janela de avaliação"
+                      className="flex h-9 w-9 items-center justify-center rounded-[8px] border border-[var(--border)] text-[var(--muted)] hover:text-[var(--foreground)]"
+                    >
+                      <X size={16} strokeWidth={1.5} />
+                    </button>
+                  </Dialog.Close>
+                </div>
+                <EvaluationSection compactDialog />
+              </Dialog.Content>
+            </Dialog.Portal>
+          </Dialog.Root>
+        </div>
       </div>
 
-      <div className="section-inner relative z-10 mt-12 border-t border-[#222D25] pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-[#78877D]">
-        <p>© 2024 EcoMind 360° · Projeto Estudantil Colégio Paulo de Tarso</p>
-        <p className="font-mono text-[#91A88F] text-[11px]">
-          100% Gratuito (R$ 0) · Dados Públicos Oficiais
-        </p>
+      <div className="section-inner mt-10 border-t border-[var(--border)] pt-6 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-[var(--muted)]">
+        <p>© {currentYear} EcoMind 360° · Todos os direitos reservados.</p>
+        <p>Fontes primárias: INPE · NASA FIRMS · MapBiomas · IBGE</p>
       </div>
     </footer>
   );
