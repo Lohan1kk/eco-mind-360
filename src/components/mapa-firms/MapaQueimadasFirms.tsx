@@ -881,14 +881,14 @@ export default function MapaQueimadasFirms() {
             )}
           </button>
 
-          {/* Status NASA FIRMS + Refresh */}
+          {/* Status NASA FIRMS + INPE + Refresh */}
           <div className="hidden lg:flex items-center gap-1.5 rounded-[6px] border border-[var(--border)] bg-[var(--background-secondary)] px-2 h-8 text-[11px] font-mono text-[var(--foreground-secondary)]">
             <span
               className={`h-2 w-2 shrink-0 rounded-full ${
                 resumo?.desatualizado ? "bg-[var(--warning)]" : "bg-[var(--success)]"
               }`}
             />
-            <span>NASA FIRMS</span>
+            <span>NASA FIRMS + INPE</span>
             <span>·</span>
             <span>
               {loading ? "atualizando..." : formatMinutesAgo(resumo?.atualizadoEm, nowMs)}

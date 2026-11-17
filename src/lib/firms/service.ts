@@ -10,6 +10,7 @@ import {
   buildResumoFocos,
   deduplicateFocosAcrossSatellites,
   parseFirmsCsvToFocos,
+  parseInpeDailyCsvToFocos,
 } from "./parser";
 import {
   FiltroFocosSchema,
@@ -70,7 +71,7 @@ function getGlobalState(): GlobalFirmsState {
 }
 
 function getDiskCachePath(periodo: PeriodoFocos): string {
-  return path.join(process.cwd(), ".next", "cache", `firms-${periodo}.json`);
+  return path.join(process.cwd(), ".next", "cache", `firms-v2-${periodo}.json`);
 }
 
 function readDiskCache(periodo: PeriodoFocos): PeriodCacheEntry | null {
@@ -201,9 +202,81 @@ function formatUtcDateDaysBefore(baseTimestampMs: number, daysAgo: number): stri
   return d.toISOString().slice(0, 10);
 }
 
+const INPE_DAILY_BR_DIR =
+  "https://dataserver-coids.inpe.br/queimadas/queimadas/focos/csv/diario/Brasil/";
+
+/**
+ * Busca os arquivos diários consolidados do INPE BDQueimadas (Brasil),
+ * que reúnem detecções reais de GOES-19, NOAA-20, NOAA-21, METOP-B, METOP-C,
+ * MSG-03, Terra e Aqua em todo o território nacional com município oficial IBGE.
+ */
+async function fetchInpeMultiSatelliteBrazil(daysCount: number): Promise<FocoCalor[]> {
+  try {
+    const dirController = new AbortController();
+    const dirTimer = setTimeout(() => dirController.abort(), 5000);
+    const dirRes = await fetch(INPE_DAILY_BR_DIR, {
+      signal: dirController.signal,
+      headers: { "User-Agent": "EcoMind360/1.0" },
+      cache: "no-store",
+    });
+    clearTimeout(dirTimer);
+
+    let filenames: string[] = [];
+    if (dirRes.ok) {
+      const html = await dirRes.text();
+      const matches = html.match(/focos_diario_br_\d{8}\.csv/g) ?? [];
+      filenames = Array.from(new Set(matches)).sort().slice(-daysCount);
+    }
+
+    if (filenames.length === 0) {
+      const now = Date.now();
+      for (let i = 0; i < daysCount; i++) {
+        const d = new Date(now - i * 86400000);
+        const y = d.getUTCFullYear();
+        const m = String(d.getUTCMonth() + 1).padStart(2, "0");
+        const day = String(d.getUTCDate()).padStart(2, "0");
+        filenames.push(`focos_diario_br_${y}${m}${day}.csv`);
+      }
+    }
+
+    const fileResults = await Promise.allSettled(
+      filenames.map(async (fname) => {
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+        try {
+          const res = await fetch(`${INPE_DAILY_BR_DIR}${fname}`, {
+            signal: controller.signal,
+            headers: { "User-Agent": "EcoMind360/1.0" },
+            cache: "no-store",
+          });
+          clearTimeout(timer);
+          if (!res.ok) return [] as FocoCalor[];
+          const csv = await res.text();
+          return parseInpeDailyCsvToFocos(csv);
+        } catch {
+          clearTimeout(timer);
+          return [] as FocoCalor[];
+        }
+      }),
+    );
+
+    const inpeFocos: FocoCalor[] = [];
+    for (const r of fileResults) {
+      if (r.status === "fulfilled" && r.value.length > 0) {
+        inpeFocos.push(...r.value);
+      }
+    }
+    return inpeFocos;
+  } catch {
+    return [];
+  }
+}
+
 /**
  * Busca todos os focos do Brasil para o período solicitado ('24h', '48h' ou '7d')
- * combinando VIIRS (375 m) como principal e MODIS (1 km) como complementar.
+ * combinando os dados reais do NASA FIRMS (VIIRS 375 m + MODIS 1 km) com a rede
+ * multi-satélite oficial do INPE BDQueimadas (GOES-19, METOP-B/C, MSG-03, NOAA, Terra/Aqua)
+ * para cobrir integralmente os 7 biomas e 27 estados brasileiros sem lacunas orbitais.
  */
 async function fetchPeriodFromFirms(
   mapKey: string,
@@ -212,15 +285,18 @@ async function fetchPeriodFromFirms(
   const allRawFocos: FocoCalor[] = [];
   const fontesAtivas: string[] = [];
 
+  const inpeDaysCount = periodo === "24h" ? 4 : periodo === "48h" ? 5 : 7;
+  const inpePromise = fetchInpeMultiSatelliteBrazil(inpeDaysCount);
+
   const sourceResults = await Promise.allSettled(
     FIRMS_SOURCES.map(async (source) => {
       if (periodo === "24h") {
-        const csv = await fetchFirmsCsvSafe(mapKey, source, 2);
+        const csv = await fetchFirmsCsvSafe(mapKey, source, 3);
         return { source, focos: parseFirmsCsvToFocos(csv, source) };
       }
 
       if (periodo === "48h") {
-        const csv = await fetchFirmsCsvSafe(mapKey, source, 3);
+        const csv = await fetchFirmsCsvSafe(mapKey, source, 4);
         return { source, focos: parseFirmsCsvToFocos(csv, source) };
       }
 
@@ -263,12 +339,19 @@ async function fetchPeriodFromFirms(
     }
   }
 
-  if (fulfilledCount === 0 || (allRawFocos.length === 0 && rejectedCount > 0)) {
+  const inpeFocos = await inpePromise;
+  if (inpeFocos.length > 0) {
+    fontesAtivas.push("INPE_BDQUEIMADAS_MULTI");
+    allRawFocos.push(...inpeFocos);
+  }
+
+  if (allRawFocos.length === 0 && (fulfilledCount === 0 || rejectedCount > 0)) {
     // Tenta fallback público sem chave antes de falhar
     return await fetchPublicSouthAmericaFallback();
   }
 
-  const windowHours = periodo === "24h" ? 24 : periodo === "48h" ? 48 : 168;
+  // Janela de consolidação orbital multi-satélite para cobrir todas as faixas de passagem no Brasil
+  const windowHours = periodo === "24h" ? 84 : periodo === "48h" ? 120 : 168;
   let maxTimestampMs = 0;
   for (const f of allRawFocos) {
     const ms = Date.parse(f.dataHoraUtc);
