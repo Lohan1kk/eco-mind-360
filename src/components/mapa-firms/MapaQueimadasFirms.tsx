@@ -14,7 +14,6 @@ import {
   ExternalLink,
   Filter,
   Flame,
-  Info,
   Layers,
   Loader2,
   MapPin,

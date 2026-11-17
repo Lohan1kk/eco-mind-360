@@ -8,6 +8,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import {
+  applyFiltroFocos,
   buildResumoFocos,
   classifyFrpIntensity,
   normalizeConfidence,
@@ -202,6 +203,24 @@ describe("4. Restauração e serialização de filtros, posição e camadas pela
     const serialized = serializeMapUrlState(state);
     const roundtrip = parseMapUrlState(serialized);
     expect(roundtrip).toEqual(state);
+  });
+
+  it("normaliza uf vazio ou 'ALL' para 'all' (minúsculo) sem filtrar focos indevidamente", () => {
+    const emptyState = parseMapUrlState("");
+    expect(emptyState.filtros.uf).toBe("all");
+    expect(serializeMapUrlState(emptyState)).not.toContain("uf=");
+
+    const allUpperState = parseMapUrlState("?periodo=24h&uf=ALL");
+    expect(allUpperState.filtros.uf).toBe("all");
+    expect(serializeMapUrlState(allUpperState)).not.toContain("uf=");
+
+    const csvViirs = fs.readFileSync(
+      path.join(fixturesDir, "sample-viirs-test.csv"),
+      "utf8",
+    );
+    const focos = parseFirmsCsvToFocos(csvViirs, "VIIRS_NOAA20_NRT");
+    expect(applyFiltroFocos(focos, emptyState.filtros)).toHaveLength(4);
+    expect(applyFiltroFocos(focos, allUpperState.filtros)).toHaveLength(4);
   });
 });
 

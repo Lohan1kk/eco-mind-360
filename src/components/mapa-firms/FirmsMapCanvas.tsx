@@ -507,6 +507,7 @@ export default function FirmsMapCanvas({
 
     let map: maplibregl.Map;
     try {
+      maplibregl.setWorkerUrl("/maplibre-gl-worker.js");
       map = new maplibregl.Map({
         container: containerRef.current,
         style: MAP_STYLES[initialTheme],

@@ -307,7 +307,12 @@ export function applyFiltroFocos(focos: FocoCalor[], filtro: FiltroFocos): FocoC
     if (filtro.bioma !== "all" && f.bioma !== filtro.bioma) {
       return false;
     }
-    if (filtro.uf !== "all" && filtro.uf !== "" && f.uf !== filtro.uf) {
+    if (
+      filtro.uf !== "all" &&
+      filtro.uf.toUpperCase() !== "ALL" &&
+      filtro.uf !== "" &&
+      f.uf !== filtro.uf.toUpperCase()
+    ) {
       return false;
     }
     if (filtro.frpMin > 0 && f.frp < filtro.frpMin) {

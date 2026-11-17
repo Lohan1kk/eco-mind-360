@@ -22,7 +22,14 @@ export const FiltroFocosSchema = z.object({
       "fora_dos_biomas",
     ])
     .default("all"),
-  uf: z.string().trim().toUpperCase().default("all"),
+  uf: z
+    .string()
+    .trim()
+    .transform((val) => {
+      const upper = val.toUpperCase();
+      return upper === "ALL" || upper === "" ? "all" : upper;
+    })
+    .default("all"),
   frpMin: z.coerce.number().min(0).max(5000).default(0),
   fonte: z
     .enum([
