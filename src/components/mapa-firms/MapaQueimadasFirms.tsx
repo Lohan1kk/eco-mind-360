@@ -576,6 +576,22 @@ export default function MapaQueimadasFirms() {
     }).sort((a, b) => b.total - a.total);
   }, [resumo]);
 
+  const ufRanking = useMemo(() => {
+    if (!resumo?.porUf) return [];
+    return Object.entries(resumo.porUf)
+      .filter(([, count]) => count > 0)
+      .map(([sigla, total]) => {
+        const ufMeta = BRAZIL_UFS.find((u) => u.sigla === sigla);
+        return {
+          sigla,
+          nome: ufMeta?.nome ?? sigla,
+          total,
+        };
+      })
+      .sort((a, b) => b.total - a.total)
+      .slice(0, 6);
+  }, [resumo]);
+
   const top20Focos = useMemo(() => {
     return [...focos]
       .sort((a, b) => b.frp - a.frp || Date.parse(b.dataHoraUtc) - Date.parse(a.dataHoraUtc))
@@ -818,6 +834,32 @@ export default function MapaQueimadasFirms() {
                     </div>
                   )}
                 </div>
+
+                {/* Seleção direta de UF na barra (estilo Painel do Fogo Gov) */}
+                <select
+                  value={mapState.filtros.uf}
+                  onChange={(e) => {
+                    const nextUf = e.target.value;
+                    updateFiltro("uf", nextUf);
+                    if (nextUf === "all") {
+                      setFlyToTarget({
+                        lat: DEFAULT_MAP_URL_STATE.lat,
+                        lon: DEFAULT_MAP_URL_STATE.lon,
+                        zoom: DEFAULT_MAP_URL_STATE.zoom,
+                        token: Date.now(),
+                      });
+                    }
+                  }}
+                  aria-label="Filtrar por Estado (UF)"
+                  className="hidden md:block h-9 rounded-[10px] border border-[var(--border)] bg-[var(--surface)]/95 px-2.5 text-xs font-medium text-[var(--foreground)] shadow-soft backdrop-blur-md focus:outline-none"
+                >
+                  <option value="all">Brasil (Todas UFs)</option>
+                  {BRAZIL_UFS.map((u) => (
+                    <option key={u.sigla} value={u.sigla}>
+                      {u.sigla} — {u.nome}
+                    </option>
+                  ))}
+                </select>
 
                 {/* Filtros */}
                 <button
@@ -1177,22 +1219,22 @@ export default function MapaQueimadasFirms() {
             )}
           </div>
 
-          {/* LEGENDA COMPACTA CANTO INFERIOR ESQUERDO */}
-          <div className="pointer-events-none absolute bottom-20 left-2.5 z-20 lg:bottom-4 sm:left-4">
+          {/* LEGENDA DISCRETA ESTILO PAINEL DO FOGO GOV */}
+          <div className="pointer-events-none hidden lg:block absolute bottom-3 left-3 z-20">
             <div
-              className="pointer-events-auto rounded-[10px] border border-[var(--border)] bg-[var(--surface)]/92 px-3 py-2 shadow-soft backdrop-blur-md text-[11px]"
+              className="pointer-events-auto rounded-[8px] border border-[var(--border)] bg-[var(--surface)]/90 px-2.5 py-1.5 shadow-soft backdrop-blur-md text-[11px]"
               aria-label="Legenda de intensidade"
             >
-              <div className="flex flex-wrap items-center gap-3">
+              <div className="flex items-center gap-2.5">
                 <span className="font-mono text-[10px] uppercase tracking-wider text-[var(--muted)]">
-                  Intensidade (FRP):
+                  FRP (MW):
                 </span>
                 {(["baixo", "medio", "alto", "critico"] as const).map((lvl) => {
                   const meta = INTENSIDADE_META[lvl];
                   return (
                     <span key={lvl} className="inline-flex items-center gap-1 font-medium text-[var(--foreground)]">
                       <span
-                        className="inline-block h-2.5 w-2.5 rounded-full"
+                        className="inline-block h-2 w-2 rounded-full"
                         style={{ backgroundColor: meta.colorDark }}
                       />
                       <span>{meta.label}</span>
@@ -1313,27 +1355,114 @@ export default function MapaQueimadasFirms() {
           </div>
 
           {/* Conteúdo do painel */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-4 text-xs">
+          <div className="flex-1 overflow-y-auto p-3.5 space-y-3.5 text-xs">
+            {/* Cabeçalho Institucional enxuto */}
+            <div className="flex items-center justify-between border-b border-[var(--border)] pb-2.5">
+              <div>
+                <span className="font-mono text-[10px] uppercase tracking-wider text-[var(--sage)]">
+                  Painel do Fogo · {mapState.filtros.uf !== "all" ? `UF: ${mapState.filtros.uf}` : "Brasil"}
+                </span>
+                <p className="text-[11px] text-[var(--muted)]">
+                  NASA FIRMS (VIIRS 375 m / MODIS 1 km)
+                </p>
+              </div>
+              {hasActiveFilters && (
+                <button
+                  type="button"
+                  onClick={resetFiltros}
+                  className="inline-flex items-center gap-1 rounded-[6px] border border-[var(--border)] bg-[var(--background-secondary)] px-2 py-1 text-[11px] font-medium text-[var(--primary)] hover:bg-[var(--surface-elevated)]"
+                >
+                  <RotateCcw size={11} />
+                  <span>Ver Brasil</span>
+                </button>
+              )}
+            </div>
+
             {/* Total + FRP Máximo */}
-            <div className="grid grid-cols-2 gap-2.5">
-              <div className="rounded-[10px] border border-[var(--border)] bg-[var(--background-secondary)] p-3">
+            <div className="grid grid-cols-2 gap-2">
+              <div className="rounded-[8px] border border-[var(--border)] bg-[var(--background-secondary)] p-2.5">
                 <span className="text-[10px] font-mono uppercase text-[var(--muted)]">
                   Focos ({mapState.filtros.periodo})
                 </span>
-                <p className="mt-1 font-display text-2xl font-semibold tabular-nums text-[var(--foreground)]">
+                <p className="mt-0.5 font-display text-2xl font-semibold tabular-nums text-[var(--foreground)]">
                   {loading && !resumo ? "..." : <AnimatedCount value={resumo?.total ?? 0} />}
                 </p>
               </div>
 
-              <div className="rounded-[10px] border border-[var(--border)] bg-[var(--background-secondary)] p-3">
+              <div className="rounded-[8px] border border-[var(--border)] bg-[var(--background-secondary)] p-2.5">
                 <span className="text-[10px] font-mono uppercase text-[var(--muted)]">
-                  Pico de Potência
+                  Pico FRP
                 </span>
-                <p className="mt-1 font-display text-2xl font-semibold tabular-nums text-[#FB923C]">
+                <p className="mt-0.5 font-display text-2xl font-semibold tabular-nums text-[#FB923C]">
                   {resumo ? `${resumo.frpMaximo.toLocaleString("pt-BR")} MW` : "..."}
                 </p>
               </div>
             </div>
+
+            {/* Estados (UFs) com mais focos — estilo Painel do Fogo Gov */}
+            {ufRanking.length > 0 && (
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <span className="font-mono text-[10px] uppercase tracking-wider text-[var(--muted)]">
+                    Estados com Mais Focos
+                  </span>
+                  {mapState.filtros.uf !== "all" && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        updateFiltro("uf", "all");
+                        setFlyToTarget({
+                          lat: DEFAULT_MAP_URL_STATE.lat,
+                          lon: DEFAULT_MAP_URL_STATE.lon,
+                          zoom: DEFAULT_MAP_URL_STATE.zoom,
+                          token: Date.now(),
+                        });
+                      }}
+                      className="text-[11px] text-[var(--primary)] hover:underline"
+                    >
+                      Todas UFs
+                    </button>
+                  )}
+                </div>
+                <div className="grid grid-cols-3 gap-1.5">
+                  {ufRanking.map((u) => {
+                    const active = mapState.filtros.uf === u.sigla;
+                    return (
+                      <button
+                        key={u.sigla}
+                        type="button"
+                        onClick={() => {
+                          if (active) {
+                            updateFiltro("uf", "all");
+                            setFlyToTarget({
+                              lat: DEFAULT_MAP_URL_STATE.lat,
+                              lon: DEFAULT_MAP_URL_STATE.lon,
+                              zoom: DEFAULT_MAP_URL_STATE.zoom,
+                              token: Date.now(),
+                            });
+                          } else {
+                            updateFiltro("uf", u.sigla);
+                          }
+                        }}
+                        title={`${u.nome}: ${u.total.toLocaleString("pt-BR")} focos`}
+                        className={`flex items-center justify-between rounded-[6px] border px-2 py-1.5 text-[11px] transition-colors ${
+                          active
+                            ? "border-[var(--primary)] bg-[var(--surface-elevated)] text-[var(--foreground)]"
+                            : "border-[var(--border)] bg-[var(--background-secondary)] text-[var(--foreground-secondary)] hover:bg-[var(--surface-elevated)] hover:text-[var(--foreground)]"
+                        }`}
+                      >
+                        <span className="font-mono font-semibold text-[var(--foreground)]">
+                          {u.sigla}
+                        </span>
+                        <span className="font-mono tabular-nums">
+                          {u.total.toLocaleString("pt-BR")}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
 
             {/* Filtro rápido por classe de intensidade */}
             <div className="space-y-1.5">
