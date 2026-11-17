@@ -1,0 +1,32 @@
+---
+description: Diretrizes e tokens de design do EcoMind 360° (Clean Editorial & Precisão Científica)
+globs: ["src/**/*.tsx", "src/**/*.css"]
+---
+
+# Sistema de Design — EcoMind 360°
+
+## 1. Direção de Arte e Princípios
+- **Sensação:** Calma, confiança, precisão científica com elegância.
+- **Menos é mais:** Uma ideia por seção, um título em serifada, no máximo 2 linhas de apoio (máx. 65ch) e uma ação clara.
+- **Espaço em branco:** Seções com 96 a 160 px de respiro vertical no desktop (64 a 96 px no mobile), container máximo de 1200 px.
+- **Terminologia padronizada:** Utilize sempre **"ambientes"** ("os 7 ambientes brasileiros") na interface geral.
+
+## 2. Paleta de Cores (Tokens CSS)
+- `--background`: `#F4F5F4` (cinza muito claro)
+- `--surface`: `#FFFFFF` com borda `--border`: `#E4E7E4`
+- `--foreground`: `#1B211D` | `--foreground-secondary`: `#4A544E` | `--muted`: `#626C66`
+- `--accent-soft`: `#BFE5CB` (verde claro para selos, destaques e hovers)
+- `--accent-action`: `#7BC796` (verde suave interativo)
+- `--primary`: `#1F5A3A` (verde profundo com contraste >= 4.5:1 para botões principais e texto sobre verde claro)
+- Escala térmica (amarelo -> laranja -> vermelho -> vinho) e cores dos 7 ambientes restritas exclusivamente ao mapa, gráficos e pequenos pontos indicadores.
+
+## 3. Tipografia (Máximo 2 Famílias)
+- **Títulos (`--font-display`):** `Instrument Serif` (tamanhos amplos, letter-spacing `-0.02em`).
+- **Interface, Corpo e Indicadores (`--font-body`):** `Inter` (com `tabular-nums` para métricas numéricas).
+
+## 4. Movimento e Bibliotecas
+- **shadcn/ui + Lucide:** Base de todos os componentes e ícones (stroke ~1.5, sem emojis).
+- **Motion (`motion/react`):** Transições de UI, entrada sutil (`opacity` + `transform`), curva `cubic-bezier(0.22, 1, 0.36, 1)`.
+- **Magic UI / Aceternity UI:** Máximo 2 microefeitos gratuitos por página (`NumberTicker`, `BorderBeam`, `Spotlight` sutil).
+- **GSAP (`useGSAP` + `ScrollTrigger`):** Exclusivamente para a narrativa guiada por scroll em "Como funciona", com cleanup obrigatório.
+- **Lenis:** Scroll suave global desativado em `prefers-reduced-motion`, rotas de mapa (`/mapa`) e elementos com `data-lenis-prevent`.

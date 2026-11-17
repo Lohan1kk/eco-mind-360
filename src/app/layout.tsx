@@ -1,26 +1,19 @@
 import type { Metadata } from 'next';
-import { Space_Grotesk, Plus_Jakarta_Sans, IBM_Plex_Mono } from 'next/font/google';
+import { Instrument_Serif, Inter } from 'next/font/google';
 import 'leaflet/dist/leaflet.css';
 import './globals.css';
 import { AppShell } from '@/components/shell/AppShell';
 import { SmoothScrollProvider } from '@/components/providers/SmoothScrollProvider';
 
-const display = Space_Grotesk({
+const display = Instrument_Serif({
   variable: '--font-display',
   subsets: ['latin'],
-  weight: ['500', '600', '700'],
+  weight: '400',
   display: 'swap',
 });
 
-const body = Plus_Jakarta_Sans({
+const body = Inter({
   variable: '--font-body',
-  subsets: ['latin'],
-  weight: ['400', '500', '600', '700'],
-  display: 'swap',
-});
-
-const mono = IBM_Plex_Mono({
-  variable: '--font-mono',
   subsets: ['latin'],
   weight: ['400', '500', '600'],
   display: 'swap',
@@ -28,11 +21,18 @@ const mono = IBM_Plex_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: 'EcoMind 360° — Inteligência Territorial & Monitoramento dos Biomas',
+    default: 'EcoMind 360° — Monitoramento dos 7 Ambientes Brasileiros',
     template: '%s · EcoMind 360°',
   },
   description:
-    'EcoMind 360°: Plataforma de inteligência territorial, mapa orbital de queimadas quase em tempo real (~3 h de latência) com dados INPE e NASA FIRMS, e monitoramento oficial dos 7 ambientes brasileiros.',
+    'Acompanhe focos de calor por satélite, cobertura vegetal nativa e indicadores oficiais dos 7 ambientes brasileiros com dados do INPE, NASA FIRMS, MapBiomas e IBGE.',
+  openGraph: {
+    title: 'EcoMind 360° — Monitoramento dos 7 Ambientes Brasileiros',
+    description:
+      'Dados oficiais do INPE, NASA FIRMS, MapBiomas e IBGE para os 7 ambientes do Brasil.',
+    locale: 'pt_BR',
+    type: 'website',
+  },
   icons: {
     icon: '/brand/icon-ecomind.png',
     apple: '/brand/icon-ecomind.png',
@@ -45,8 +45,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="pt-BR" className={`dark ${display.variable} ${body.variable} ${mono.variable}`}>
-      <body className="min-h-screen bg-[#101512] text-[#DCE5DD] antialiased font-sans selection:bg-[#789B7C]/25 selection:text-[#DCE5DD]">
+    <html lang="pt-BR" className={`light ${display.variable} ${body.variable}`}>
+      <body className="min-h-screen bg-[var(--background)] text-[var(--foreground)] antialiased font-sans selection:bg-[#BFE5CB] selection:text-[#1B211D]">
         <SmoothScrollProvider>
           <AppShell>{children}</AppShell>
         </SmoothScrollProvider>

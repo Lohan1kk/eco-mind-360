@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
 
-export type Theme = 'dark' | 'light';
+export type Theme = 'light' | 'dark';
 
 interface ThemeContextType {
   theme: Theme;
@@ -11,17 +11,17 @@ interface ThemeContextType {
 }
 
 const ThemeContext = createContext<ThemeContextType>({
-  theme: 'dark',
+  theme: 'light',
   toggleTheme: () => {},
   setTheme: () => {},
 });
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>('dark');
+  const [theme, setThemeState] = useState<Theme>('light');
 
   useEffect(() => {
     try {
-      const saved = window.localStorage.getItem('ecomind-theme') as Theme | null;
+      const saved = window.localStorage.getItem('ecomind-theme-v2') as Theme | null;
       if (saved === 'light' || saved === 'dark') {
         setThemeState(saved);
       }
@@ -36,7 +36,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     root.classList.toggle('light', theme === 'light');
     root.dataset.theme = theme;
     try {
-      window.localStorage.setItem('ecomind-theme', theme);
+      window.localStorage.setItem('ecomind-theme-v2', theme);
     } catch {
       // ignore
     }

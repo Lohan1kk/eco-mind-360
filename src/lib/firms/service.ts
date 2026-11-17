@@ -25,9 +25,6 @@ const CACHE_TTL_MS = 15 * 60 * 1000; // 15 minutos
 const FETCH_TIMEOUT_MS = 9000;
 const MAX_RETRIES = 1;
 
-// Chave padrão configurada para o projeto caso a variável de ambiente não tenha sido injetada no host
-const DEFAULT_PROJECT_FIRMS_KEY = "6edd8e846865f519a4086f403634e734";
-
 // Feeds públicos oficiais da NASA FIRMS para América do Sul (sem necessidade de chave) como fallback resiliente
 const PUBLIC_SOUTH_AMERICA_FEEDS: Array<{ url: string; source: FirmsSourceId }> = [
   {
@@ -288,42 +285,42 @@ async function fetchPeriodFromFirms(
   const inpeDaysCount = periodo === "24h" ? 4 : periodo === "48h" ? 5 : 7;
   const inpePromise = fetchInpeMultiSatelliteBrazil(inpeDaysCount);
 
-  const sourceResults = await Promise.allSettled(
-    FIRMS_SOURCES.map(async (source) => {
-      if (periodo === "24h") {
-        const csv = await fetchFirmsCsvSafe(mapKey, source, 3);
-        return { source, focos: parseFirmsCsvToFocos(csv, source) };
-      }
+  const sourceResults = mapKey
+    ? await Promise.allSettled(
+        FIRMS_SOURCES.map(async (source) => {
+          if (periodo === "24h") {
+            const csv = await fetchFirmsCsvSafe(mapKey, source, 3);
+            return { source, focos: parseFirmsCsvToFocos(csv, source) };
+          }
 
-      if (periodo === "48h") {
-        const csv = await fetchFirmsCsvSafe(mapKey, source, 4);
-        return { source, focos: parseFirmsCsvToFocos(csv, source) };
-      }
+          if (periodo === "48h") {
+            const csv = await fetchFirmsCsvSafe(mapKey, source, 4);
+            return { source, focos: parseFirmsCsvToFocos(csv, source) };
+          }
 
-      // 7d: busca primeiro os 5 dias mais recentes e usa a data mais recente real do satélite
-      // como referência para a janela anterior de 3 dias (evita erro se o relógio local estiver deslocado)
-      const recentCsv = await fetchFirmsCsvSafe(mapKey, source, 5);
-      const recentFocos = parseFirmsCsvToFocos(recentCsv, source);
+          const recentCsv = await fetchFirmsCsvSafe(mapKey, source, 5);
+          const recentFocos = parseFirmsCsvToFocos(recentCsv, source);
 
-      let latestSatMs = Date.now();
-      for (const f of recentFocos) {
-        const ms = Date.parse(f.dataHoraUtc);
-        if (ms > 0) {
-          latestSatMs = ms;
-          break;
-        }
-      }
+          let latestSatMs = Date.now();
+          for (const f of recentFocos) {
+            const ms = Date.parse(f.dataHoraUtc);
+            if (ms > 0) {
+              latestSatMs = ms;
+              break;
+            }
+          }
 
-      try {
-        const startOlderDate = formatUtcDateDaysBefore(latestSatMs, 7);
-        const olderCsv = await fetchFirmsCsvSafe(mapKey, source, 3, startOlderDate);
-        const olderFocos = parseFirmsCsvToFocos(olderCsv, source);
-        return { source, focos: [...recentFocos, ...olderFocos] };
-      } catch {
-        return { source, focos: recentFocos };
-      }
-    }),
-  );
+          try {
+            const startOlderDate = formatUtcDateDaysBefore(latestSatMs, 7);
+            const olderCsv = await fetchFirmsCsvSafe(mapKey, source, 3, startOlderDate);
+            const olderFocos = parseFirmsCsvToFocos(olderCsv, source);
+            return { source, focos: [...recentFocos, ...olderFocos] };
+          } catch {
+            return { source, focos: recentFocos };
+          }
+        }),
+      )
+    : [];
 
   let fulfilledCount = 0;
   let rejectedCount = 0;
@@ -413,7 +410,7 @@ async function getOrFetchPeriodData(
     };
   }
 
-  const mapKey = process.env.NASA_FIRMS_MAP_KEY?.trim() || DEFAULT_PROJECT_FIRMS_KEY;
+  const mapKey = process.env.NASA_FIRMS_MAP_KEY?.trim() || "";
 
   let inFlightPromise = state.inFlight.get(periodo);
   if (!inFlightPromise) {
