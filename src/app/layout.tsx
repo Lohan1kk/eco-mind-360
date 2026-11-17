@@ -1,17 +1,18 @@
 import type { Metadata } from 'next';
-import { Inter, IBM_Plex_Mono } from 'next/font/google';
+import { Space_Grotesk, Plus_Jakarta_Sans, IBM_Plex_Mono } from 'next/font/google';
 import 'leaflet/dist/leaflet.css';
 import './globals.css';
 import { AppShell } from '@/components/shell/AppShell';
+import { SmoothScrollProvider } from '@/components/providers/SmoothScrollProvider';
 
-const display = Inter({
+const display = Space_Grotesk({
   variable: '--font-display',
   subsets: ['latin'],
-  weight: ['400', '500', '600', '700'],
+  weight: ['500', '600', '700'],
   display: 'swap',
 });
 
-const body = Inter({
+const body = Plus_Jakarta_Sans({
   variable: '--font-body',
   subsets: ['latin'],
   weight: ['400', '500', '600', '700'],
@@ -46,7 +47,9 @@ export default function RootLayout({
   return (
     <html lang="pt-BR" className={`dark ${display.variable} ${body.variable} ${mono.variable}`}>
       <body className="min-h-screen bg-[#101512] text-[#DCE5DD] antialiased font-sans selection:bg-[#789B7C]/25 selection:text-[#DCE5DD]">
-        <AppShell>{children}</AppShell>
+        <SmoothScrollProvider>
+          <AppShell>{children}</AppShell>
+        </SmoothScrollProvider>
       </body>
     </html>
   );
