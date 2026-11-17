@@ -14,7 +14,6 @@ const features = [
   "Cobertura completa dos 7 biomas e ecossistemas brasileiros",
   "Dashboard analítico com histórico PRODES e MapBiomas",
   "Calculadora científica de pegada de carbono (kg CO₂e)",
-  "Quiz interativo com guardiões e folclore brasileiro",
 ];
 
 export function BaixarContent() {

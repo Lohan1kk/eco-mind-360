@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { MapPin, Calculator, HelpCircle, Sparkles } from 'lucide-react';
+import { MapPin, Calculator, Sparkles } from 'lucide-react';
 
 export function Encourage() {
   return (
@@ -41,14 +41,6 @@ export function Encourage() {
           >
             <Calculator size={15} className="text-[#91A88F]" />
             <span>Calcular Minha Pegada</span>
-          </Link>
-
-          <Link
-            href="/quiz"
-            className="btn-secondary !py-2.5 !px-5 text-xs font-medium inline-flex items-center gap-1.5"
-          >
-            <HelpCircle size={15} className="text-[#91A88F]" />
-            <span>Jogar o Quiz do Folclore</span>
           </Link>
         </div>
       </div>

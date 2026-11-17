@@ -16,7 +16,6 @@ const links = [
   { href: "/#problema", label: "Problema" },
   { href: "/#como-funciona", label: "Como funciona" },
   { href: "/calculadora", label: "Calculadora" },
-  { href: "/quiz", label: "Quiz" },
   { href: "/alerta-queimadas", label: "Mapa" },
   { href: "/#glossario", label: "Termos" },
   { href: "/#equipe", label: "Equipe" },

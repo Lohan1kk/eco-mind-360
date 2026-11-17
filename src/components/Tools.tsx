@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { MapPin, LayoutDashboard, Calculator, HelpCircle, ArrowUpRight, Sparkles } from 'lucide-react';
+import { MapPin, LayoutDashboard, Calculator, Trees, ArrowUpRight, Sparkles } from 'lucide-react';
 
 const TOOLS = [
   {
@@ -30,12 +30,12 @@ const TOOLS = [
     icon: Calculator,
   },
   {
-    href: '/quiz',
-    tag: 'Gincana Escolar',
-    title: 'Quiz & Folclore Protetor',
-    desc: 'Educação ambiental conectada às lendas brasileiras: o papel do Curupira, Caipora e Boitatá na proteção das matas nativas.',
-    cta: 'Iniciar gincana',
-    icon: HelpCircle,
+    href: '/biomas',
+    tag: 'Atlas IBGE',
+    title: 'Dossiê dos 7 Biomas',
+    desc: 'Fichas técnicas completas da Amazônia, Cerrado, Mata Atlântica, Caatinga, Pampa, Pantanal e Sistema Costeiro-Marinho.',
+    cta: 'Explorar biomas',
+    icon: Trees,
   },
 ];
 

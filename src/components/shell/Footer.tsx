@@ -48,7 +48,6 @@ export function Footer() {
               Prática & Análise
             </span>
             <Link href="/calculadora" className="text-[#A7B3A9] hover:text-[#DCE5DD] transition-colors">Calculadora de Carbono</Link>
-            <Link href="/quiz" className="text-[#A7B3A9] hover:text-[#DCE5DD] transition-colors">Quiz & Folclore</Link>
             <Link href="/comparacao" className="text-[#A7B3A9] hover:text-[#DCE5DD] transition-colors">Comparador Multicritério</Link>
             <Link href="/metodologia" className="text-[#A7B3A9] hover:text-[#DCE5DD] transition-colors">Metodologia Científica</Link>
             <Link href="/baixar" className="text-[#A7B3A9] hover:text-[#DCE5DD] transition-colors">Instalar App PWA</Link>

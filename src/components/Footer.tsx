@@ -4,7 +4,6 @@ import { Reveal, StaggerItem, StaggerReveal } from "@/components/motion";
 
 const links = [
   { href: "/calculadora", label: "Calculadora" },
-  { href: "/quiz", label: "Quiz" },
   { href: "/alerta-queimadas", label: "Mapa de queimadas" },
   { href: "/#glossario", label: "Termos" },
   { href: "/#avaliacao", label: "Avaliar" },

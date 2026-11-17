@@ -5,7 +5,7 @@ import { PageAtmosphereShell } from "@/components/ui/page-atmosphere-shell";
 export const metadata: Metadata = {
   title: "Baixar App EcoMind",
   description:
-    "Instale o EcoMind 360 no celular — calculadora, quiz e mapa de queimadas com dados oficiais.",
+    "Instale o EcoMind 360 no celular — calculadora de carbono e mapa orbital de queimadas com dados oficiais.",
 };
 
 export default function BaixarPage() {

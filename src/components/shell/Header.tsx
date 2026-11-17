@@ -14,7 +14,6 @@ const NAV_LINKS = [
   { href: '/biomas', label: 'Biomas' },
   { href: '/dashboard', label: 'Dashboard' },
   { href: '/calculadora', label: 'Calculadora' },
-  { href: '/quiz', label: 'Quiz' },
 ];
 
 export function Header() {
