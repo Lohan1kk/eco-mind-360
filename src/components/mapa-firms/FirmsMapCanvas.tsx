@@ -27,7 +27,9 @@ interface FirmsMapCanvasProps {
     biomas: boolean;
     gibs: boolean;
     heatmap: boolean;
+    estados?: boolean;
   };
+  baseMap?: "dark" | "satellite" | "light";
   selectedFoco: FocoCalor | null;
   selectedBiome: string;
   userLocation: { lat: number; lon: number } | null;
@@ -44,6 +46,7 @@ export default function FirmsMapCanvas({
   lon,
   zoom,
   camadas,
+  baseMap = "dark",
   selectedFoco,
   selectedBiome,
   userLocation,
@@ -65,6 +68,8 @@ export default function FirmsMapCanvas({
   geojsonRef.current = geojson;
   const camadasRef = useRef(camadas);
   camadasRef.current = camadas;
+  const baseMapRef = useRef(baseMap);
+  baseMapRef.current = baseMap;
   const selectedFocoRef = useRef(selectedFoco);
   selectedFocoRef.current = selectedFoco;
   const selectedBiomeRef = useRef(selectedBiome);
@@ -88,7 +93,38 @@ export default function FirmsMapCanvas({
     };
 
     try {
-      // 1. Camada opcional de imagem orbital NASA GIBS (WMTS sem chave)
+      // 0. Mosaico Satélite Óptico de Alta Resolução (estilo Painel do Fogo CENSIPAM / INPE)
+      if (!map.getSource("satellite-imagery")) {
+        map.addSource("satellite-imagery", {
+          type: "raster",
+          tiles: [
+            "https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+          ],
+          tileSize: 256,
+          maxzoom: 17,
+          attribution: "Esri World Imagery",
+        });
+      }
+      if (!map.getLayer("satellite-imagery-layer")) {
+        map.addLayer({
+          id: "satellite-imagery-layer",
+          type: "raster",
+          source: "satellite-imagery",
+          layout: {
+            visibility: baseMapRef.current === "satellite" ? "visible" : "none",
+          },
+          paint: {
+            "raster-opacity": 0.92,
+            "raster-contrast": 0.08,
+          },
+        });
+      }
+    } catch {
+      // Ignora caso o tile server de satélite esteja indisponível
+    }
+
+    try {
+      // 1. Camada opcional de imagem orbital diária NASA GIBS (WMTS sem chave)
       if (!map.getSource("nasa-gibs")) {
         map.addSource("nasa-gibs", {
           type: "raster",
@@ -200,9 +236,12 @@ export default function FirmsMapCanvas({
           id: "estados-outline",
           type: "line",
           source: "estados-ibge",
+          layout: {
+            visibility: c.estados !== false ? "visible" : "none",
+          },
           paint: {
-            "line-color": isDark ? "rgba(220, 229, 221, 0.18)" : "rgba(18, 28, 22, 0.22)",
-            "line-width": ["interpolate", ["linear"], ["zoom"], 3, 0.6, 7, 1.1],
+            "line-color": isDark ? "rgba(220, 229, 221, 0.28)" : "rgba(18, 28, 22, 0.3)",
+            "line-width": ["interpolate", ["linear"], ["zoom"], 3, 0.8, 7, 1.4],
           },
         });
       }
@@ -663,16 +702,27 @@ export default function FirmsMapCanvas({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Troca de estilo base (Claro / Escuro) acompanhando o tema do site
+  // Troca de estilo base (Claro / Escuro / Satélite) acompanhando a seleção ou tema do site
   useEffect(() => {
     const map = mapRef.current;
     if (!map) return;
-    const nextTheme = theme === "light" ? "light" : "dark";
-    if (currentStyleThemeRef.current === nextTheme) return;
-    currentStyleThemeRef.current = nextTheme;
-    styleLoadedRef.current = false;
-    map.setStyle(MAP_STYLES[nextTheme]);
-  }, [theme]);
+    const nextTheme = baseMap === "light" || (baseMap !== "dark" && baseMap !== "satellite" && theme === "light")
+      ? "light"
+      : "dark";
+    if (currentStyleThemeRef.current !== nextTheme) {
+      currentStyleThemeRef.current = nextTheme;
+      styleLoadedRef.current = false;
+      map.setStyle(MAP_STYLES[nextTheme]);
+      return;
+    }
+    if (styleLoadedRef.current && map.getLayer("satellite-imagery-layer")) {
+      map.setLayoutProperty(
+        "satellite-imagery-layer",
+        "visibility",
+        baseMap === "satellite" ? "visible" : "none",
+      );
+    }
+  }, [theme, baseMap]);
 
   // Atualiza dados dos focos quando o filtro/API muda
   useEffect(() => {
@@ -710,6 +760,7 @@ export default function FirmsMapCanvas({
     setVis("focos-unclustered", camadas.focos);
     setVis("biomas-fill", camadas.biomas);
     setVis("biomas-outline", camadas.biomas);
+    setVis("estados-outline", camadas.estados !== false);
     setVis("nasa-gibs-layer", camadas.gibs);
     setVis("focos-heatmap", camadas.heatmap);
   }, [camadas]);
