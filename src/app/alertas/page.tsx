@@ -215,7 +215,7 @@ export default function AlertasPage() {
 
       {/* Tabela de Ocorrências com Design Limpo */}
       <div className="rounded-[10px] border border-[#29362D] bg-[#171F1A] overflow-hidden">
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto" data-lenis-prevent>
           <table className="w-full text-left text-xs text-[#DCE5DD]">
             <thead className="bg-[#131A16] text-[11px] font-mono uppercase text-[#78877D] border-b border-[#222D25]">
               <tr>
@@ -309,6 +309,7 @@ export default function AlertasPage() {
         {activeAlert && (
           <div className="fixed inset-0 z-50 bg-[#101512]/80 backdrop-blur-sm flex justify-end">
             <motion.div 
+              data-lenis-prevent
               initial={{ opacity: 0, x: 200 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: 200 }}

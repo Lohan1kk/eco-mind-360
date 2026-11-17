@@ -8,6 +8,7 @@ import {
   useSpring,
   useTransform,
 } from "framer-motion";
+import { Info } from "lucide-react";
 import { CarbonBreakdown } from "./CarbonBreakdown";
 import {
   calculateFootprint,
@@ -57,12 +58,12 @@ export function CarbonCalculator() {
   }, [result.total, totalMv]);
 
   return (
-    <div className="grid gap-10 lg:grid-cols-2 lg:gap-14">
-      <div className="space-y-8 rounded-[10px] border border-[#29362D] bg-[#171F1A] p-6 sm:p-8">
+    <div className="grid gap-8 lg:grid-cols-2 lg:gap-12">
+      <div className="glass-panel space-y-7 p-6 sm:p-8">
         <div>
-          <label htmlFor="km" className="flex justify-between text-sm font-medium text-[#DCE5DD]">
+          <label htmlFor="km" className="flex justify-between text-sm font-medium text-[var(--foreground)]">
             <span>Deslocamento diário</span>
-            <span className="font-mono text-[#91A88F]">{km} km</span>
+            <span className="font-mono text-[var(--primary)]">{km} km</span>
           </label>
           <input
             id="km"
@@ -71,22 +72,22 @@ export function CarbonCalculator() {
             max={80}
             value={km}
             onChange={(e) => setKm(Number(e.target.value))}
-            className="mt-2.5 w-full accent-[#789B7C]"
+            className="mt-2.5 w-full accent-[var(--primary)]"
           />
         </div>
 
         <div>
-          <p className="text-sm font-medium text-[#DCE5DD]">Meio de transporte principal</p>
+          <p className="text-sm font-medium text-[var(--foreground)]">Meio de transporte principal</p>
           <div className="mt-2.5 flex flex-wrap gap-2">
             {TRANSPORT_OPTIONS.map((opt) => (
               <motion.button
                 key={opt.mode}
                 type="button"
                 onClick={() => setTransport(opt.mode)}
-                className={`cursor-pointer rounded-[7px] px-4 py-2 text-xs font-medium transition ${
+                className={`min-h-[40px] cursor-pointer rounded-[8px] px-4 py-2 text-xs font-medium transition ${
                   transport === opt.mode
-                    ? "bg-[#294C35] text-[#DCE5DD] border border-[#365C40]"
-                    : "border border-[#29362D] bg-[#131A16] text-[#A7B3A9] hover:border-[#789B7C]/50 hover:text-[#DCE5DD]"
+                    ? "bg-[var(--primary)] text-white"
+                    : "border border-[var(--border)] bg-[var(--background)] text-[var(--foreground-secondary)] hover:border-[var(--accent-action)] hover:text-[var(--foreground)]"
                 }`}
                 whileTap={reduce ? undefined : tapSoft}
                 transition={pressTransition}
@@ -98,9 +99,9 @@ export function CarbonCalculator() {
         </div>
 
         <div>
-          <label htmlFor="meat" className="flex justify-between text-sm font-medium text-[#DCE5DD]">
+          <label htmlFor="meat" className="flex justify-between text-sm font-medium text-[var(--foreground)]">
             <span>Consumo de carne</span>
-            <span className="font-mono text-[#91A88F]">{meat}x por semana</span>
+            <span className="font-mono text-[var(--primary)]">{meat}x por semana</span>
           </label>
           <input
             id="meat"
@@ -109,14 +110,14 @@ export function CarbonCalculator() {
             max={14}
             value={meat}
             onChange={(e) => setMeat(Number(e.target.value))}
-            className="mt-2.5 w-full accent-[#789B7C]"
+            className="mt-2.5 w-full accent-[var(--primary)]"
           />
         </div>
 
         <div>
-          <label htmlFor="energy" className="flex justify-between text-sm font-medium text-[#DCE5DD]">
+          <label htmlFor="energy" className="flex justify-between text-sm font-medium text-[var(--foreground)]">
             <span>Conta de energia mensal</span>
-            <span className="font-mono text-[#91A88F]">
+            <span className="font-mono text-[var(--primary)]">
               R$ {energy} (~{Math.round(result.kwhEstimado)} kWh)
             </span>
           </label>
@@ -128,47 +129,50 @@ export function CarbonCalculator() {
             step={10}
             value={energy}
             onChange={(e) => setEnergy(Number(e.target.value))}
-            className="mt-2.5 w-full accent-[#789B7C]"
+            className="mt-2.5 w-full accent-[var(--primary)]"
           />
         </div>
       </div>
 
-      <div className="rounded-[10px] border border-[#29362D] bg-[#171F1A] p-6 sm:p-8">
-        <p className="text-xs font-mono uppercase tracking-wider text-[#91A88F]">
-          Estimativa anual
-        </p>
-        <motion.p
-          className={`mt-2 font-display text-5xl sm:text-6xl font-semibold tabular-nums ${
-            result.level === "excelente" ? "text-[#83A989]" : "text-[#DCE5DD]"
-          }`}
-        >
-          {totalDisplay}
-        </motion.p>
-        <p className="text-base text-[#A7B3A9] mt-1">kg de CO₂ equivalente por ano</p>
-        <p className="mt-1 text-xs text-[#78877D]">
-          CO₂e = impacto de vários gases numa só unidade (como se fosse só CO₂).
-        </p>
+      <div className="glass-panel p-6 sm:p-8 flex flex-col justify-between">
+        <div>
+          <div className="flex items-center justify-between gap-2">
+            <span className="eyebrow">Resultado Anual</span>
+            <span className="inline-flex items-center gap-1 rounded-full bg-[var(--accent-soft)] px-2.5 py-0.5 text-[11px] font-medium text-[var(--primary)]">
+              <Info size={12} strokeWidth={1.5} />
+              <span>Estimativa parcial</span>
+            </span>
+          </div>
 
-        <div className="mt-6 h-2 overflow-hidden rounded-full bg-[#131A16] border border-[#222D25]">
-          <motion.div
-            className="h-full rounded-full bg-[#789B7C]"
-            animate={{ width: `${result.progressPct}%` }}
-            transition={{ duration: reduce ? 0 : 0.35, ease: "easeOut" }}
+          <motion.p className="mt-3 font-display text-5xl sm:text-6xl text-[var(--foreground)] tabular-nums">
+            {totalDisplay}
+          </motion.p>
+          <p className="text-sm text-[var(--foreground-secondary)] mt-1">
+            kg de CO₂ equivalente por ano
+          </p>
+
+          <div className="mt-5 h-2 overflow-hidden rounded-full bg-[var(--background)] border border-[var(--border)]">
+            <motion.div
+              className="h-full rounded-full bg-[var(--primary)]"
+              animate={{ width: `${result.progressPct}%` }}
+              transition={{ duration: reduce ? 0 : 0.35, ease: "easeOut" }}
+            />
+          </div>
+
+          <p className="mt-5 text-sm leading-relaxed text-[var(--foreground)]">
+            {result.message}
+          </p>
+
+          <CarbonBreakdown
+            transport={result.transportAnnual}
+            meat={result.meatAnnual}
+            energy={result.energyAnnual}
+            total={result.total}
           />
         </div>
 
-        <p className="mt-6 text-sm leading-relaxed text-[#DCE5DD]">{result.message}</p>
-
-        <CarbonBreakdown
-          transport={result.transportAnnual}
-          meat={result.meatAnnual}
-          energy={result.energyAnnual}
-          total={result.total}
-        />
-
-        <p className="mt-6 text-xs leading-relaxed text-[#78877D]">
-          Metodologia: fatores médios de transporte (DEFRA/EPA), alimentação
-          (Poore &amp; Nemecek, 2018) e matriz elétrica do SIN (MCTI).
+        <p className="mt-6 pt-4 border-t border-[var(--border)] text-xs leading-relaxed text-[var(--muted)]">
+          Aviso de estimativa parcial: cálculo simplificado nos eixos transporte, alimentação e eletricidade residencial (fatores médios DEFRA/EPA, Poore &amp; Nemecek 2018 e SIN/MCTI).
         </p>
       </div>
     </div>

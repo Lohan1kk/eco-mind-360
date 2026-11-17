@@ -1220,7 +1220,10 @@ export default function MapaQueimadasFirms() {
             </div>
 
             {/* CONTEÚDO DAS ABAS */}
-            <div className="flex-1 overflow-y-auto p-3.5 space-y-3.5 text-xs">
+            <div
+              data-lenis-prevent
+              className="flex-1 overflow-y-auto p-3.5 space-y-3.5 text-xs"
+            >
               {activeTab === "resumo" && (
                 <>
                   {/* KPIs Principais */}
@@ -1756,7 +1759,10 @@ export default function MapaQueimadasFirms() {
             </div>
           </div>
 
-          <div className="overflow-x-auto rounded-[12px] border border-[var(--border)] bg-[var(--surface)] shadow-soft">
+          <div
+            data-lenis-prevent
+            className="overflow-x-auto rounded-[12px] border border-[var(--border)] bg-[var(--surface)] shadow-soft"
+          >
             <table className="w-full text-left text-xs text-[var(--foreground)]">
               <thead className="border-b border-[var(--border)] bg-[var(--background-secondary)] font-mono text-[11px] uppercase text-[var(--muted)]">
                 <tr>

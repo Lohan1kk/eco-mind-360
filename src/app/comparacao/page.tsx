@@ -221,7 +221,7 @@ export default function ComparacaoPage() {
           Tabela Comparativa Multicritério
         </h3>
 
-        <div className="overflow-x-auto rounded-[7px] border border-[#222D25]">
+        <div className="overflow-x-auto rounded-[7px] border border-[#222D25]" data-lenis-prevent>
           <table className="w-full text-left text-xs text-[#DCE5DD]">
             <thead className="bg-[#131A16] text-[11px] font-mono uppercase text-[#78877D] border-b border-[#222D25]">
               <tr>

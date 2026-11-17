@@ -1,20 +1,21 @@
-import React from 'react';
-import Link from 'next/link';
-import { notFound } from 'next/navigation';
-import { BIOMES_DATA, BIOMES_LIST } from '@/data/biomes';
-import type { BiomeId } from '@/data/types';
-import { getResumoFocos } from '@/lib/firms/service';
-import { FreshnessSeal } from '@/components/firms/FreshnessSeal';
-import { 
-  Trees, 
-  Shield, 
-  Flame, 
-  TrendingDown, 
-  MapPin, 
-  ArrowLeft, 
+import React from "react";
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import type { Metadata } from "next";
+import { BIOMES_DATA, BIOMES_LIST } from "@/data/biomes";
+import type { BiomeId } from "@/data/types";
+import { getResumoFocos } from "@/lib/firms/service";
+import { FreshnessSeal } from "@/components/firms/FreshnessSeal";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Trees,
+  Shield,
+  Flame,
+  TrendingDown,
+  MapPin,
+  ArrowLeft,
   ExternalLink,
-  Info
-} from 'lucide-react';
+} from "lucide-react";
 
 export const revalidate = 900;
 
@@ -28,6 +29,17 @@ export function generateStaticParams() {
   return BIOMES_LIST.map((b) => ({ id: b.id }));
 }
 
+export function generateMetadata({ params }: Props): Metadata {
+  const biome = BIOMES_DATA[params.id];
+  if (!biome) {
+    return { title: "Ambiente não encontrado" };
+  }
+  return {
+    title: `${biome.name} — Ficha Territorial`,
+    description: biome.description,
+  };
+}
+
 export default async function BiomeDetailPage({ params }: Props) {
   const biome = BIOMES_DATA[params.id];
 
@@ -35,187 +47,191 @@ export default async function BiomeDetailPage({ params }: Props) {
     notFound();
   }
 
-  const resumo = await getResumoFocos({ periodo: '24h' });
+  const resumo = await getResumoFocos({ periodo: "24h" });
   const biomeResumo = resumo.porBioma[biome.id as BiomeId];
-  const updatedStr = new Date(resumo.atualizadoEm).toLocaleString('pt-BR', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
+  const updatedStr = new Date(resumo.atualizadoEm).toLocaleString("pt-BR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
   });
 
   return (
-    <div className="section-inner max-w-5xl mx-auto py-8 space-y-10">
-      {/* Voltar */}
+    <div className="section-inner max-w-4xl mx-auto py-8 space-y-12">
       <div>
         <Link
           href="/biomas"
-          className="inline-flex items-center gap-2 text-xs font-medium text-[#91A88F] hover:text-[#DCE5DD] transition-colors group"
+          className="inline-flex items-center gap-2 text-xs font-medium text-[var(--primary)] hover:underline"
         >
-          <ArrowLeft size={14} className="group-hover:-translate-x-1 transition-transform" />
+          <ArrowLeft size={14} strokeWidth={1.5} />
           <span>Voltar para todos os 7 ambientes</span>
         </Link>
       </div>
 
-      {/* Cabeçalho */}
-      <div className="flex flex-col md:flex-row md:items-start justify-between gap-6 border-b border-[#222D25] pb-6">
-        <div className="space-y-3">
-          <div className="badge-360">
-            <span>{biome.category}</span>
+      {/* Hero Editorial Simples */}
+      <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-[var(--border)] pb-8">
+        <div className="space-y-3 max-w-2xl">
+          <div className="flex items-center gap-2">
+            <span
+              className="h-2.5 w-2.5 rounded-full"
+              style={{ backgroundColor: biome.color }}
+              aria-hidden="true"
+            />
+            <span className="eyebrow">{biome.category}</span>
           </div>
-          <h1 className="font-display text-3xl sm:text-5xl font-semibold text-[#DCE5DD] tracking-tight">
+          <h1 className="font-display text-4xl sm:text-5xl text-[var(--foreground)]">
             {biome.name}
           </h1>
-          <p className="max-w-2xl text-sm sm:text-base text-[#A7B3A9] leading-relaxed">
+          <p className="lede text-base text-[var(--foreground-secondary)]">
             {biome.description}
           </p>
-
-          <div className="flex flex-wrap items-center gap-2 text-xs text-[#78877D]">
-            <span className="font-medium text-[#DCE5DD]">Estados abrangidos:</span>
-            <span className="font-mono text-[#A7B3A9]">{biome.states.join(', ')}</span>
+          <div className="pt-1">
+            <FreshnessSeal
+              atualizadoEm={resumo.atualizadoEm}
+              ultimoFocoEm={resumo.ultimoFocoEm}
+              desatualizado={resumo.desatualizado}
+              fonte={resumo.fonte}
+              periodo="24h"
+            />
           </div>
-
-          <FreshnessSeal
-            atualizadoEm={resumo.atualizadoEm}
-            ultimoFocoEm={resumo.ultimoFocoEm}
-            desatualizado={resumo.desatualizado}
-            fonte={resumo.fonte}
-            periodo="24h"
-          />
         </div>
 
-        <div className="flex flex-col items-start md:items-end gap-3 shrink-0">
-          <span className="font-mono font-medium text-xs px-3.5 py-1.5 rounded-[7px] bg-[#171F1A] border border-[#29362D] text-[#91A88F]">
-            {biome.percentageBrazil}% do Território BR
-          </span>
-          <Link
-            href={`/mapa?bioma=${biome.id}&periodo=24h`}
-            className="btn-primary !py-2 !px-4 text-xs font-medium inline-flex items-center gap-1.5"
-          >
-            <MapPin size={14} />
-            <span>Ver no mapa de queimadas</span>
-          </Link>
-        </div>
-      </div>
+        <Link
+          href={`/mapa?bioma=${biome.id}&periodo=24h`}
+          className="btn-primary shrink-0"
+        >
+          <MapPin size={15} strokeWidth={1.5} />
+          <span>Abrir no mapa</span>
+        </Link>
+      </header>
 
-      {/* Grid de Métricas Principais */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="rounded-[10px] border border-[#29362D] bg-[#171F1A] p-5">
-          <span className="text-[10px] font-mono uppercase tracking-wider text-[#78877D]">
-            Área Territorial
-          </span>
-          <p className="font-display text-2xl sm:text-3xl font-semibold text-[#DCE5DD] mt-1.5 tabular-nums">
-            {biome.areaKm2.toLocaleString('pt-BR')}
-          </p>
-          <p className="text-xs text-[#78877D] mt-1 font-mono">km² oficiais (IBGE)</p>
-        </div>
-
-        <div className="rounded-[10px] border border-[#29362D] bg-[#171F1A] p-5">
-          <span className="text-[10px] font-mono uppercase tracking-wider text-[#78877D]">
-            Veg. Nativa
-          </span>
-          <p className="font-display text-2xl sm:text-3xl font-semibold text-[#83A989] mt-1.5 tabular-nums">
+      {/* 3 Números Principais (+ Focos 24h) */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <div className="glass-panel p-6">
+          <span className="text-xs text-[var(--muted)]">Vegetação nativa</span>
+          <p className="mt-2 font-display text-4xl text-[var(--foreground)] tabular-nums">
             {biome.nativeVegetationPercentage}%
           </p>
-          <p className="text-xs text-[#78877D] mt-1 font-mono">MapBiomas Coleção 9</p>
+          <p className="mt-1 text-xs text-[var(--muted)]">
+            {biome.areaKm2.toLocaleString("pt-BR")} km² ({biome.percentageBrazil}% do Brasil)
+          </p>
         </div>
 
-        <div className="rounded-[10px] border border-[#29362D] bg-[#171F1A] p-5">
-          <span className="text-[10px] font-mono uppercase tracking-wider text-[#78877D]">
-            Áreas Protegidas (UCs)
-          </span>
-          <p className="font-display text-2xl sm:text-3xl font-semibold text-[#91A88F] mt-1.5 tabular-nums">
+        <div className="glass-panel p-6">
+          <span className="text-xs text-[var(--muted)]">Áreas protegidas (UCs)</span>
+          <p className="mt-2 font-display text-4xl text-[var(--foreground)] tabular-nums">
             {biome.protectedAreaPercentage}%
           </p>
-          <p className="text-xs text-[#78877D] mt-1 font-mono">Unidades ICMBio</p>
+          <p className="mt-1 text-xs text-[var(--muted)]">Unidades ICMBio / MMA</p>
         </div>
 
-        <div className="rounded-[10px] border border-[#29362D] bg-[#171F1A] p-5">
-          <span className="text-[10px] font-mono uppercase tracking-wider text-[#78877D]">
-            Focos (últimas 24 h)
-          </span>
-          <p className="font-display text-2xl sm:text-3xl font-semibold text-[#A9A17A] mt-1.5 flex items-center gap-1.5 tabular-nums">
-            <Flame size={20} className="text-[#A9A17A]" />
-            {(biomeResumo?.total ?? 0).toLocaleString('pt-BR')}
+        <div className="glass-panel p-6">
+          <span className="text-xs text-[var(--muted)]">Focos ativos (24h)</span>
+          <p className="mt-2 font-display text-4xl text-[var(--foreground)] tabular-nums flex items-center gap-2">
+            <Flame size={22} strokeWidth={1.5} className="text-[#EA580C]" />
+            {(biomeResumo?.total ?? 0).toLocaleString("pt-BR")}
           </p>
-          <p className="text-[11px] text-[#78877D] mt-1 font-mono">
-            Fonte: NASA FIRMS · {updatedStr}
+          <p className="mt-1 text-[11px] text-[var(--muted)]">
+            NASA FIRMS · {updatedStr}
           </p>
         </div>
       </div>
 
-      {/* Detalhes Ecológicos e Vetores de Pressão */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="rounded-[10px] border border-[#29362D] bg-[#171F1A] p-6 space-y-4">
-          <h3 className="font-display text-lg font-semibold text-[#DCE5DD] flex items-center gap-2">
-            <Trees size={18} className="text-[#789B7C]" />
-            <span>Importância Ecológica e Serviços Ecossistêmicos</span>
-          </h3>
-          <p className="text-xs sm:text-sm leading-relaxed text-[#A7B3A9]">
-            {biome.ecologicalImportance}
-          </p>
-          <div className="pt-3 border-t border-[#222D25]">
-            <span className="text-xs font-medium text-[#DCE5DD]">Regime Climático:</span>
-            <p className="text-xs text-[#78877D] mt-1">{biome.climate}</p>
-          </div>
-        </div>
+      {/* Seções em Abas (Importância, Pressões, Fontes) para não alongar a página */}
+      <Tabs defaultValue="importancia" className="space-y-6">
+        <TabsList>
+          <TabsTrigger value="importancia">Importância</TabsTrigger>
+          <TabsTrigger value="pressoes">Pressões</TabsTrigger>
+          <TabsTrigger value="fontes">Fontes</TabsTrigger>
+        </TabsList>
 
-        <div className="rounded-[10px] border border-[#29362D] bg-[#171F1A] p-6 space-y-4">
-          <h3 className="font-display text-lg font-semibold text-[#DCE5DD] flex items-center gap-2">
-            <Shield size={18} className="text-[#A9A17A]" />
-            <span>Principais Vetores de Pressão & Ameaças</span>
-          </h3>
-          <ul className="space-y-2.5 text-xs sm:text-sm text-[#A7B3A9]">
-            {biome.mainThreats.map((threat, idx) => (
-              <li key={idx} className="flex items-start gap-2.5">
-                <span className="h-1.5 w-1.5 rounded-full bg-[#A9A17A] mt-2 shrink-0" />
-                <span>{threat}</span>
-              </li>
-            ))}
-          </ul>
-          {biome.deforestationTrendPercent !== null && (
-            <div className="pt-3 border-t border-[#222D25] flex items-center gap-2 text-xs">
-              <TrendingDown size={15} className="text-[#83A989]" />
-              <span className="font-medium text-[#83A989]">
-                Tendência PRODES 2024: {biome.deforestationTrendPercent}% vs período anterior
-              </span>
+        <TabsContent value="importancia">
+          <div className="glass-panel p-7 space-y-4">
+            <div className="flex items-center gap-2 text-[var(--primary)]">
+              <Trees size={18} strokeWidth={1.5} />
+              <h2 className="font-display text-2xl text-[var(--foreground)]">
+                Importância ecológica e clima
+              </h2>
             </div>
-          )}
-        </div>
-      </div>
-
-      {/* Fontes Científicas e Auditoria */}
-      <div className="rounded-[10px] border border-[#29362D] bg-[#171F1A] p-6 space-y-5">
-        <div className="flex items-center justify-between border-b border-[#222D25] pb-3.5">
-          <h3 className="font-display text-base font-semibold text-[#DCE5DD] flex items-center gap-2">
-            <Info size={16} className="text-[#789B7C]" />
-            <span>Bases Oficiais & Fontes Científicas Auditadas</span>
-          </h3>
-          <span className="text-xs font-mono text-[#78877D]">Orçamento R$ 0 · Dados Públicos</span>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {biome.sources.map((src, i) => (
-            <div key={i} className="p-4 rounded-[7px] bg-[#131A16] border border-[#222D25] text-xs space-y-2">
-              <div className="flex items-center justify-between font-medium text-[#DCE5DD]">
-                <span>{src.name}</span>
-                <a
-                  href={src.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-[#78877D] hover:text-[#91B596] transition-colors"
-                  title="Abrir base oficial externa"
-                >
-                  <ExternalLink size={13} />
-                </a>
+            <p className="lede text-sm sm:text-base text-[var(--foreground-secondary)]">
+              {biome.ecologicalImportance}
+            </p>
+            <div className="pt-4 border-t border-[var(--border)] grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+              <div>
+                <span className="font-medium text-[var(--foreground)]">Regime climático:</span>
+                <p className="mt-1 text-[var(--muted)]">{biome.climate}</p>
               </div>
-              <p className="text-[#A7B3A9] leading-relaxed">{src.description}</p>
-              <p className="text-[11px] text-[#78877D] font-mono">Atualização: {src.lastUpdated}</p>
+              <div>
+                <span className="font-medium text-[var(--foreground)]">Estados abrangidos:</span>
+                <p className="mt-1 text-[var(--muted)]">{biome.states.join(", ")}</p>
+              </div>
             </div>
-          ))}
-        </div>
-      </div>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="pressoes">
+          <div className="glass-panel p-7 space-y-4">
+            <div className="flex items-center gap-2 text-[var(--warning)]">
+              <Shield size={18} strokeWidth={1.5} />
+              <h2 className="font-display text-2xl text-[var(--foreground)]">
+                Vetores de pressão e conservação
+              </h2>
+            </div>
+            <ul className="space-y-2.5 text-sm text-[var(--foreground-secondary)]">
+              {biome.mainThreats.map((threat, idx) => (
+                <li key={idx} className="flex items-start gap-2.5">
+                  <span className="mt-2 h-1.5 w-1.5 rounded-full bg-[var(--primary)] shrink-0" />
+                  <span>{threat}</span>
+                </li>
+              ))}
+            </ul>
+            {biome.deforestationTrendPercent !== null && (
+              <div className="pt-4 border-t border-[var(--border)] flex items-center gap-2 text-xs text-[var(--primary)] font-medium">
+                <TrendingDown size={15} strokeWidth={1.5} />
+                <span>
+                  Tendência PRODES 2024: {biome.deforestationTrendPercent}% em relação ao período anterior
+                </span>
+              </div>
+            )}
+          </div>
+        </TabsContent>
+
+        <TabsContent value="fontes">
+          <div className="glass-panel p-7 space-y-4">
+            <h2 className="font-display text-2xl text-[var(--foreground)]">
+              Bases científicas auditadas
+            </h2>
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+              {biome.sources.map((src, i) => (
+                <div
+                  key={i}
+                  className="rounded-[10px] border border-[var(--border)] bg-[var(--background)] p-4 text-xs space-y-2"
+                >
+                  <div className="flex items-center justify-between font-medium text-[var(--foreground)]">
+                    <span>{src.name}</span>
+                    <a
+                      href={src.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[var(--primary)] hover:underline"
+                      title="Abrir fonte oficial"
+                    >
+                      <ExternalLink size={13} strokeWidth={1.5} />
+                    </a>
+                  </div>
+                  <p className="text-[var(--foreground-secondary)] leading-relaxed">
+                    {src.description}
+                  </p>
+                  <p className="text-[11px] text-[var(--muted)]">
+                    Atualização: {src.lastUpdated}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
