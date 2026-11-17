@@ -1,101 +1,117 @@
-'use client';
+"use client";
 
-import React from 'react';
-import Link from 'next/link';
-import { MapPin, LayoutDashboard, Calculator, Trees, ArrowUpRight, Sparkles } from 'lucide-react';
+import React from "react";
+import Link from "next/link";
+import {
+  AlertTriangle,
+  ArrowUpRight,
+  Calculator,
+  GitCompare,
+  LayoutDashboard,
+  MapPin,
+} from "lucide-react";
+import { BorderBeam } from "@/components/ui/magicui/border-beam";
+import { Reveal } from "@/components/ui/reveal";
 
 const TOOLS = [
   {
-    href: '/mapa',
-    tag: 'Tempo Real',
-    title: 'Mapa Orbital de Queimadas',
-    desc: 'Focos de calor instantâneos (INPE e NASA FIRMS) graduados por potência radiativa (FRP), com a malha vetorial dos 7 biomas.',
-    cta: 'Abrir mapa 360°',
+    href: "/mapa",
+    title: "Mapa ao Vivo",
+    desc: "Visualize milhares de focos de calor da NASA e do INPE classificados por potência radiativa nos 7 ambientes.",
     icon: MapPin,
+    featured: true,
+    span: "md:col-span-2",
   },
   {
-    href: '/dashboard',
-    tag: 'Telemetria',
-    title: 'Dashboard dos 7 Ambientes',
-    desc: 'Indicadores territoriais consolidados: desmatamento PRODES 2024, áreas protegidas ICMBio e cobertura vegetal nativa.',
-    cta: 'Acessar painel',
+    href: "/dashboard",
+    title: "Dashboard Territorial",
+    desc: "Série histórica PRODES, cobertura vegetal MapBiomas e áreas protegidas.",
     icon: LayoutDashboard,
+    featured: false,
+    span: "md:col-span-1",
   },
   {
-    href: '/calculadora',
-    tag: 'Pegada Pessoal',
-    title: 'Calculadora de Carbono',
-    desc: 'Descubra sua emissão anual estimada em kg de CO₂e nos eixos transporte, alimentação e energia com recomendações práticas.',
-    cta: 'Calcular emissão',
+    href: "/alertas",
+    title: "Alertas e Ocorrências",
+    desc: "Consulta filtrável de anomalias térmicas e alertas DETER com exportação CSV.",
+    icon: AlertTriangle,
+    featured: false,
+    span: "md:col-span-1",
+  },
+  {
+    href: "/calculadora",
+    title: "Calculadora de Carbono",
+    desc: "Estime sua emissão anual em kg de CO₂e em transporte, alimentação e energia.",
     icon: Calculator,
+    featured: false,
+    span: "md:col-span-1",
   },
   {
-    href: '/biomas',
-    tag: 'Atlas IBGE',
-    title: 'Dossiê dos 7 Biomas',
-    desc: 'Fichas técnicas completas da Amazônia, Cerrado, Mata Atlântica, Caatinga, Pampa, Pantanal e Sistema Costeiro-Marinho.',
-    cta: 'Explorar biomas',
-    icon: Trees,
+    href: "/comparacao",
+    title: "Comparador de Ambientes",
+    desc: "Confronte dois ambientes brasileiros lado a lado em múltiplas dimensões.",
+    icon: GitCompare,
+    featured: false,
+    span: "md:col-span-1",
   },
 ];
 
 export function Tools() {
   return (
-    <section id="ferramentas" className="section scroll-mt-20 bg-[#101512] border-b border-[#222D25]">
+    <section
+      id="ferramentas"
+      className="section scroll-mt-20 bg-[var(--background)] border-b border-[var(--border)]"
+    >
       <div className="section-inner space-y-12">
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-[#222D25] pb-6">
-          <div>
-            <div className="badge-360 mb-2">
-              <Sparkles size={12} />
-              <span>Ferramentas Integradas</span>
-            </div>
-            <h2 className="font-display text-3xl sm:text-4xl font-semibold text-[#DCE5DD] tracking-tight">
-              Quatro Módulos de Consciência e Ação
-            </h2>
-            <p className="mt-3 max-w-2xl text-base text-[#A7B3A9]">
-              Da detecção orbital de queimadas à gincana escolar: uma plataforma unificada
-              desenvolvida por alunos para transformar dados complexos em ações concretas.
-            </p>
-          </div>
-        </div>
+        <Reveal className="max-w-xl space-y-3">
+          <span className="eyebrow">Ferramentas</span>
+          <h2 className="font-display text-[clamp(2rem,4vw,3rem)] leading-tight text-[var(--foreground)]">
+            Instrumentos abertos para monitorar e agir
+          </h2>
+          <p className="text-sm sm:text-base text-[var(--foreground-secondary)] leading-relaxed">
+            Explore os módulos interativos construídos sobre bases públicas auditadas.
+          </p>
+        </Reveal>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
           {TOOLS.map((t) => {
             const Icon = t.icon;
             return (
-              <article
-                key={t.title}
-                className="glass-panel p-6 flex flex-col justify-between relative group"
+              <Link
+                key={t.href}
+                href={t.href}
+                className={`group relative overflow-hidden rounded-[12px] border border-[var(--border)] bg-[var(--surface)] p-6 flex flex-col justify-between transition-all duration-300 hover:-translate-y-0.5 hover:border-[var(--accent-action)] hover:shadow-lift ${t.span}`}
               >
-                <div>
-                  <div className="flex items-center justify-between mb-4">
-                    <span className="text-[10px] font-mono uppercase tracking-wider text-[#91A88F] bg-[#1D2821] border border-[#29362D] px-2.5 py-0.5 rounded-[5px]">
-                      {t.tag}
-                    </span>
-                    <div className="h-9 w-9 rounded-[7px] bg-[#1D2821] border border-[#29362D] text-[#789B7C] flex items-center justify-center">
-                      <Icon size={17} />
+                {t.featured && (
+                  <BorderBeam
+                    size={200}
+                    duration={14}
+                    colorFrom="#1F5A3A"
+                    colorTo="#7BC796"
+                  />
+                )}
+
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-[8px] bg-[var(--accent-soft)] text-[var(--primary)]">
+                      <Icon size={18} strokeWidth={1.5} />
                     </div>
+                    <ArrowUpRight
+                      size={16}
+                      strokeWidth={1.5}
+                      className="text-[var(--muted)] transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-[var(--primary)]"
+                    />
                   </div>
 
-                  <h3 className="font-display text-lg font-semibold text-[#DCE5DD] group-hover:text-[#91A88F] transition-colors">
+                  <h3 className="font-display text-2xl text-[var(--foreground)]">
                     {t.title}
                   </h3>
 
-                  <p className="mt-2.5 text-xs text-[#A7B3A9] leading-relaxed">
+                  <p className="text-sm text-[var(--foreground-secondary)] leading-relaxed">
                     {t.desc}
                   </p>
                 </div>
-
-                <div className="mt-6 pt-4 border-t border-[#222D25]">
-                  <Link
-                    href={t.href}
-                    className="text-xs font-medium text-[#91A88F] hover:text-[#DCE5DD] inline-flex items-center gap-1 group/link"
-                  >
-                    <span>{t.cta}</span>
-                    <ArrowUpRight size={14} className="group-hover/link:translate-x-0.5 group-hover/link:-translate-y-0.5 transition-transform" />
-                  </Link>
-                </div>
-              </article>
+              </Link>
             );
           })}
         </div>

@@ -1,77 +1,69 @@
-'use client';
+"use client";
 
-import React from 'react';
-import Image from 'next/image';
-import { Users } from 'lucide-react';
+import React from "react";
+import Image from "next/image";
+import { Reveal } from "@/components/ui/reveal";
 
 const TEAM = [
   {
-    name: 'Ana Flávia',
-    role: 'Designer & Marketing',
-    image: '/team/foto-ana.png',
+    name: "Ana Flávia",
+    role: "Design & Comunicação",
+    image: "/team/foto-ana.png",
   },
   {
-    name: 'André Zauli',
-    role: 'Programador Fullstack',
-    image: '/team/foto-andre.png',
+    name: "André Zauli",
+    role: "Desenvolvimento Fullstack",
+    image: "/team/foto-andre.png",
   },
   {
-    name: 'Lucas Lohan',
-    role: 'Programador & Pesquisa',
-    image: '/team/foto-lucas.png',
+    name: "Lucas Lohan",
+    role: "Engenharia & Pesquisa",
+    image: "/team/foto-lucas.png",
   },
   {
-    name: 'Gabriel Rosa',
-    role: 'Conteúdo & Design Visual',
-    image: '/team/foto-gabriel.png',
+    name: "Gabriel Rosa",
+    role: "Conteúdo & Direção Visual",
+    image: "/team/foto-gabriel.png",
   },
 ];
 
 export function Team() {
   return (
-    <section id="equipe" className="section scroll-mt-20 bg-[#101512] border-b border-[#222D25]">
+    <section
+      id="equipe"
+      className="section scroll-mt-20 bg-[var(--surface)] border-b border-[var(--border)]"
+    >
       <div className="section-inner space-y-12">
-        <div className="max-w-3xl space-y-3">
-          <div className="badge-360">
-            <Users size={12} className="text-[#789B7C]" />
-            <span>Colégio Paulo de Tarso</span>
-          </div>
-          <h2 className="font-display text-3xl sm:text-4xl font-semibold text-[#DCE5DD] tracking-tight">
-            Quatro Alunos, Uma Causa Continental
+        <Reveal className="max-w-xl space-y-3">
+          <span className="eyebrow">Quem fez</span>
+          <h2 className="font-display text-[clamp(2rem,4vw,3rem)] leading-tight text-[var(--foreground)]">
+            Projeto estudantil do Colégio Paulo de Tarso
           </h2>
-          <p className="text-base text-[#A7B3A9]">
-            Desenvolvimento de software, cartografia digital e comunicação científica: uma equipe escolar
-            provando na prática o poder do aprendizado ativo.
+          <p className="text-sm sm:text-base text-[var(--foreground-secondary)] leading-relaxed">
+            Desenvolvido por quatro alunos para aproximar ciência aberta e educação ambiental.
           </p>
-        </div>
+        </Reveal>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 gap-6 sm:grid-cols-4">
           {TEAM.map((person) => (
             <div
               key={person.name}
-              className="glass-panel p-6 text-center space-y-4 relative group"
+              className="flex flex-col items-center rounded-[12px] border border-[var(--border)] bg-[var(--background)] p-6 text-center"
             >
-              <div className="relative mx-auto h-24 w-24 rounded-full overflow-hidden border border-[#29362D]">
+              <div className="relative h-20 w-20 overflow-hidden rounded-full border border-[var(--border)]">
                 <Image
                   src={person.image}
                   alt={person.name}
                   fill
+                  sizes="80px"
+                  quality={75}
                   className="object-cover"
                 />
               </div>
-
-              <div>
-                <h3 className="font-display text-base font-semibold text-[#DCE5DD]">
-                  {person.name}
-                </h3>
-                <p className="text-xs text-[#91A88F] mt-0.5">
-                  {person.role}
-                </p>
-              </div>
-
-              <div className="pt-3 border-t border-[#222D25] text-[11px] text-[#78877D] font-mono">
-                EcoMind 360 Team
-              </div>
+              <h3 className="mt-4 font-display text-xl text-[var(--foreground)]">
+                {person.name}
+              </h3>
+              <p className="mt-1 text-xs text-[var(--muted)]">{person.role}</p>
             </div>
           ))}
         </div>
